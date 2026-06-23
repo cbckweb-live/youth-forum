@@ -77,6 +77,7 @@ export default function GallerySection() {
           accept="image/*"
           label="Select one or more photos"
           file={files?.[0] || null}
+          files={files}
           progress={uploadProgress}
           multiple
           onChange={(f) => setFiles(f)}

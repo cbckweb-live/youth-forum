@@ -6,17 +6,19 @@ type Props = {
   accept: string;
   label: string;
   file: File | null;
+  files?: FileList | null;
   currentUrl?: string | null;
   progress?: number | null;
   multiple?: boolean;
   onChange: (files: FileList | null) => void;
 };
 
-export default function FileUploadInput({ accept, label, file, currentUrl, progress, multiple, onChange }: Props) {
+export default function FileUploadInput({ accept, label, file, files, currentUrl, progress, multiple, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const previewUrl = file ? URL.createObjectURL(file) : currentUrl;
   const isImage = accept.includes("image");
+  const fileCount = multiple && files ? files.length : null;
 
   return (
     <div
@@ -32,7 +34,7 @@ export default function FileUploadInput({ accept, label, file, currentUrl, progr
         onChange={(e) => onChange(e.target.files)}
       />
 
-      {isImage && previewUrl ? (
+      {isImage && previewUrl && !multiple ? (
         <img src={previewUrl} alt="Preview" className="w-full max-h-40 object-cover rounded-lg mb-3" />
       ) : null}
 
@@ -42,9 +44,13 @@ export default function FileUploadInput({ accept, label, file, currentUrl, progr
         </div>
         <div>
           <p className="text-sm font-medium text-[#231F1E]">
-            {file ? (multiple ? `${(file as unknown as FileList).length ?? 1} file(s) selected` : file.name) : label}
+            {fileCount !== null
+              ? `${fileCount} photo${fileCount !== 1 ? "s" : ""} selected`
+              : file
+              ? file.name
+              : label}
           </p>
-          <p className="text-xs text-[#231F1E]/50">Click to {file ? "change" : "browse"}</p>
+          <p className="text-xs text-[#231F1E]/50">Click to {file || fileCount ? "change" : "browse"}</p>
         </div>
       </div>
 
