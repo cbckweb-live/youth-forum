@@ -82,7 +82,7 @@ export default function PostsSection() {
       fetchPosts();
     } catch (err) {
       console.error(err);
-      setError("Something went wrong uploading. Check that the bucket exists and has authenticated insert policy.");
+      setError(`Upload failed: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setSaving(false);
     }
