@@ -84,16 +84,18 @@ export default function GallerySection() {
         body: JSON.stringify({ rows }),
       });
 
+      const responseText = await response.text();
       let result: any;
       try {
-        result = await response.json();
+        result = responseText ? JSON.parse(responseText) : {};
       } catch {
-        const text = await response.text();
-        throw new Error(text || "Failed to save gallery rows.");
+        result = { error: responseText };
       }
 
       if (!response.ok) {
-        throw new Error(result?.error || JSON.stringify(result) || "Failed to save gallery rows.");
+        throw new Error(
+          result?.error || responseText || "Failed to save gallery rows.",
+        );
       }
 
       setDebugInfo(

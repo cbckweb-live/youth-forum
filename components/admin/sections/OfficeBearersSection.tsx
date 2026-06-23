@@ -102,16 +102,18 @@ export default function OfficeBearersSection() {
         }),
       });
 
+      const responseText = await response.text();
       let result: any;
       try {
-        result = await response.json();
+        result = responseText ? JSON.parse(responseText) : {};
       } catch {
-        const text = await response.text();
-        throw new Error(text || "Failed to save person.");
+        result = { error: responseText };
       }
 
       if (!response.ok) {
-        throw new Error(result?.error || "Failed to save person.");
+        throw new Error(
+          result?.error || responseText || "Failed to save person.",
+        );
       }
 
       setForm(emptyPerson());
