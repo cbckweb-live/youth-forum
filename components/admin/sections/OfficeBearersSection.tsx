@@ -46,26 +46,39 @@ export default function OfficeBearersSection() {
   const [newTeamName, setNewTeamName] = useState("");
   const [search, setSearch] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [confirmDeleteTeamId, setConfirmDeleteTeamId] = useState<string | null>(null);
+  const [confirmDeleteTeamId, setConfirmDeleteTeamId] = useState<string | null>(
+    null,
+  );
 
   const fetchData = useCallback(async () => {
     const [{ data: peopleData }, { data: teamsData }] = await Promise.all([
-      supabase.from("office_bearers").select("*").order("display_order", { ascending: true }),
-      supabase.from("teams").select("*").order("display_order", { ascending: true }),
+      supabase
+        .from("office_bearers")
+        .select("*")
+        .order("display_order", { ascending: true }),
+      supabase
+        .from("teams")
+        .select("*")
+        .order("display_order", { ascending: true }),
     ]);
     setPeople((peopleData as Person[]) || []);
     setTeams((teamsData as Team[]) || []);
   }, [supabase]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   async function uploadPhoto(file: File): Promise<string> {
     const path = `${Date.now()}-${file.name}`;
     setUploadProgress(10);
-    const { error } = await supabase.storage.from("office-bearers-media").upload(path, file);
+    const { error } = await supabase.storage
+      .from("office-bearers-media")
+      .upload(path, file);
     if (error) throw error;
     setUploadProgress(100);
-    return supabase.storage.from("office-bearers-media").getPublicUrl(path).data.publicUrl;
+    return supabase.storage.from("office-bearers-media").getPublicUrl(path).data
+      .publicUrl;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -77,19 +90,42 @@ export default function OfficeBearersSection() {
       let photo_url = form.photo_url;
       if (photoFile) photo_url = await uploadPhoto(photoFile);
       const payload = { ...form, photo_url };
-      if (editingId) {
-        await supabase.from("office_bearers").update(payload).eq("id", editingId);
-      } else {
-        await supabase.from("office_bearers").insert({ ...payload, display_order: people.length });
+
+      const response = await fetch("/api/admin/office-bearers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: editingId ? "update_person" : "create_person",
+          id: editingId,
+          ...payload,
+          display_order: editingId ? undefined : people.length,
+        }),
+      });
+
+      let result: any;
+      try {
+        result = await response.json();
+      } catch {
+        const text = await response.text();
+        throw new Error(text || "Failed to save person.");
       }
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save person.");
+      }
+
       setForm(emptyPerson());
       setEditingId(null);
       setPhotoFile(null);
       setUploadProgress(null);
       setShowEditModal(false);
       fetchData();
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -97,7 +133,14 @@ export default function OfficeBearersSection() {
 
   function handleEdit(person: Person) {
     setEditingId(person.id);
-    setForm({ name: person.name, role: person.role, photo_url: person.photo_url, phone: person.phone, email: person.email, team_id: person.team_id });
+    setForm({
+      name: person.name,
+      role: person.role,
+      photo_url: person.photo_url,
+      phone: person.phone,
+      email: person.email,
+      team_id: person.team_id,
+    });
     setPhotoFile(null);
     setUploadProgress(null);
     setShowEditModal(true);
@@ -113,41 +156,131 @@ export default function OfficeBearersSection() {
   }
 
   async function handleDelete(id: string) {
-    await supabase.from("office_bearers").delete().eq("id", id);
-    setConfirmDeleteId(null);
-    fetchData();
+    try {
+      const response = await fetch("/api/admin/office-bearers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete_person", id }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        setError(text || "Failed to delete person.");
+        return;
+      }
+
+      setConfirmDeleteId(null);
+      fetchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete person.");
+    }
   }
 
   async function handleAddTeam(e: React.FormEvent) {
     e.preventDefault();
     if (!newTeamName.trim()) return;
-    await supabase.from("teams").insert({ name: newTeamName.trim(), display_order: teams.length });
-    setNewTeamName("");
-    fetchData();
+    try {
+      const response = await fetch("/api/admin/office-bearers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_team",
+          name: newTeamName.trim(),
+          display_order: teams.length,
+        }),
+      });
+
+      let result: any;
+      try {
+        result = await response.json();
+      } catch {
+        const text = await response.text();
+        throw new Error(text || "Failed to add team.");
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to add team.");
+      }
+
+      setNewTeamName("");
+      fetchData();
+    } catch (err) {
+      console.error("Team creation error:", err);
+    }
   }
 
   async function handleDeleteTeam(id: string) {
-    await supabase.from("teams").delete().eq("id", id);
-    setConfirmDeleteTeamId(null);
-    fetchData();
+    try {
+      const response = await fetch("/api/admin/office-bearers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete_team", id }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Team deletion error:", text);
+        return;
+      }
+
+      setConfirmDeleteTeamId(null);
+      fetchData();
+    } catch (err) {
+      console.error("Team deletion error:", err);
+    }
   }
 
-  const inputCls = "w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]";
+  const inputCls =
+    "w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]";
 
-  const filtered = people.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.role?.toLowerCase().includes(search.toLowerCase())
+  const filtered = people.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.role?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const PersonForm = (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <input type="text" placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className={inputCls} />
-      <input type="text" placeholder="Role / Title" value={form.role || ""} onChange={(e) => setForm({ ...form, role: e.target.value })} className={inputCls} />
-      <input type="text" placeholder="Phone (optional)" value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputCls} />
-      <input type="email" placeholder="Email (optional)" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputCls} />
-      <select value={form.team_id || ""} onChange={(e) => setForm({ ...form, team_id: e.target.value || null })} className={inputCls}>
+      <input
+        type="text"
+        placeholder="Full name"
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
+        required
+        className={inputCls}
+      />
+      <input
+        type="text"
+        placeholder="Role / Title"
+        value={form.role || ""}
+        onChange={(e) => setForm({ ...form, role: e.target.value })}
+        className={inputCls}
+      />
+      <input
+        type="text"
+        placeholder="Phone (optional)"
+        value={form.phone || ""}
+        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+        className={inputCls}
+      />
+      <input
+        type="email"
+        placeholder="Email (optional)"
+        value={form.email || ""}
+        onChange={(e) => setForm({ ...form, email: e.target.value })}
+        className={inputCls}
+      />
+      <select
+        value={form.team_id || ""}
+        onChange={(e) => setForm({ ...form, team_id: e.target.value || null })}
+        className={inputCls}
+      >
         <option value="">No team</option>
-        {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+        {teams.map((t) => (
+          <option key={t.id} value={t.id}>
+            {t.name}
+          </option>
+        ))}
       </select>
       <FileUploadInput
         accept="image/*"
@@ -159,10 +292,20 @@ export default function OfficeBearersSection() {
       />
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex gap-3 pt-1">
-        <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
+        <button
+          type="submit"
+          disabled={saving}
+          className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60"
+        >
           {saving ? "Saving..." : editingId ? "Update" : "Add Person"}
         </button>
-        <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 hover:underline">Cancel</button>
+        <button
+          type="button"
+          onClick={handleCloseModal}
+          className="text-sm text-[#231F1E]/50 hover:underline"
+        >
+          Cancel
+        </button>
       </div>
     </form>
   );
@@ -180,7 +323,11 @@ export default function OfficeBearersSection() {
         />
         <div className="flex gap-2">
           <button
-            onClick={() => { setEditingId(null); setForm(emptyPerson()); setShowEditModal(true); }}
+            onClick={() => {
+              setEditingId(null);
+              setForm(emptyPerson());
+              setShowEditModal(true);
+            }}
             className="bg-[#6B1F2A] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#7d2432] transition-colors"
           >
             + Add Person
@@ -197,10 +344,17 @@ export default function OfficeBearersSection() {
       {/* People list */}
       <div className="space-y-3">
         {filtered.map((person) => (
-          <div key={person.id} className="bg-white shadow-sm rounded-xl px-5 py-4 flex items-center justify-between gap-3">
+          <div
+            key={person.id}
+            className="bg-white shadow-sm rounded-xl px-5 py-4 flex items-center justify-between gap-3"
+          >
             <div className="flex items-center gap-3">
               {person.photo_url ? (
-                <img src={person.photo_url} alt={person.name} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                <img
+                  src={person.photo_url}
+                  alt={person.name}
+                  className="w-9 h-9 rounded-full object-cover shrink-0"
+                />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
               )}
@@ -208,17 +362,30 @@ export default function OfficeBearersSection() {
                 <p className="font-medium text-sm">{person.name}</p>
                 <p className="text-xs text-[#231F1E]/50">
                   {person.role || "—"}
-                  {person.team_id && ` · ${teams.find(t => t.id === person.team_id)?.name}`}
+                  {person.team_id &&
+                    ` · ${teams.find((t) => t.id === person.team_id)?.name}`}
                 </p>
               </div>
             </div>
             <div className="flex gap-3 text-sm">
-              <button onClick={() => handleEdit(person)} className="text-[#6B1F2A] hover:underline">Edit</button>
-              <button onClick={() => setConfirmDeleteId(person.id)} className="text-red-500 hover:underline">Delete</button>
+              <button
+                onClick={() => handleEdit(person)}
+                className="text-[#6B1F2A] hover:underline"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setConfirmDeleteId(person.id)}
+                className="text-red-500 hover:underline"
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <p className="text-sm text-[#231F1E]/50">No results.</p>}
+        {filtered.length === 0 && (
+          <p className="text-sm text-[#231F1E]/50">No results.</p>
+        )}
       </div>
 
       {confirmDeleteId && (
@@ -241,7 +408,9 @@ export default function OfficeBearersSection() {
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-display text-lg mb-5">{editingId ? "Edit Person" : "Add Person"}</h2>
+            <h2 className="font-display text-lg mb-5">
+              {editingId ? "Edit Person" : "Add Person"}
+            </h2>
             {PersonForm}
           </div>
         </div>
@@ -253,20 +422,46 @@ export default function OfficeBearersSection() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display text-lg">Manage Teams</h2>
-              <button onClick={() => setShowTeamsModal(false)} className="text-sm text-[#231F1E]/50 hover:underline">Close</button>
+              <button
+                onClick={() => setShowTeamsModal(false)}
+                className="text-sm text-[#231F1E]/50 hover:underline"
+              >
+                Close
+              </button>
             </div>
             <form onSubmit={handleAddTeam} className="flex gap-2 mb-4">
-              <input type="text" placeholder="New team name" value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} className={`${inputCls} flex-1`} />
-              <button type="submit" className="bg-[#6B1F2A] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#7d2432] transition-colors">Add</button>
+              <input
+                type="text"
+                placeholder="New team name"
+                value={newTeamName}
+                onChange={(e) => setNewTeamName(e.target.value)}
+                className={`${inputCls} flex-1`}
+              />
+              <button
+                type="submit"
+                className="bg-[#6B1F2A] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#7d2432] transition-colors"
+              >
+                Add
+              </button>
             </form>
             <div className="space-y-2">
               {teams.map((team) => (
-                <div key={team.id} className="flex items-center justify-between px-4 py-2 rounded-lg bg-gray-50">
+                <div
+                  key={team.id}
+                  className="flex items-center justify-between px-4 py-2 rounded-lg bg-gray-50"
+                >
                   <p className="text-sm">{team.name}</p>
-                  <button onClick={() => setConfirmDeleteTeamId(team.id)} className="text-red-500 text-sm hover:underline">Delete</button>
+                  <button
+                    onClick={() => setConfirmDeleteTeamId(team.id)}
+                    className="text-red-500 text-sm hover:underline"
+                  >
+                    Delete
+                  </button>
                 </div>
               ))}
-              {teams.length === 0 && <p className="text-sm text-[#231F1E]/50">No teams yet.</p>}
+              {teams.length === 0 && (
+                <p className="text-sm text-[#231F1E]/50">No teams yet.</p>
+              )}
             </div>
           </div>
         </div>
