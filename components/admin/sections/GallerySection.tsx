@@ -22,13 +22,20 @@ export default function GallerySection() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fetchPhotos = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("gallery")
       .select("*")
       .order("created_at", { ascending: false });
+    if (error) {
+      setError(`Unable to load gallery: ${error.message}`);
+      setPhotos([]);
+      return;
+    }
+    setError(null);
     setPhotos((data as Photo[]) || []);
   }, [supabase]);
 
@@ -65,10 +72,14 @@ export default function GallerySection() {
         };
       });
       const rows = await Promise.all(uploads);
-      const { error: insertError } = await supabase
+      const { data: insertedRows, error: insertError } = await supabase
         .from("gallery")
-        .insert(rows);
+        .insert(rows)
+        .select();
       if (insertError) throw new Error(insertError.message);
+      setDebugInfo(
+        `Inserted ${insertedRows?.length ?? 0} rows. Latest id: ${insertedRows?.[0]?.id ?? "none"}`,
+      );
       setFiles(null);
       setCaption("");
       setEventTag("");
@@ -78,6 +89,7 @@ export default function GallerySection() {
       setError(
         `Upload failed: ${err instanceof Error ? err.message : "Please try again."}`,
       );
+      setDebugInfo(null);
     } finally {
       setSaving(false);
     }
@@ -131,6 +143,8 @@ export default function GallerySection() {
           {saving ? "Uploading..." : "Upload"}
         </button>
       </form>
+
+      {debugInfo && <p className="text-sm text-[#231F1E]/60">{debugInfo}</p>}
 
       {confirmDeleteId && (
         <ConfirmDialog
