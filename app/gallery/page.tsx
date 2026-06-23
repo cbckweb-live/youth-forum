@@ -22,7 +22,7 @@ export default async function GalleryPage() {
       return acc;
     },
     {},
-  );
+  ) ?? {};
 
   return (
     <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-6xl mx-auto">
@@ -38,8 +38,7 @@ export default async function GalleryPage() {
         <p className="text-[#231F1E]/60">No photos have been added yet.</p>
       )}
 
-      {grouped &&
-        Object.entries(grouped).map(([tag, items]) => (
+      {Object.entries(grouped).map(([tag, items]) => (
           <section key={tag} className="mb-12">
             <h2 className="font-display text-xl mb-4">{tag}</h2>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
