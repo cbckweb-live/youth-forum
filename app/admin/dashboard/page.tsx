@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("Posts");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(({ data }: { data: { session: unknown } }) => {
       if (!data.session) router.push("/admin");
     });
   }, [supabase, router]);
