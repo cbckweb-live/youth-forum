@@ -38,10 +38,10 @@ export default function GallerySection() {
     try {
       const total = files.length;
       let done = 0;
-      const uploads = Array.from(files).map(async (file) => {
-        const path = `${Date.now()}-${file.name}`;
+      const uploads = Array.from(files).map(async (file, i) => {
+        const path = `${Date.now()}-${i}-${file.name}`;
         const { error: uploadError } = await supabase.storage.from("gallery-media").upload(path, file);
-        if (uploadError) throw uploadError;
+        if (uploadError) throw new Error(uploadError.message);
         const { data } = supabase.storage.from("gallery-media").getPublicUrl(path);
         done++;
         setUploadProgress(Math.round((done / total) * 100));
@@ -54,8 +54,8 @@ export default function GallerySection() {
       setEventTag("");
       setUploadProgress(null);
       fetchPhotos();
-    } catch {
-      setError("Upload failed. Please try again.");
+    } catch (err) {
+      setError(`Upload failed: ${err instanceof Error ? err.message : "Please try again."}`);
     } finally {
       setSaving(false);
     }
