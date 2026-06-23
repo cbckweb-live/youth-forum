@@ -11,6 +11,19 @@ type Photo = {
   created_at: string;
 };
 
+function cleanPhotoUrl(url: string): string | null {
+  const trimmed = url.trim();
+  const markdownMatch = trimmed.match(/^\[[^\]]+\]\(([^)]+)\)$/);
+  const candidate = markdownMatch ? markdownMatch[1].trim() : trimmed;
+  const normalized = candidate.replace(/\s+/g, "");
+
+  try {
+    return new URL(normalized).toString();
+  } catch {
+    return null;
+  }
+}
+
 export default async function GalleryPage() {
   let photos: Photo[] | null = null;
   let errorMessage: string | null = null;
@@ -21,7 +34,12 @@ export default async function GalleryPage() {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) throw error;
-    photos = data as Photo[] | null;
+    photos = (data as Photo[] | null)
+      ?.map((photo) => ({
+        ...photo,
+        photo_url: cleanPhotoUrl(photo.photo_url),
+      }))
+      .filter((photo): photo is Photo => Boolean(photo.photo_url));
   } catch (err) {
     errorMessage = err instanceof Error ? err.message : String(err);
   }
