@@ -63,7 +63,7 @@ export default function EventsSection() {
         await supabase.from("events").insert(payload);
       }
       closeModal();
-      fetchEvents();
+      await fetchEvents();
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
