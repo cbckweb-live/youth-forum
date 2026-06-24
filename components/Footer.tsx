@@ -19,11 +19,8 @@ export default function Footer() {
           <img src="/logo.png" alt="Youth Forum" className="h-12 w-auto mb-4" />
           <h3 className="font-display text-lg mb-4 text-[#231F1E]">
             Chakhesang Baptist Church,
-            <br /> Youth Ministry
+            Youth Ministry
           </h3>
-          <p className="text-sm text-gray-500">
-            Growing together, rooted in purpose.
-          </p>
         </div>
 
         <div>
