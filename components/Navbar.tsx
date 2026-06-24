@@ -43,8 +43,8 @@ export default function Navbar() {
   return (
     <Disclosure
       as="nav"
-      open={open}
-      onChange={setOpen}
+      defaultOpen={false}
+      onChange={(val: unknown) => setOpen(Boolean(val))}
       className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -85,8 +85,6 @@ export default function Navbar() {
 
       <DisclosurePanel className="sm:hidden" ref={panelRef}>
         <div className="space-y-1 px-4 pt-2 pb-4">
-
-
           {navigation.map((item) => (
             <DisclosureButton
               key={item.name}
