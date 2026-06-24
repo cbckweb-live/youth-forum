@@ -123,7 +123,8 @@ export default function Footer() {
             <br />
             Nagaland, India
           </p>
-
+        </div>
+        <div>
           <iframe
             title="CBCK Youth Forum location map"
             className="mt-4 h-32 w-full rounded-lg border border-gray-200"
@@ -132,7 +133,6 @@ export default function Footer() {
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3595.891652834068!2d94.10877407415414!3d25.674886112189345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3746210abc33ddf3%3A0x366e970c18b6490e!2sChakhesang%20Baptist%20Church!5e0!3m2!1sen!2sus!4v1782318995927!5m2!1sen!2sus"
           ></iframe>
         </div>
-
       </div>
 
       <div className="border-t border-gray-200 px-8 py-6 flex flex-wrap justify-between gap-4 text-sm text-gray-500">
