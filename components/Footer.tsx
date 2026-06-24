@@ -64,10 +64,10 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-gray-200 px-8 py-6 flex flex-wrap justify-between gap-4 text-sm text-gray-500">
-        <p>© {new Date().getFullYear()} CBCK. All rights reserved.</p>
-
         <div className="flex items-center gap-6 flex-wrap">
           <div className="flex gap-4">
+            <p className="sr-only">Social links</p>
+
             <a
               href={SOCIAL_LINKS.facebook}
               target="_blank"
