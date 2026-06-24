@@ -124,31 +124,12 @@ export default function Footer() {
           </p>
 
           <iframe
-            title="CBCK Youth Forum location map (pin code)"
+            title="CBCK Youth Forum location map"
             className="mt-4 h-48 w-full rounded-lg border border-gray-200"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            src="https://www.google.com/maps?q=M4F6+XG5&output=embed"
+            src="https://www.google.com/maps?q=M4F6+XG5,+Kitsubozou+Colony,+Kohima,+Nagaland+797001,+India&output=embed"
           ></iframe>
-
-          <iframe
-            title="CBCK Youth Forum location map (address)"
-            className="mt-4 h-48 w-full rounded-lg border border-gray-200"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            src="https://www.google.com/maps?q=Kitsubozou+Colony,+Kohima,+Nagaland,+India&output=embed"
-          ></iframe>
-
-          <a
-            href="https://www.google.com/maps?q=M4F6+XG5"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[#6B1F2A] hover:underline"
-            aria-label="Open Google Map location"
-          >
-            <span aria-hidden="true">📍</span>
-            View on Google Maps
-          </a>
         </div>
       </div>
 
