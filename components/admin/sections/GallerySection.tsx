@@ -24,6 +24,10 @@ export default function GallerySection() {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
+  const [editCaption, setEditCaption] = useState("");
+  const [editEventTag, setEditEventTag] = useState("");
 
   const fetchPhotos = useCallback(async () => {
     const { data, error } = await supabase
@@ -116,10 +120,14 @@ export default function GallerySection() {
         if (!insertedRows?.length) return "none";
         const first = insertedRows[0] as Record<string, unknown>;
         const id = first?.["id"];
-        return typeof id === "string" || typeof id === "number" ? String(id) : "none";
+        return typeof id === "string" || typeof id === "number"
+          ? String(id)
+          : "none";
       })();
 
-      setDebugInfo(`Inserted ${insertedRows?.length ?? 0} rows. Latest id: ${latestId}`);
+      setDebugInfo(
+        `Inserted ${insertedRows?.length ?? 0} rows. Latest id: ${latestId}`,
+      );
       setFiles(null);
       setCaption("");
       setEventTag("");
@@ -133,6 +141,31 @@ export default function GallerySection() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function updateCaptionTag(
+    id: string,
+    nextCaption: string,
+    nextEventTag: string,
+  ) {
+    const response = await fetch("/api/admin/gallery", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+        caption: nextCaption.trim() === "" ? null : nextCaption,
+        event_tag: nextEventTag.trim() === "" ? null : nextEventTag,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || "Failed to update gallery item.");
+    }
+
+    return response;
   }
 
   async function handleDelete(id: string) {
@@ -207,6 +240,92 @@ export default function GallerySection() {
         />
       )}
 
+      {/* Edit modal */}
+
+      {editingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="font-display text-lg mb-5">Edit Gallery Photo</h2>
+            <div className="rounded-xl overflow-hidden border bg-gray-50 mb-4">
+              <img
+                src={editingPhoto?.photo_url}
+                alt={editingPhoto?.caption || ""}
+                className="w-full h-40 object-cover"
+              />
+            </div>
+
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void (async () => {
+                  try {
+                    setSaving(true);
+                    setError(null);
+                    await updateCaptionTag(
+                      editingId!,
+                      editCaption,
+                      editEventTag,
+                    );
+                    setEditingId(null);
+                    setEditCaption("");
+                    setEditEventTag("");
+                    await fetchPhotos();
+                  } catch (err) {
+                    setError(
+                      `Update failed: ${
+                        err instanceof Error ? err.message : "Please try again."
+                      }`,
+                    );
+                  } finally {
+                    setSaving(false);
+                  }
+                })();
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Caption"
+                value={editCaption}
+                onChange={(e) => setEditCaption(e.target.value)}
+                className={inputCls}
+              />
+              <input
+                type="text"
+                placeholder="Event tag (optional)"
+                value={editEventTag}
+                onChange={(e) => setEditEventTag(e.target.value)}
+                className={inputCls}
+              />
+
+              {error && <p className="text-sm text-red-600">{error}</p>}
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60"
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingId(null);
+                    setEditCaption("");
+                    setEditEventTag("");
+                    setError(null);
+                  }}
+                  className="text-sm text-[#231F1E]/50 hover:underline"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-4">
         {photos.map((photo) => (
           <div
@@ -230,6 +349,22 @@ export default function GallerySection() {
                 </p>
               )}
             </div>
+
+            <div className="absolute top-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => {
+                  setEditingId(photo.id);
+                  setEditingPhoto(photo);
+                  setEditCaption(photo.caption ?? "");
+                  setEditEventTag(photo.event_tag ?? "");
+                  setError(null);
+                }}
+                className="bg-white/90 text-[#6B1F2A] text-xs rounded-full px-3 py-1 border border-white/50"
+              >
+                Edit
+              </button>
+            </div>
+
             <button
               onClick={() => setConfirmDeleteId(photo.id)}
               className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"

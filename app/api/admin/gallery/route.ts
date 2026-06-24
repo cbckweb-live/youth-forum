@@ -118,3 +118,52 @@ export async function DELETE(request: NextRequest) {
 
   return new NextResponse(null, { status: 204 });
 }
+
+export async function PUT(request: NextRequest) {
+  const response = NextResponse.next();
+  const serverSupabase = getServerSupabase(request, response);
+  const {
+    data: { session },
+    error: sessionError,
+  } = await serverSupabase.auth.getSession();
+
+  if (sessionError || !session) {
+    return errorResponse("Unauthorized", 401);
+  }
+
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return errorResponse("Supabase service role key is not configured.", 500);
+  }
+
+  const payload = (await request.json()) as {
+    id?: string;
+    caption?: string | null;
+    event_tag?: string | null;
+  };
+
+  if (!payload?.id) {
+    return errorResponse("Missing gallery photo id.", 400);
+  }
+
+  const serviceSupabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+
+  const updatePayload = {
+    caption: payload.caption ?? null,
+    event_tag: payload.event_tag ?? null,
+  };
+
+  const { data, error } = await serviceSupabase
+    .from("gallery")
+    .update(updatePayload)
+    .eq("id", payload.id)
+    .select();
+
+  if (error) {
+    return errorResponse(error.message, 500);
+  }
+
+  return jsonResponse({ updatedRows: data });
+}

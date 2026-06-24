@@ -5,6 +5,7 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
+import { useEffect, useRef, useState } from "react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
@@ -18,9 +19,32 @@ const navigation = [
 ];
 
 export default function Navbar() {
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      const panel = panelRef.current;
+      if (!panel) return;
+
+      const target = e.target as Node | null;
+      if (!target) return;
+
+      // If user tapped outside the open mobile panel, close it.
+      if (!panel.contains(target)) setOpen(false);
+    };
+
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => window.removeEventListener("pointerdown", onPointerDown);
+  }, [open]);
+
   return (
     <Disclosure
       as="nav"
+      open={open}
+      onChange={setOpen}
       className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -59,8 +83,10 @@ export default function Navbar() {
         </div>
       </div>
 
-      <DisclosurePanel className="sm:hidden">
+      <DisclosurePanel className="sm:hidden" ref={panelRef}>
         <div className="space-y-1 px-4 pt-2 pb-4">
+
+
           {navigation.map((item) => (
             <DisclosureButton
               key={item.name}
