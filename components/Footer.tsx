@@ -49,7 +49,7 @@ export default function Footer() {
               {/* Facebook (official-style) */}
               <svg
                 viewBox="0 0 24 24"
-                className="h-7 w-7"
+                className="h-8 w-8"
                 aria-hidden="true"
                 fill="currentColor"
               >
@@ -67,7 +67,7 @@ export default function Footer() {
               {/* Instagram */}
               <svg
                 viewBox="0 0 24 24"
-                className="h-7 w-7"
+                className="h-8 w-8"
                 aria-hidden="true"
                 fill="currentColor"
               >
@@ -85,7 +85,7 @@ export default function Footer() {
               {/* YouTube */}
               <svg
                 viewBox="0 0 24 24"
-                className="h-5 w-5"
+                className="h-8 w-8"
                 aria-hidden="true"
                 fill="currentColor"
               >
@@ -122,6 +122,17 @@ export default function Footer() {
             <br />
             Nagaland, India
           </p>
+
+          <a
+            href="https://www.google.com/maps?q=M4F6+XG5"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#6B1F2A] hover:underline"
+            aria-label="Open Google Map location"
+          >
+            <span aria-hidden="true">📍</span>
+            View on Google Maps
+          </a>
         </div>
       </div>
 
