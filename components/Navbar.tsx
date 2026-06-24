@@ -1,10 +1,8 @@
 "use client";
 
-
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, startTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -18,15 +16,8 @@ const navigation = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const pathname = usePathname();
 
   // Close on route change
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);// Close on route change
-useEffect(() => {
-  startTransition(() => setOpen(false));
-}, [pathname]);
 
   // Close on outside click/scroll
   useEffect(() => {
