@@ -8,6 +8,8 @@ import {
 } from "@heroicons/react/24/outline";
 import LeadershipCard from "@/components/LeadershipCard";
 
+export const revalidate = 0;
+
 type Event = {
   id: string;
   title: string;
