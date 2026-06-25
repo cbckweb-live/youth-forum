@@ -1,9 +1,4 @@
 import Link from "next/link";
-import {
-  FaceSmileIcon,
-  HashtagIcon,
-  CubeIcon,
-} from "@heroicons/react/24/solid";
 
 const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/cbck.youthforum",
@@ -18,8 +13,7 @@ export default function Footer() {
         <div>
           <img src="/logo.png" alt="Youth Forum" className="h-12 w-auto mb-4" />
           <h3 className="font-display text-lg mb-4 text-[#231F1E]">
-            Chakhesang Baptist Church Kohima,
-            Youth Ministry
+            Chakhesang Baptist Church, Kohima, Youth Ministry
           </h3>
         </div>
 

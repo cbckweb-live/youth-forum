@@ -99,6 +99,7 @@ export default async function HomePage() {
   const { data: recentPosts } = await supabase
     .from("posts")
     .select("id,title,slug,category,content,created_at,photo_url")
+    .eq("published", true)
     .order("created_at", { ascending: false })
     .limit(3);
 
