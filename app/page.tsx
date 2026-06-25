@@ -7,6 +7,7 @@ import {
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import LeadershipCard from "@/components/LeadershipCard";
+import Image from "next/image";
 
 export const revalidate = 0;
 
@@ -199,8 +200,7 @@ export default async function HomePage() {
                 className="group bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {post.photo_url && (
-                  <img
-                    src={post.photo_url}
+                  <Image                     src={post.photo_url}
                     alt={post.title}
                     className="w-full h-36 object-cover"
                   />

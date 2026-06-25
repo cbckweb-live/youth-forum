@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { MapPinIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 
 export const revalidate = 0;
 
@@ -70,8 +71,7 @@ export default async function CezoMepuPage() {
                 {/* Photo */}
                 <div className="relative w-full sm:w-52 h-40 rounded-xl overflow-hidden shrink-0">
                   {location.photo_url ? (
-                    <img
-                      src={location.photo_url}
+                    <Image                       src={location.photo_url}
                       alt={location.name}
                       className="w-full h-full object-cover"
                     />
@@ -108,8 +108,7 @@ export default async function CezoMepuPage() {
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#6B1F2A] text-white text-sm font-medium hover:bg-[#7d2432] transition-colors"
                           >
                             {s.photo_url && (
-                              <img
-                                src={s.photo_url}
+                              <Image                                 src={s.photo_url}
                                 alt={s.name}
                                 className="w-5 h-5 rounded-full object-cover"
                               />

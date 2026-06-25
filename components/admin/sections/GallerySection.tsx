@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import Image from "next/image";
 
 type Photo = {
   id: string;
@@ -256,9 +257,9 @@ export default function GallerySection() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="font-display text-lg mb-5">Edit Gallery Photo</h2>
             <div className="rounded-xl overflow-hidden border bg-gray-50 mb-4">
-              <img
+              <Image
                 src={editingPhoto?.photo_url}
-                alt={editingPhoto?.caption || ""}
+                alt={String(editingPhoto?.caption || "")}
                 className="w-full h-40 object-cover"
               />
             </div>
@@ -341,9 +342,9 @@ export default function GallerySection() {
             key={photo.id}
             className="relative group rounded-xl overflow-hidden bg-gray-100"
           >
-            <img
+            <Image
               src={photo.photo_url}
-              alt={photo.caption || ""}
+              alt={String(photo.caption || "")}
               className="w-full h-32 object-cover"
             />
             <div className="p-2">

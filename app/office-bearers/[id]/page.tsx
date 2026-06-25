@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 export default async function OfficeBearerDetailPage({
   params,
@@ -19,7 +20,7 @@ export default async function OfficeBearerDetailPage({
   return (
     <main className="px-8 py-16 max-w-2xl mx-auto text-center">
       {person.photo_url && (
-        <img
+        <Image 
           src={person.photo_url}
           alt={person.name}
           className="w-32 h-32 rounded-full object-cover mx-auto mb-6"

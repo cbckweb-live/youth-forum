@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/cbck.youthforum",
@@ -11,7 +12,7 @@ export default function Footer() {
     <footer className="bg-gray-100 text-gray-700 mt-auto border-t border-gray-200">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-8 px-8 py-10">
         <div>
-          <img src="/logo.png" alt="Youth Forum" className="h-12 w-auto mb-4" />
+          <Image src="/logo.png" alt="Youth Forum" className="h-12 w-auto mb-4" />
           <h3 className="font-display text-lg mb-4 text-[#231F1E]">
             Chakhesang Baptist Church, Kohima, Youth Ministry
           </h3>

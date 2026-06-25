@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import Image from "next/image";
 
 type Person = {
   id: string;
@@ -379,8 +380,7 @@ export default function OfficeBearersSection() {
           >
             <div className="flex items-center gap-3">
               {person.photo_url ? (
-                <img
-                  src={person.photo_url}
+                <Image                   src={person.photo_url}
                   alt={person.name}
                   className="w-9 h-9 rounded-full object-cover shrink-0"
                 />

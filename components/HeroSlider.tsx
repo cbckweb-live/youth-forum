@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 
 const images = [
   "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Events/A7402285.jpg",
@@ -46,7 +47,7 @@ export default function HeroSlider() {
       onTouchEnd={handleTouchEnd}
       className="relative w-full max-w-6xl mx-auto h-[220px] sm:h-[320px] md:h-[420px] rounded-xl border border-white/40 bg-white/30 backdrop-blur-sm shadow-lg overflow-hidden p-1 touch-pan-y"
     >
-      <img
+      <Image 
         src={images[index]}
         alt="Community highlight"
         className="w-full h-full object-cover"

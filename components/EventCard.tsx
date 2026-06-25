@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 interface EventCardProps {
   title: string;
@@ -45,7 +46,7 @@ export default function EventCard({
             className="flex-shrink-0 w-36 h-36 rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]"
             aria-label="Enlarge image"
           >
-            <img
+            <Image 
               src={image_url}
               alt={title}
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-zoom-in"
@@ -70,7 +71,7 @@ export default function EventCard({
             >
               Close ✕
             </button>
-            <img
+            <Image 
               src={image_url}
               alt={title}
               className="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"

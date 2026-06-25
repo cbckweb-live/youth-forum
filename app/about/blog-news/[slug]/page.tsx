@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 export default async function PostDetailPage({
   params,
@@ -48,8 +49,7 @@ export default async function PostDetailPage({
       </div>
 
       {post.photo_url && (
-        <img
-          src={post.photo_url}
+        <Image           src={post.photo_url}
           alt={post.title}
           className="w-full max-h-[420px] object-cover rounded-2xl mb-8"
         />

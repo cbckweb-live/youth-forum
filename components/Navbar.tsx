@@ -3,6 +3,7 @@
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -59,7 +60,7 @@ export default function Navbar() {
 
           <div className="flex flex-1 items-center justify-center sm:justify-start">
             <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
-              <img src="/logo.png" alt="Youth Forum" className="h-12 w-auto" />
+              <Image src="/logo.png" alt="Youth Forum" className="h-12 w-auto" />
             </Link>
 
             <div className="hidden sm:ml-12 sm:flex sm:gap-8">

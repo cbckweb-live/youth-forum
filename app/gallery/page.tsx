@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
@@ -87,7 +88,7 @@ export default async function GalleryPage() {
                 key={photo.id}
                 className="rounded-lg overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md"
               >
-                <img
+                <Image 
                   src={photo.photo_url}
                   alt={photo.caption || tag}
                   className="w-full h-56 object-cover"

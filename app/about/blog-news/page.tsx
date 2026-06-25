@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import Image from "next/image";
 
 export const revalidate = 0;
 
@@ -76,8 +77,7 @@ export default async function BlogNewsPage({
             className="group bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
           >
             {post.photo_url && (
-              <img
-                src={post.photo_url}
+              <Image                 src={post.photo_url}
                 alt={post.title}
                 className="w-full h-44 object-cover"
               />

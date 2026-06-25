@@ -1,3 +1,4 @@
+import Image from "next/image";
 type MathetesCardProps = {
   title: string;
   description: string | null;
@@ -12,7 +13,7 @@ export default function MathetesCard({
   return (
     <div className="rounded-xl overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md">
       {photo_url && (
-        <img
+        <Image 
           src={photo_url}
           alt={title}
           className="w-full h-auto object-cover"

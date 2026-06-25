@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
+import ImageCropper from "./ImageCropper";
 
 type Props = {
   accept: string;
@@ -15,9 +17,45 @@ type Props = {
 
 export default function FileUploadInput({ accept, label, file, files, currentUrl, progress, multiple, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+
+  const isImage = accept.includes("image");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files;
+    if (!selected || !selected[0]) {
+      onChange(null);
+      return;
+    }
+    if (isImage && !multiple) {
+      setCropFile(selected[0]);
+    } else {
+      onChange(selected);
+    }
+  };
+
+  const handleCropped = (croppedFile: File) => {
+    setCropFile(null);
+    if (croppedFile) {
+      const dt = new DataTransfer();
+      dt.items.add(croppedFile);
+      onChange(dt.files);
+    } else {
+      onChange(null);
+    }
+  };
+
+  const handleCancelCrop = () => {
+    setCropFile(null);
+  };
+
+  const handleCropExisting = () => {
+    if (file && isImage) {
+      setCropFile(file);
+    }
+  };
 
   const previewUrl = file ? URL.createObjectURL(file) : currentUrl;
-  const isImage = accept.includes("image");
   const fileCount = multiple && files ? files.length : null;
 
   return (
@@ -31,12 +69,33 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
         accept={accept}
         multiple={multiple}
         className="hidden"
-        onChange={(e) => onChange(e.target.files)}
+        onChange={handleChange}
       />
 
-      {isImage && previewUrl && !multiple ? (
-        <img src={previewUrl} alt="Preview" className="w-full max-h-40 object-cover rounded-lg mb-3" />
-      ) : null}
+      {isImage && previewUrl && !multiple && (
+        <div className="relative mb-3">
+          <Image             src={previewUrl}
+            alt="Preview"
+            className="w-full max-h-40 object-cover rounded-lg"
+          />
+          {file && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCropExisting();
+              }}
+              className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white text-xs px-2 py-1 rounded-md transition-colors"
+            >
+              Crop
+            </button>
+          )}
+        </div>
+      )}
+
+      {!isImage && fileCount !== null && files && files[0] && (
+        <p className="text-xs text-[#231F1E]/70 mb-2">{files[0].name}</p>
+      )}
 
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-lg bg-[#6B1F2A]/10 flex items-center justify-center shrink-0">
@@ -47,8 +106,8 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
             {fileCount !== null
               ? `${fileCount} photo${fileCount !== 1 ? "s" : ""} selected`
               : file
-              ? file.name
-              : label}
+                ? file.name
+                : label}
           </p>
           <p className="text-xs text-[#231F1E]/50">Click to {file || fileCount ? "change" : "browse"}</p>
         </div>
@@ -68,6 +127,14 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
       )}
       {progress === 100 && (
         <p className="text-xs text-green-600 mt-2">✓ Upload complete</p>
+      )}
+
+      {cropFile && (
+        <ImageCropper
+          imageFile={cropFile}
+          onCropped={handleCropped}
+          onCancel={handleCancelCrop}
+        />
       )}
     </div>
   );
