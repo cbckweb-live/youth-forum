@@ -96,13 +96,22 @@ export default async function HomePage() {
     .filter((e) => (e.event_end_date ?? e.event_date) >= today)
     .slice(0, 2);
 
-  const { data: recentPosts } = await supabase
+  const { data: newsPosts } = await supabase
     .from("posts")
     .select("id,title,slug,category,content,created_at,photo_url")
+    .eq("category", "news")
     .order("created_at", { ascending: false })
     .limit(3);
 
-  const posts = (recentPosts as Post[] | null) ?? [];
+  const { data: blogPosts } = await supabase
+    .from("posts")
+    .select("id,title,slug,category,content,created_at,photo_url")
+    .eq("category", "blog-opinion")
+    .order("created_at", { ascending: false })
+    .limit(3);
+
+  const news = (newsPosts as Post[] | null) ?? [];
+  const blogs = (blogPosts as Post[] | null) ?? [];
 
   return (
     <main className="bg-white text-[#231F1E]">
@@ -171,25 +180,25 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* Blog & News */}
+      {/* News */}
       <section className="px-4 sm:px-8 py-12 sm:py-16">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <h2 className="font-display text-2xl text-center sm:text-left">
-            Recent Blog &amp; News
+            Recent News
           </h2>
           <Link
-            href="/about/blog-news"
+            href="/about/blog-news?category=news"
             className="text-sm text-[#6B1F2A] hover:underline"
           >
             Read more →
           </Link>
         </div>
 
-        {posts.length === 0 ? (
-          <p className="text-[#231F1E]/60 text-center">No posts yet.</p>
+        {news.length === 0 ? (
+          <p className="text-[#231F1E]/60 text-center">No news yet.</p>
         ) : (
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {posts.map((post) => (
+            {news.map((post) => (
               <Link
                 key={post.id}
                 href={`/about/blog-news/${post.slug}`}
@@ -203,9 +212,56 @@ export default async function HomePage() {
                   />
                 )}
                 <div className="p-5">
-                  <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">
-                    {post.category === "news" ? "News" : "Blog & Opinion"}
-                  </p>
+                  <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">News</p>
+                  <h3 className="font-display text-lg leading-snug mb-2 group-hover:text-[#6B1F2A] transition-colors">
+                    {post.title}
+                  </h3>
+                  <div className="text-sm text-[#231F1E]/70 line-clamp-4">
+                    {truncate(post.content, 160)}
+                  </div>
+                  <div className="mt-4 text-sm font-medium text-[#6B1F2A] group-hover:underline">
+                    Read more →
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Blog & Opinion */}
+      <section className="px-4 sm:px-8 py-12 sm:py-16">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+          <h2 className="font-display text-2xl text-center sm:text-left">
+            Recent Blog &amp; Opinion
+          </h2>
+          <Link
+            href="/about/blog-news?category=blog-opinion"
+            className="text-sm text-[#6B1F2A] hover:underline"
+          >
+            Read more →
+          </Link>
+        </div>
+
+        {blogs.length === 0 ? (
+          <p className="text-[#231F1E]/60 text-center">No blog posts yet.</p>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {blogs.map((post) => (
+              <Link
+                key={post.id}
+                href={`/about/blog-news/${post.slug}`}
+                className="group bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                {post.photo_url && (
+                  <img
+                    src={post.photo_url}
+                    alt={post.title}
+                    className="w-full h-36 object-cover"
+                  />
+                )}
+                <div className="p-5">
+                  <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">Blog & Opinion</p>
                   <h3 className="font-display text-lg leading-snug mb-2 group-hover:text-[#6B1F2A] transition-colors">
                     {post.title}
                   </h3>
