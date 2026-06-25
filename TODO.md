@@ -1,7 +1,4 @@
-# TODO
-
-- [x] Inspect existing footer implementation (`components/Footer.tsx`).
-- [ ] Add Facebook/Instagram/YouTube icon links to the footer using `@heroicons/react`.
-- [ ] Ensure links open in new tab with proper `rel` and accessibility labels.
-- [x] Run lint/build to confirm no issues (lint/build executed successfully based on terminal progress).
-
+- [ ] Add 10MB PDF upload limit (client-side reject with user-friendly error)
+- [ ] Add 10MB PDF upload limit (server-side reject)
+- [x] Ensure PDFs larger than 10MB never reach Supabase storage
+- [ ] Quick sanity check: TypeScript build + lint (if available)

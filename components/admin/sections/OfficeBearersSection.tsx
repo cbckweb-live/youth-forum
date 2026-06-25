@@ -75,11 +75,18 @@ export default function OfficeBearersSection() {
   }, [fetchData]);
 
   async function uploadPhoto(file: File): Promise<string> {
-    const path = `${Date.now()}-${file.name}`;
+    const { compressImageFile } = await import("@/lib/compress");
+    const compressed = await compressImageFile(file, {
+      maxDimension: 1200,
+      quality: 0.78,
+      preferWebp: true,
+    });
+
+    const path = `${Date.now()}-${compressed.name}`;
     setUploadProgress(10);
     const { error } = await supabase.storage
       .from("office-bearers-media")
-      .upload(path, file);
+      .upload(path, compressed);
     if (error) throw error;
     setUploadProgress(100);
     return supabase.storage.from("office-bearers-media").getPublicUrl(path).data
@@ -121,8 +128,6 @@ export default function OfficeBearersSection() {
         const err = maybe["error"];
         return typeof err === "string" ? err : undefined;
       })();
-
-
 
       if (!response.ok) {
         throw new Error(

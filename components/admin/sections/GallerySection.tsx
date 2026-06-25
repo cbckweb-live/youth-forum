@@ -60,11 +60,20 @@ export default function GallerySection() {
     try {
       const total = files.length;
       let done = 0;
+      const { compressImageFile } = await import("@/lib/compress");
+
       const uploads = Array.from(files).map(async (file, i) => {
-        const path = `${Date.now()}-${i}-${file.name}`;
+        const compressed = await compressImageFile(file, {
+          maxDimension: 1600,
+          quality: 0.78,
+          preferWebp: true,
+        });
+
+        const path = `${Date.now()}-${i}-${compressed.name}`;
         const { error: uploadError } = await supabase.storage
           .from("gallery-media")
-          .upload(path, file);
+          .upload(path, compressed);
+
         if (uploadError) throw new Error(uploadError.message);
         const { data } = supabase.storage
           .from("gallery-media")
