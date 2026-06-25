@@ -246,9 +246,19 @@ export default function PostsSection() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-display text-lg mb-5">
-              {editingId ? "Edit Post" : "New Post"}
-            </h2>
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <h2 className="font-display text-lg">
+                {editingId ? "Edit Post" : "New Post"}
+              </h2>
+              <button
+                type="button"
+                onClick={closeModal}
+                aria-label="Close"
+                className="text-[#231F1E]/50 hover:text-[#231F1E] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
