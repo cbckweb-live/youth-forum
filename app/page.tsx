@@ -93,7 +93,8 @@ export default async function HomePage() {
           Welcome
         </p>
         <h1 className="font-display text-2xl sm:text-4xl leading-tight mb-4">
-          Chakhesang Baptist Church, Youth Ministry
+          Chakhesang Baptist Church Kohima,
+          <br /> Youth Ministry
         </h1>
         <p className="text-[#231F1E]/80 leading-relaxed">
           A community built on shared faith and shared ground — gathering for
