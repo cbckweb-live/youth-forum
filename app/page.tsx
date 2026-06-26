@@ -82,7 +82,7 @@ export default async function HomePage() {
   const { data: leadership } = await supabase
     .from("office_bearers")
     .select("*")
-    .or("role.ilike.%youth director%,role.ilike.%pastor in charge%");
+    .or("role.ilike.%youth director%,role.ilike.%pastor in charge%,role.ilike.%youth chairman%");
 
   const today = new Date().toISOString().split("T")[0];
 
