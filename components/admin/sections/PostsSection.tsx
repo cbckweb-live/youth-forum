@@ -77,11 +77,11 @@ export default function PostsSection() {
       alert("File too large. Please upload a PDF smaller than 10 MB.");
       throw new Error("PDF exceeds 10 MB limit.");
     }
-    const { compressImageFile, compressPdfFile } =
-      await import("@/lib/compress");
+    const { compressImageFile } = await import("@/lib/compress");
 
     const bucket = type === "photo" ? "posts-media" : "posts-pdf";
 
+    // PDF compression removed: upload original PDF as-is.
     const compressed =
       type === "photo"
         ? await compressImageFile(file, {
@@ -89,13 +89,14 @@ export default function PostsSection() {
             quality: 0.78,
             preferWebp: true,
           })
-        : await compressPdfFile(file, { maxBytes: 5 * 1024 * 1024 });
+        : file;
 
     const path = `${Date.now()}-${compressed.name}`;
     setUploadProgress(10);
     const { error } = await supabase.storage
       .from(bucket)
       .upload(path, compressed);
+
     if (error) throw error;
     setUploadProgress(100);
     return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;

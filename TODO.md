@@ -7,3 +7,9 @@
 - [x] Run lint/build in `community-site/`
 - [ ] Verify homepage rendering (events date ranges, blog excerpt + links)
 
+- [ ] Remove PDF compression feature to reduce complexity
+  - [ ] Delete `app/api/compress-pdf/route.ts`
+  - [ ] Remove `compressPdfFile` exports/usages from `lib/compress/pdf.ts` and `lib/compress/index.ts`
+  - [ ] Ensure no remaining imports of `compressPdfFile`
+  - [ ] Run lint/typecheck/build
+

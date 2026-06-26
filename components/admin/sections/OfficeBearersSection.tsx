@@ -454,9 +454,19 @@ export default function OfficeBearersSection() {
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-display text-lg mb-5">
-              {editingId ? "Edit Person" : "Add Person"}
-            </h2>
+            <div className="flex items-start justify-between gap-3 mb-5">
+              <h2 className="font-display text-lg">
+                {editingId ? "Edit Person" : "Add Person"}
+              </h2>
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                aria-label="Close"
+                className="w-9 h-9 rounded-full grid place-items-center text-[#231F1E]/60 hover:text-[#231F1E] hover:bg-black/5 transition-colors shrink-0"
+              >
+                ✕
+              </button>
+            </div>
             {PersonForm}
           </div>
         </div>
