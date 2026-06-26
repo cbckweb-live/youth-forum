@@ -50,14 +50,14 @@ export default async function PostDetailPage({
 
       {post.photo_url && (
         <div className="relative h-[420px] rounded-2xl mb-8">
-          <Image
-            src={post.photo_url}
-            alt={post.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            style={{ objectFit: "cover" }}
-            quality={85}
-          />
+<Image
+             src={post.photo_url}
+             alt={post.title}
+             fill
+             sizes="100vw"
+             style={{ objectFit: "cover" }}
+             quality={100}
+           />
         </div>
       )}
 

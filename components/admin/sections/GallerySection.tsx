@@ -261,9 +261,9 @@ export default function GallerySection() {
                 src={editingPhoto!.photo_url}
                 alt={String(editingPhoto?.caption || "")}
                 fill
-                sizes="(max-width: 768px) 100vw, 33vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 style={{ objectFit: "cover" }}
-                quality={85}
+                quality={100}
               />
             </div>
 
@@ -349,9 +349,9 @@ export default function GallerySection() {
               src={photo.photo_url}
               alt={String(photo.caption || "")}
               fill
-              sizes="(max-width: 768px) 100vw, 33vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               style={{ objectFit: "cover" }}
-              quality={85}
+              quality={100}
             />
             <div className="p-2">
               {photo.event_tag && (

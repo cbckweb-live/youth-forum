@@ -46,14 +46,14 @@ export default function EventCard({
             className="flex-shrink-0 w-36 h-36 rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]"
             aria-label="Enlarge image"
           >
-            <Image
-              src={image_url}
-              alt={title}
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              style={{ objectFit: "cover" }}
-              quality={85}
-            />
+<Image
+               src={image_url}
+               alt={title}
+               fill
+               sizes="144px"
+               style={{ objectFit: "cover" }}
+               quality={100}
+             />
           </button>
         )}
       </div>
@@ -74,14 +74,14 @@ export default function EventCard({
             >
               Close ✕
             </button>
-            <Image
-              src={image_url}
-              alt={title}
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              style={{ objectFit: "contain" }}
-              quality={85}
-            />
+<Image
+               src={image_url}
+               alt={title}
+               fill
+               sizes="100vw"
+               style={{ objectFit: "contain" }}
+               quality={100}
+             />
             <p className="text-white text-center mt-3 font-display text-lg">
               {title}
             </p>

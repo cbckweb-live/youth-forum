@@ -71,14 +71,14 @@ export default async function CezoMepuPage() {
                 {/* Photo */}
                 <div className="relative w-full sm:w-52 h-40 rounded-xl overflow-hidden shrink-0">
                   {location.photo_url ? (
-                    <Image
-                      src={location.photo_url}
-                      alt={location.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      style={{ objectFit: "cover" }}
-                      quality={85}
-                    />
+<Image
+                       src={location.photo_url}
+                       alt={location.name}
+                       fill
+                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 208px"
+                       style={{ objectFit: "cover" }}
+                       quality={100}
+                     />
                   ) : (
                     <div className="w-full h-full bg-[#231F1E]/05 flex flex-col items-center justify-center gap-2 text-[#231F1E]/30">
                       <MapPinIcon className="size-8" />
@@ -117,7 +117,7 @@ export default async function CezoMepuPage() {
                                 alt={s.name}
                                 width={20}
                                 height={20}
-                                quality={85}
+                                quality={100}
                                 className="w-5 h-5 rounded-full object-cover"
                               />
                             )}

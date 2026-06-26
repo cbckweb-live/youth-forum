@@ -82,9 +82,9 @@ export default async function BlogNewsPage({
                   src={post.photo_url}
                   alt={post.title}
                   fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  sizes="(max-width: 639px) 100vw, (max-width: 767px) 50vw, 33vw"
                   style={{ objectFit: "cover" }}
-                  quality={85}
+                  quality={100}
                 />
               </div>
             )}

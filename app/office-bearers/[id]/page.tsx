@@ -25,7 +25,7 @@ export default async function OfficeBearerDetailPage({
           alt={person.name}
           width={128}
           height={128}
-          quality={85}
+          quality={100}
           className="w-32 h-32 rounded-full object-cover mx-auto mb-6"
         />
       )}

@@ -12,7 +12,7 @@ export default function OfficeBearerCard({ id, name, role, photo_url, phone, ema
   return (
     <div id={id} className="text-center bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-xl p-5">
       {photo_url ? (
-        <Image src={photo_url} alt={name} width={80} height={80} quality={85} className="w-20 h-20 rounded-full object-cover mx-auto mb-3" />
+        <Image src={photo_url} alt={name} width={80} height={80} quality={100} className="w-20 h-20 rounded-full object-cover mx-auto mb-3" />
       ) : (
         <div className="w-20 h-20 rounded-full bg-gray-200 mx-auto mb-3" />
       )}

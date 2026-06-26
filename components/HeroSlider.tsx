@@ -50,9 +50,9 @@ export default function HeroSlider() {
         src={images[index]}
         alt="Community highlight"
         fill
-        sizes="(max-width: 768px) 100vw, 33vw"
+        sizes="100vw"
         style={{ objectFit: "cover" }}
-        quality={85}
+        quality={100}
       />
 
       <button

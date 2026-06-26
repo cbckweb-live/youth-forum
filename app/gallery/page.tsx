@@ -93,9 +93,9 @@ export default async function GalleryPage() {
                     src={photo.photo_url}
                     alt={photo.caption || tag}
                     fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                     style={{ objectFit: "cover" }}
-                    quality={85}
+                    quality={100}
                   />
                 </div>
                 {photo.caption && (
