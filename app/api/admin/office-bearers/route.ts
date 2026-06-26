@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   const { action } = payload as { action?: string };
 
   if (action === "create_person") {
-    const { name, role, photo_url, phone, email, team_id, display_order } =
+    const { name, role, photo_url, phone, email, bio, team_id, display_order } =
       payload;
     if (!name) return errorResponse("Name is required.", 400);
 
@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
         photo_url: photo_url || null,
         phone: phone || null,
         email: email || null,
+        bio: bio || null,
         team_id: team_id || null,
         display_order: display_order ?? 0,
       })
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "update_person") {
-    const { id, name, role, photo_url, phone, email, team_id } = payload;
+    const { id, name, role, photo_url, phone, email, bio, team_id } = payload;
     if (!id) return errorResponse("Person ID is required.", 400);
     if (!name) return errorResponse("Name is required.", 400);
 
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
         photo_url: photo_url || null,
         phone: phone || null,
         email: email || null,
+        bio: bio || null,
         team_id: team_id || null,
       })
       .eq("id", id);

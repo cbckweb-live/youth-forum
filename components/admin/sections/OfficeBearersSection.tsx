@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import FileUploadInput from "@/components/admin/FileUploadInput";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import Image from "next/image";
 
@@ -13,6 +14,7 @@ type Person = {
   photo_url: string | null;
   phone: string | null;
   email: string | null;
+  bio: string | null;
   team_id: string | null;
   display_order: number;
 };
@@ -29,6 +31,7 @@ const emptyPerson = (): Omit<Person, "id" | "display_order"> => ({
   photo_url: null,
   phone: "",
   email: "",
+  bio: "",
   team_id: null,
 });
 
@@ -161,6 +164,7 @@ export default function OfficeBearersSection() {
       photo_url: person.photo_url,
       phone: person.phone,
       email: person.email,
+      bio: person.bio,
       team_id: person.team_id,
     });
     setPhotoFile(null);
@@ -312,6 +316,15 @@ export default function OfficeBearersSection() {
           </option>
         ))}
       </select>
+      <div>
+        <label className="block text-sm font-medium text-[#231F1E] mb-2">
+          Bio (optional)
+        </label>
+        <RichTextEditor
+          value={form.bio || ""}
+          onChange={(val) => setForm({ ...form, bio: val })}
+        />
+      </div>
       <FileUploadInput
         accept="image/*"
         label="Upload photo (optional)"
