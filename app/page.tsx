@@ -205,9 +205,9 @@ export default async function HomePage() {
                       src={post.photo_url}
                       alt={post.title}
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       style={{ objectFit: "cover" }}
-                      quality={100}
+                      quality={85}
                     />
                   </div>
                 )}
@@ -235,7 +235,7 @@ export default async function HomePage() {
         <h2 className="font-display text-2xl mb-6 text-center">
           Our Leadership
         </h2>
-        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-2xl mx-auto">
           {leadership?.map((person) => (
             <LeadershipCard key={person.id} {...person} />
           ))}
