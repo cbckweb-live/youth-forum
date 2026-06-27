@@ -2,9 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  // IMPORTANT:
+  // - In middleware, the only cookies that persist are those set on the
+  //   *returned* NextResponse.
+  // - Do NOT mutate request.cookies; it won’t be reflected back to the browser.
+  // - Use a single response instance so any session-refresh cookies written
+  //   by @supabase/ssr are included in the final response.
+  const response = NextResponse.next();
 
   const supabase = createServerClient(
     process.env.SUPABASE_URL!,
@@ -15,13 +19,9 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
         },
       },
     },
@@ -40,9 +40,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin?denied=1", request.url));
   }
 
-  return supabaseResponse;
+  return response;
 }
 
 export const config = {
   matcher: ["/admin/dashboard/:path*"],
 };
+
+
