@@ -81,7 +81,7 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
             unoptimized={file !== null}
             sizes="(max-width: 768px) 100vw, 33vw"
             style={{ objectFit: "cover" }}
-            quality={100}
+            quality={75}
             className="rounded-lg"
           />
           {file && (

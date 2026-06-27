@@ -95,7 +95,7 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-5">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-5 max-h-[95vh] overflow-y-auto flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display text-lg">Crop Image</h3>
           <button
@@ -110,28 +110,32 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
 
         <p className="text-xs text-[#231F1E]/60 mb-3">Drag to adjust the crop area.</p>
 
-        <div className="relative select-none overflow-hidden bg-gray-100 rounded-lg">
-          <ReactCrop
-            crop={crop}
-            onChange={onCropChange}
-            onComplete={onCropComplete}
-            keepSelection
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              ref={imgRef}
-              src={imageUrl}
-              alt="Crop preview"
-              onLoad={() => setImageLoaded(true)}
-              className={`w-full h-auto block ${imageLoaded ? "" : "opacity-0"}`}
-            />
-          </ReactCrop>
-          {!imageLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center text-sm text-[#231F1E]/50">
-              Loading...
-            </div>
-          )}
-        </div>
+        <div
+  className="relative select-none bg-gray-100 rounded-lg overflow-auto"
+  style={{ maxHeight: "60vh" }}
+>
+  <ReactCrop
+    crop={crop}
+    onChange={onCropChange}
+    onComplete={onCropComplete}
+    keepSelection
+  >
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    <img
+      ref={imgRef}
+      src={imageUrl}
+      alt="Crop preview"
+      onLoad={() => setImageLoaded(true)}
+      className={`block ${imageLoaded ? "" : "opacity-0"}`}
+      style={{ maxHeight: "60vh", width: "auto", maxWidth: "100%" }}
+    />
+  </ReactCrop>
+  {!imageLoaded && (
+    <div className="absolute inset-0 flex items-center justify-center text-sm text-[#231F1E]/50">
+      Loading...
+    </div>
+  )}
+</div>
 
         <canvas ref={previewCanvasRef} style={{ display: "none" }} />
 
