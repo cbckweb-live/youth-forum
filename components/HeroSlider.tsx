@@ -52,7 +52,11 @@ export default function HeroSlider() {
         fill
         sizes="100vw"
         style={{ objectFit: "cover" }}
-        quality={100}
+        quality={85}
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.style.display = "none";
+        }}
       />
 
       <button
