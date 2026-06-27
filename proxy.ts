@@ -7,8 +7,8 @@ export async function proxy(request: NextRequest) {
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
@@ -33,6 +33,11 @@ export async function proxy(request: NextRequest) {
 
   if (!session) {
     return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
+  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
+  if (role !== "admin") {
+    return NextResponse.redirect(new URL("/admin?denied=1", request.url));
   }
 
   return supabaseResponse;

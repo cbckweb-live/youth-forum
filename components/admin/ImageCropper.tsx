@@ -10,7 +10,7 @@ const MAX_CROP_OUTPUT_DIM = 1600;
 
 type Props = {
   imageFile: File;
-  onCropped: (croppedFile: File) => void;
+  onCropped: (croppedFile: File | null) => void;
   onCancel: () => void;
 };
 
@@ -83,7 +83,10 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
       canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85);
     });
 
-    if (!blob) return;
+    if (!blob) {
+      onCropped(null);
+      return;
+    }
 
     const base = imageFile.name.replace(/\.[^/.]+$/, "");
     const croppedFile = new File([blob], `${base}-cropped.jpg`, {

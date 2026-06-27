@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import ImageCropper from "./ImageCropper";
 
@@ -34,7 +34,7 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
     }
   };
 
-  const handleCropped = (croppedFile: File) => {
+  const handleCropped = (croppedFile: File | null) => {
     setCropFile(null);
     if (croppedFile) {
       const dt = new DataTransfer();
@@ -55,7 +55,14 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
     }
   };
 
-  const previewUrl = file ? URL.createObjectURL(file) : currentUrl;
+  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : currentUrl), [file, currentUrl]);
+
+  useEffect(() => {
+    if (file) {
+      const url = URL.createObjectURL(file);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [file]);
   const fileCount = multiple && files ? files.length : null;
 
   return (

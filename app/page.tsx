@@ -8,12 +8,8 @@ import {
 } from "@heroicons/react/24/outline";
 import LeadershipCard from "@/components/LeadershipCard";
 import Image from "next/image";
-import { convert } from "html-to-text";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  news: "News",
-  "blog-opinion": "Blog & Opinion",
-};
+import { truncate } from "@/lib/truncate";
+import { CATEGORY_LABELS } from "@/lib/categories";
 
 export const revalidate = 0;
 
@@ -35,15 +31,6 @@ type Post = {
   created_at: string;
   photo_url?: string | null;
 };
-
-// FIX: Replaced the old stripHtml (naive regex) + truncate combo with a single
-// function that uses html-to-text's convert(). This correctly handles HTML
-// entities, nested tags, and complex markup that the regex would mangle.
-function truncate(html: string, maxChars: number) {
-  const plain = convert(html, { wordwrap: false });
-  if (plain.length <= maxChars) return plain;
-  return plain.slice(0, maxChars).trimEnd() + "…";
-}
 
 function formatRange(startISO: string, endISO?: string | null) {
   const start = new Date(startISO);
@@ -201,6 +188,9 @@ export default async function HomePage() {
                       sizes="(max-width: 768px) 100vw, 33vw"
                       style={{ objectFit: "cover" }}
                       quality={85}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
+                      }}
                     />
                   </div>
                 )}

@@ -63,13 +63,17 @@ export default function GallerySection() {
       let done = 0;
       const { compressImageFile } = await import("@/lib/compress");
 
-      const uploads = Array.from(files).map(async (file, i) => {
-        // Validate MIME type before compression or upload
-        if (!file.type.startsWith("image/")) {
-          throw new Error(`"${file.name}" is not a valid image file.`);
-        }
+      const uploads = Array.from(files).map(async (file) => {
+    // Validate MIME type before compression or upload
+    if (!file.type.startsWith("image/")) {
+      throw new Error(`"${file.name}" is not a valid image file.`);
+    }
 
-        // Per-file compression with fallback to original if compression fails
+    if (file.size > 20 * 1024 * 1024) {
+      throw new Error(`"${file.name}" exceeds 20MB limit. Please select a smaller image.`);
+    }
+
+    // Per-file compression with fallback to original if compression fails
         let toUpload: File = file;
         try {
           toUpload = await compressImageFile(file, {
@@ -81,22 +85,49 @@ export default function GallerySection() {
           toUpload = file;
         }
 
-        const path = `${Date.now()}-${i}-${toUpload.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from("gallery-media")
-          .upload(path, toUpload);
+        const formData = new FormData();
+        formData.append("file", toUpload);
+        formData.append("type", "photo");
+        formData.append("bucket", "gallery-media");
 
-        if (uploadError) throw new Error(uploadError.message);
+        const uploadResp = await fetch("/api/admin/media/upload", {
+          method: "POST",
+          body: formData,
+        });
 
-        const { data } = supabase.storage.from("gallery-media").getPublicUrl(path);
-        if (!data?.publicUrl)
-          throw new Error("Unable to create public URL for uploaded file.");
+        const uploadText = await uploadResp.text();
+        let uploadResult: unknown;
+        try {
+          uploadResult = uploadText ? JSON.parse(uploadText) : {};
+        } catch {
+          uploadResult = { error: uploadText };
+        }
+
+        const uploadErr = (() => {
+          if (typeof uploadResult !== "object" || uploadResult === null) return undefined;
+          const maybe = uploadResult as Record<string, unknown>;
+          const err = maybe["error"];
+          return typeof err === "string" ? err : undefined;
+        })();
+
+        if (!uploadResp.ok) {
+          throw new Error(uploadErr || "Failed to upload gallery photo.");
+        }
+
+        const photoUrl = (() => {
+          if (typeof uploadResult !== "object" || uploadResult === null) return undefined;
+          const maybe = uploadResult as Record<string, unknown>;
+          const u = maybe["url"];
+          return typeof u === "string" ? u : undefined;
+        })();
+
+        if (!photoUrl) throw new Error("No URL returned from server.");
 
         done++;
         setUploadProgress(Math.round((done / total) * 100));
 
         return {
-          photo_url: data.publicUrl,
+          photo_url: photoUrl,
           caption: caption || null,
           event_tag: eventTag || null,
         };
@@ -242,7 +273,9 @@ export default function GallerySection() {
         </button>
       </form>
 
-      {debugInfo && <p className="text-sm text-[#231F1E]/60">{debugInfo}</p>}
+      {process.env.NODE_ENV !== "production" && debugInfo && (
+        <p className="text-sm text-[#231F1E]/60">{debugInfo}</p>
+      )}
 
       {confirmDeleteId && (
         <ConfirmDialog
@@ -264,6 +297,9 @@ export default function GallerySection() {
                 sizes="(max-width: 640px) 100vw, 400px"
                 style={{ objectFit: "cover" }}
                 quality={75}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
+                }}
               />
             </div>
             <form
@@ -343,6 +379,9 @@ export default function GallerySection() {
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               style={{ objectFit: "cover" }}
               quality={75}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
+              }}
             />
             <div className="p-2">
               {photo.event_tag && (

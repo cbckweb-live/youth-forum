@@ -5,6 +5,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { CATEGORY_LABELS } from "@/lib/categories";
 
 type Post = {
   id: string;
@@ -79,39 +80,44 @@ export default function PostsSection() {
   }, [fetchPosts]);
 
   async function uploadMedia(file: File, type: "photo" | "pdf"): Promise<string> {
-    if (type === "pdf") {
-      // Re-validate at upload time — catches edit-flow cases that bypass onChange
-      const validationError = validatePdf(file);
-      if (validationError) {
-        alert(validationError);
-        throw new Error(validationError);
-      }
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", type);
+    formData.append("bucket", type === "photo" ? "posts-media" : "posts-pdf");
+
+    const response = await fetch("/api/admin/media/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const responseText = await response.text();
+    let result: unknown;
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      result = { error: responseText };
     }
 
-    if (type === "photo" && !file.type.startsWith("image/")) {
-      const msg = "Invalid file type. Please upload an image.";
-      alert(msg);
-      throw new Error(msg);
+    const errorFromApi = (() => {
+      if (typeof result !== "object" || result === null) return undefined;
+      const maybe = result as Record<string, unknown>;
+      const err = maybe["error"];
+      return typeof err === "string" ? err : undefined;
+    })();
+
+    if (!response.ok) {
+      throw new Error(errorFromApi || responseText || "Failed to upload media.");
     }
 
-    const { compressImageFile } = await import("@/lib/compress");
-    const bucket = type === "photo" ? "posts-media" : "posts-pdf";
+    const url = (() => {
+      if (typeof result !== "object" || result === null) return undefined;
+      const maybe = result as Record<string, unknown>;
+      const u = maybe["url"];
+      return typeof u === "string" ? u : undefined;
+    })();
 
-    const toUpload =
-      type === "photo"
-        ? await compressImageFile(file, {
-            maxDimension: 1600,
-            quality: 0.78,
-            preferWebp: true,
-          })
-        : file;
-
-    const path = `${Date.now()}-${toUpload.name}`;
-    setUploadProgress(10);
-    const { error } = await supabase.storage.from(bucket).upload(path, toUpload);
-    if (error) throw error;
-    setUploadProgress(100);
-    return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+    if (!url) throw new Error("No URL returned from server.");
+    return url;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -135,7 +141,6 @@ export default function PostsSection() {
       closeModal();
       fetchPosts();
     } catch (err) {
-      console.error(err);
       setError(`Upload failed: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setSaving(false);
@@ -212,7 +217,7 @@ export default function PostsSection() {
             <div>
               <p className="font-medium text-sm">{post.title}</p>
               <p className="text-xs text-[#231F1E]/50">
-                {post.category === "news" ? "News" : "Blog / Opinion"} ·{" "}
+                {post.category === "news" ? CATEGORY_LABELS.news : CATEGORY_LABELS["blog-opinion"]} ·{" "}
                 {new Date(post.created_at).toLocaleDateString()}
               </p>
             </div>
@@ -291,7 +296,7 @@ export default function PostsSection() {
                       checked={form.category === cat}
                       onChange={() => setForm({ ...form, category: cat })}
                     />
-                    {cat === "news" ? "News" : "Blog / Opinion"}
+                    {CATEGORY_LABELS[cat]}
                   </label>
                 ))}
               </div>

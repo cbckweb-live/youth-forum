@@ -79,22 +79,46 @@ export default function OfficeBearersSection() {
   }, [fetchData]);
 
   async function uploadPhoto(file: File): Promise<string> {
-    const { compressImageFile } = await import("@/lib/compress");
-    const compressed = await compressImageFile(file, {
-      maxDimension: 1200,
-      quality: 0.78,
-      preferWebp: true,
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "photo");
+    formData.append("bucket", "office-bearers-media");
+
+    setUploadProgress(10);
+    const response = await fetch("/api/admin/media/upload", {
+      method: "POST",
+      body: formData,
     });
 
-    const path = `${Date.now()}-${compressed.name}`;
-    setUploadProgress(10);
-    const { error } = await supabase.storage
-      .from("office-bearers-media")
-      .upload(path, compressed);
-    if (error) throw error;
+    const responseText = await response.text();
+    let result: unknown;
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      result = { error: responseText };
+    }
+
+    const errorFromApi = (() => {
+      if (typeof result !== "object" || result === null) return undefined;
+      const maybe = result as Record<string, unknown>;
+      const err = maybe["error"];
+      return typeof err === "string" ? err : undefined;
+    })();
+
+    if (!response.ok) {
+      throw new Error(errorFromApi || "Failed to upload photo.");
+    }
+
+    const url = (() => {
+      if (typeof result !== "object" || result === null) return undefined;
+      const maybe = result as Record<string, unknown>;
+      const u = maybe["url"];
+      return typeof u === "string" ? u : undefined;
+    })();
+
+    if (!url) throw new Error("No URL returned from server.");
     setUploadProgress(100);
-    return supabase.storage.from("office-bearers-media").getPublicUrl(path).data
-      .publicUrl;
+    return url;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -238,8 +262,8 @@ export default function OfficeBearersSection() {
 
       setNewTeamName("");
       fetchData();
-    } catch (err) {
-      console.error("Team creation error:", err);
+    } catch {
+      // error already handled via UI where applicable
     }
   }
 
@@ -253,14 +277,14 @@ export default function OfficeBearersSection() {
 
       if (!response.ok) {
         const text = await response.text();
-        console.error("Team deletion error:", text);
+        setError(text || "Failed to delete team.");
         return;
       }
 
       setConfirmDeleteTeamId(null);
       fetchData();
     } catch (err) {
-      console.error("Team deletion error:", err);
+      setError(err instanceof Error ? err.message : "Failed to delete team.");
     }
   }
 
@@ -393,14 +417,17 @@ export default function OfficeBearersSection() {
           >
             <div className="flex items-center gap-3">
               {person.photo_url ? (
-<Image
-                   src={person.photo_url}
-                   alt={person.name}
-                   width={36}
-                   height={36}
-                   quality={100}
-                   className="w-9 h-9 rounded-full object-cover shrink-0"
-                 />
+                  <Image
+                    src={person.photo_url}
+                    alt={person.name}
+                    width={36}
+                    height={36}
+                    quality={75}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
+                    }}
+                    className="w-9 h-9 rounded-full object-cover shrink-0"
+                  />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
               )}
