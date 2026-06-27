@@ -9,16 +9,18 @@ export async function createSupabaseServerClient() {
     process.env.SUPABASE_ANON_KEY!,
     {
       cookies: {
-        // Only read cookies from Server Components.
-        // Supabase may attempt to refresh tokens (writes cookies) during rendering.
-        // Next.js will crash if cookies are modified during layout/page render.
+        // Provide explicit read-only cookie handlers.
+        // Supabase token refresh can attempt cookie writes during Server Component render.
+        // Next.js throws: "Cookies can only be modified in a Server Action...".
         getAll: () => cookieStore.getAll(),
-        setAll: () => {
-          // No-op: prevent cookie mutations during render.
-        },
+
+        // No-op write handlers (read-only mode)
+        setAll: () => {},
       },
+
     },
   );
+
 
 }
 
