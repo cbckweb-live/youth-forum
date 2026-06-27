@@ -30,11 +30,24 @@ const emptyPost = (): Omit<Post, "id" | "created_at"> => ({
   published: false,
 });
 
+const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10 MB — module scope, not re-created on render
+
 function slugify(text: string) {
   return text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+// Centralised PDF validation — used by both onChange and uploadMedia
+function validatePdf(file: File): string | null {
+  const isPdf =
+    file.type === "application/pdf" ||
+    file.name.toLowerCase().endsWith(".pdf");
+  if (!isPdf) return "Invalid file type. Please upload a PDF.";
+  if (file.size > MAX_PDF_BYTES)
+    return "File too large. Please upload a PDF smaller than 10 MB.";
+  return null;
 }
 
 export default function PostsSection() {
@@ -62,27 +75,29 @@ export default function PostsSection() {
     const id = window.setTimeout(() => {
       void fetchPosts();
     }, 0);
-
     return () => window.clearTimeout(id);
   }, [fetchPosts]);
 
-  const MAX_PDF_BYTES = 10 * 1024 * 1024;
-
-  async function uploadMedia(
-    file: File,
-    type: "photo" | "pdf",
-  ): Promise<string> {
-    if (type === "pdf" && file.size > MAX_PDF_BYTES) {
-      // Use an alert-based popup as requested.
-      alert("File too large. Please upload a PDF smaller than 10 MB.");
-      throw new Error("PDF exceeds 10 MB limit.");
+  async function uploadMedia(file: File, type: "photo" | "pdf"): Promise<string> {
+    if (type === "pdf") {
+      // Re-validate at upload time — catches edit-flow cases that bypass onChange
+      const validationError = validatePdf(file);
+      if (validationError) {
+        alert(validationError);
+        throw new Error(validationError);
+      }
     }
-    const { compressImageFile } = await import("@/lib/compress");
 
+    if (type === "photo" && !file.type.startsWith("image/")) {
+      const msg = "Invalid file type. Please upload an image.";
+      alert(msg);
+      throw new Error(msg);
+    }
+
+    const { compressImageFile } = await import("@/lib/compress");
     const bucket = type === "photo" ? "posts-media" : "posts-pdf";
 
-    // PDF compression removed: upload original PDF as-is.
-    const compressed =
+    const toUpload =
       type === "photo"
         ? await compressImageFile(file, {
             maxDimension: 1600,
@@ -91,12 +106,9 @@ export default function PostsSection() {
           })
         : file;
 
-    const path = `${Date.now()}-${compressed.name}`;
+    const path = `${Date.now()}-${toUpload.name}`;
     setUploadProgress(10);
-    const { error } = await supabase.storage
-      .from(bucket)
-      .upload(path, compressed);
-
+    const { error } = await supabase.storage.from(bucket).upload(path, toUpload);
     if (error) throw error;
     setUploadProgress(100);
     return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
@@ -124,9 +136,7 @@ export default function PostsSection() {
       fetchPosts();
     } catch (err) {
       console.error(err);
-      setError(
-        `Upload failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-      );
+      setError(`Upload failed: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setSaving(false);
     }
@@ -179,7 +189,6 @@ export default function PostsSection() {
 
   return (
     <div>
-      {/* Top bar */}
       <div className="flex justify-end mb-6">
         <button
           onClick={() => {
@@ -194,7 +203,6 @@ export default function PostsSection() {
         </button>
       </div>
 
-      {/* Posts list */}
       <div className="space-y-3">
         {posts.map((post) => (
           <div
@@ -215,10 +223,7 @@ export default function PostsSection() {
               >
                 {post.published ? "Published" : "Draft"}
               </button>
-              <button
-                onClick={() => handleEdit(post)}
-                className="text-[#6B1F2A] hover:underline"
-              >
+              <button onClick={() => handleEdit(post)} className="text-[#6B1F2A] hover:underline">
                 Edit
               </button>
               <button
@@ -243,7 +248,6 @@ export default function PostsSection() {
         />
       )}
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
@@ -266,11 +270,7 @@ export default function PostsSection() {
                 placeholder="Title"
                 value={form.title}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    title: e.target.value,
-                    slug: slugify(e.target.value),
-                  })
+                  setForm({ ...form, title: e.target.value, slug: slugify(e.target.value) })
                 }
                 required
                 className={inputCls}
@@ -279,9 +279,7 @@ export default function PostsSection() {
                 type="text"
                 placeholder="Slug (auto-generated)"
                 value={form.slug}
-                onChange={(e) =>
-                  setForm({ ...form, slug: slugify(e.target.value) })
-                }
+                onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })}
                 required
                 className={inputCls}
               />
@@ -301,9 +299,7 @@ export default function PostsSection() {
                 type="text"
                 placeholder="Author name (optional)"
                 value={form.author_name || ""}
-                onChange={(e) =>
-                  setForm({ ...form, author_name: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, author_name: e.target.value })}
                 className={inputCls}
               />
               <RichTextEditor
@@ -317,10 +313,7 @@ export default function PostsSection() {
                 </p>
                 <div className="flex gap-4 mb-3">
                   {(["none", "photo", "pdf"] as const).map((type) => (
-                    <label
-                      key={type}
-                      className="flex items-center gap-2 text-sm capitalize"
-                    >
+                    <label key={type} className="flex items-center gap-2 text-sm capitalize">
                       <input
                         type="radio"
                         checked={mediaType === type}
@@ -336,21 +329,28 @@ export default function PostsSection() {
                 </div>
                 {mediaType !== "none" && (
                   <FileUploadInput
-                    accept={
-                      mediaType === "photo" ? "image/*" : "application/pdf"
-                    }
+                    accept={mediaType === "photo" ? "image/*" : "application/pdf"}
                     label={`Upload ${mediaType}`}
                     file={mediaFile}
-                    currentUrl={
-                      mediaType === "photo" ? form.photo_url : form.pdf_url
-                    }
+                    currentUrl={mediaType === "photo" ? form.photo_url : form.pdf_url}
                     progress={uploadProgress}
                     onChange={(files) => {
                       const f = files?.[0] || null;
-                      if (mediaType === "pdf" && f && f.size > MAX_PDF_BYTES) {
-                        alert(
-                          "File too large. Please upload a PDF smaller than 10 MB.",
-                        );
+                      if (!f) {
+                        setMediaFile(null);
+                        return;
+                      }
+                      if (mediaType === "pdf") {
+                        const validationError = validatePdf(f);
+                        if (validationError) {
+                          alert(validationError);
+                          setMediaFile(null);
+                          setUploadProgress(null);
+                          return;
+                        }
+                      }
+                      if (mediaType === "photo" && !f.type.startsWith("image/")) {
+                        alert("Invalid file type. Please upload an image.");
                         setMediaFile(null);
                         setUploadProgress(null);
                         return;
@@ -365,9 +365,7 @@ export default function PostsSection() {
                 <input
                   type="checkbox"
                   checked={form.published}
-                  onChange={(e) =>
-                    setForm({ ...form, published: e.target.checked })
-                  }
+                  onChange={(e) => setForm({ ...form, published: e.target.checked })}
                 />
                 Publish immediately
               </label>
@@ -379,11 +377,7 @@ export default function PostsSection() {
                   disabled={saving}
                   className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60"
                 >
-                  {saving
-                    ? "Saving..."
-                    : editingId
-                      ? "Update Post"
-                      : "Create Post"}
+                  {saving ? "Saving..." : editingId ? "Update Post" : "Create Post"}
                 </button>
                 <button
                   type="button"

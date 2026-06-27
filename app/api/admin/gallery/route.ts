@@ -9,9 +9,12 @@ type GalleryInsertRow = {
 };
 
 function getServerSupabase(request: NextRequest, response: NextResponse) {
+  // FIX: Use non-NEXT_PUBLIC_ env vars for server-side Supabase client.
+  // NEXT_PUBLIC_ vars are embedded in the client bundle; using them on the
+  // server is harmless but inconsistent and risks accidental exposure patterns.
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -40,8 +43,20 @@ function errorResponse(message: string, status: number) {
   return jsonResponse({ error: message }, { status });
 }
 
-export async function POST(request: NextRequest) {
-  const response = NextResponse.next();
+/**
+ * FIX: Centralised auth + role guard used by every handler in this route.
+ *
+ * Previously the routes only checked that a session existed, meaning ANY
+ * logged-in Supabase user could trigger service-role DB writes (privilege
+ * escalation). Now we additionally verify app_metadata.role === "admin",
+ * which is set server-side only and cannot be spoofed by the client.
+ *
+ * Returns the session on success, or a 401/403 NextResponse on failure.
+ */
+async function requireAdmin(
+  request: NextRequest,
+  response: NextResponse,
+): Promise<{ error: NextResponse } | { session: NonNullable<Awaited<ReturnType<ReturnType<typeof getServerSupabase>["auth"]["getSession"]>>["data"]["session"]> }> {
   const serverSupabase = getServerSupabase(request, response);
   const {
     data: { session },
@@ -49,10 +64,38 @@ export async function POST(request: NextRequest) {
   } = await serverSupabase.auth.getSession();
 
   if (sessionError || !session) {
-    return errorResponse("Unauthorized", 401);
+    return { error: errorResponse("Unauthorized", 401) };
   }
 
+  // app_metadata is populated server-side only — safe to trust from the JWT.
+  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
+  if (role !== "admin") {
+    return { error: errorResponse("Forbidden", 403) };
+  }
+
+  return { session };
+}
+
+function getServiceSupabase() {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("Supabase service role key is not configured.");
+  }
+  // FIX: Use non-NEXT_PUBLIC_ SUPABASE_URL for the service client too.
+  return createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
+
+export async function POST(request: NextRequest) {
+  const response = NextResponse.next();
+  const auth = await requireAdmin(request, response);
+  if ("error" in auth) return auth.error;
+
+  let serviceSupabase;
+  try {
+    serviceSupabase = getServiceSupabase();
+  } catch {
     return errorResponse("Supabase service role key is not configured.", 500);
   }
 
@@ -65,36 +108,24 @@ export async function POST(request: NextRequest) {
     return errorResponse("Missing gallery rows.", 400);
   }
 
-  const serviceSupabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-
   const { data, error } = await serviceSupabase
     .from("gallery")
     .insert(payload.rows)
     .select();
 
-  if (error) {
-    return errorResponse(error.message, 500);
-  }
-
+  if (error) return errorResponse(error.message, 500);
   return jsonResponse({ insertedRows: data });
 }
 
 export async function DELETE(request: NextRequest) {
   const response = NextResponse.next();
-  const serverSupabase = getServerSupabase(request, response);
-  const {
-    data: { session },
-    error: sessionError,
-  } = await serverSupabase.auth.getSession();
+  const auth = await requireAdmin(request, response);
+  if ("error" in auth) return auth.error;
 
-  if (sessionError || !session) {
-    return errorResponse("Unauthorized", 401);
-  }
-
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  let serviceSupabase;
+  try {
+    serviceSupabase = getServiceSupabase();
+  } catch {
     return errorResponse("Supabase service role key is not configured.", 500);
   }
 
@@ -103,35 +134,24 @@ export async function DELETE(request: NextRequest) {
     return errorResponse("Missing gallery photo id.", 400);
   }
 
-  const serviceSupabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-
   const { error } = await serviceSupabase
     .from("gallery")
     .delete()
     .eq("id", payload.id);
-  if (error) {
-    return errorResponse(error.message, 500);
-  }
 
+  if (error) return errorResponse(error.message, 500);
   return new NextResponse(null, { status: 204 });
 }
 
 export async function PUT(request: NextRequest) {
   const response = NextResponse.next();
-  const serverSupabase = getServerSupabase(request, response);
-  const {
-    data: { session },
-    error: sessionError,
-  } = await serverSupabase.auth.getSession();
+  const auth = await requireAdmin(request, response);
+  if ("error" in auth) return auth.error;
 
-  if (sessionError || !session) {
-    return errorResponse("Unauthorized", 401);
-  }
-
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  let serviceSupabase;
+  try {
+    serviceSupabase = getServiceSupabase();
+  } catch {
     return errorResponse("Supabase service role key is not configured.", 500);
   }
 
@@ -145,25 +165,15 @@ export async function PUT(request: NextRequest) {
     return errorResponse("Missing gallery photo id.", 400);
   }
 
-  const serviceSupabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-
-  const updatePayload = {
-    caption: payload.caption ?? null,
-    event_tag: payload.event_tag ?? null,
-  };
-
   const { data, error } = await serviceSupabase
     .from("gallery")
-    .update(updatePayload)
+    .update({
+      caption: payload.caption ?? null,
+      event_tag: payload.event_tag ?? null,
+    })
     .eq("id", payload.id)
     .select();
 
-  if (error) {
-    return errorResponse(error.message, 500);
-  }
-
+  if (error) return errorResponse(error.message, 500);
   return jsonResponse({ updatedRows: data });
 }

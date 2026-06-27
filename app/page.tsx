@@ -8,6 +8,12 @@ import {
 } from "@heroicons/react/24/outline";
 import LeadershipCard from "@/components/LeadershipCard";
 import Image from "next/image";
+import { convert } from "html-to-text";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  news: "News",
+  "blog-opinion": "Blog & Opinion",
+};
 
 export const revalidate = 0;
 
@@ -30,17 +36,13 @@ type Post = {
   photo_url?: string | null;
 };
 
-function stripHtml(html: string) {
-  return html
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function truncate(text: string, maxChars: number) {
-  const t = stripHtml(text);
-  if (t.length <= maxChars) return t;
-  return t.slice(0, maxChars).trimEnd() + "…";
+// FIX: Replaced the old stripHtml (naive regex) + truncate combo with a single
+// function that uses html-to-text's convert(). This correctly handles HTML
+// entities, nested tags, and complex markup that the regex would mangle.
+function truncate(html: string, maxChars: number) {
+  const plain = convert(html, { wordwrap: false });
+  if (plain.length <= maxChars) return plain;
+  return plain.slice(0, maxChars).trimEnd() + "…";
 }
 
 function formatRange(startISO: string, endISO?: string | null) {
@@ -135,10 +137,7 @@ export default async function HomePage() {
           <h2 className="font-display text-2xl text-center sm:text-left">
             Upcoming Events
           </h2>
-          <Link
-            href="/events"
-            className="text-sm text-[#6B1F2A] hover:underline"
-          >
+          <Link href="/events" className="text-sm text-[#6B1F2A] hover:underline">
             View all →
           </Link>
         </div>
@@ -155,10 +154,7 @@ export default async function HomePage() {
                 <CalendarDate date={event.event_date} />
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                   <p className="text-xs text-[#6B1F2A] mb-2">
-                    {formatRange(
-                      event.event_date,
-                      event.event_end_date ?? event.event_date,
-                    )}
+                    {formatRange(event.event_date, event.event_end_date ?? event.event_date)}
                   </p>
                   <h3 className="font-display text-2xl leading-snug mb-2">
                     {event.title}
@@ -181,10 +177,7 @@ export default async function HomePage() {
           <h2 className="font-display text-2xl text-center sm:text-left">
             Recent Blog &amp; News
           </h2>
-          <Link
-            href="/about/blog-news"
-            className="text-sm text-[#6B1F2A] hover:underline"
-          >
+          <Link href="/about/blog-news" className="text-sm text-[#6B1F2A] hover:underline">
             Read more →
           </Link>
         </div>
@@ -213,7 +206,7 @@ export default async function HomePage() {
                 )}
                 <div className="p-5">
                   <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">
-                    {post.category === "news" ? "News" : "Blog & Opinion"}
+                    {CATEGORY_LABELS[post.category] ?? "Uncategorised"}
                   </p>
                   <h3 className="font-display text-lg leading-snug mb-2 group-hover:text-[#6B1F2A] transition-colors">
                     {post.title}
@@ -231,6 +224,7 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* Leadership Section */}
       <section className="px-4 sm:px-8 py-12 sm:py-16">
         <h2 className="font-display text-2xl mb-6 text-center">
           Our Leadership
@@ -241,6 +235,8 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Navigation Cards */}
       <section className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4 sm:px-8 py-12 sm:py-16">
         {[
           {

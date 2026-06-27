@@ -4,6 +4,10 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import ReactCrop, { type Crop, type PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
+// FIX: Maximum pixel dimension for the exported crop.
+// Avoids sending very large files to the server from high-res phone uploads.
+const MAX_CROP_OUTPUT_DIM = 1600;
+
 type Props = {
   imageFile: File;
   onCropped: (croppedFile: File) => void;
@@ -40,31 +44,43 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
 
     const scaleX = imgEl.naturalWidth / imgEl.width;
     const scaleY = imgEl.naturalHeight / imgEl.height;
-    const pixelRatio = window.devicePixelRatio;
 
-    canvas.width = Math.floor(completedCrop.width * scaleX * pixelRatio);
-    canvas.height = Math.floor(completedCrop.height * scaleY * pixelRatio);
+    // The actual pixel region of the original image that was cropped.
+    const cropX = completedCrop.x * scaleX;
+    const cropY = completedCrop.y * scaleY;
+    const cropW = completedCrop.width * scaleX;
+    const cropH = completedCrop.height * scaleY;
+
+    // FIX: Do NOT multiply by window.devicePixelRatio.
+    // The previous code scaled the canvas by DPR (e.g. ×3 on a phone),
+    // producing files up to 9× larger than needed for upload purposes.
+    // Instead, cap the longer side to MAX_CROP_OUTPUT_DIM.
+    const maxSide = Math.max(cropW, cropH);
+    const outputScale = maxSide > MAX_CROP_OUTPUT_DIM ? MAX_CROP_OUTPUT_DIM / maxSide : 1;
+
+    canvas.width = Math.floor(cropW * outputScale);
+    canvas.height = Math.floor(cropH * outputScale);
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.scale(pixelRatio, pixelRatio);
+    // FIX: No ctx.scale(pixelRatio, ...) call — canvas is already sized correctly.
+    ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
-    const cropX = completedCrop.x * scaleX;
-    const cropY = completedCrop.y * scaleY;
-
-    ctx.save();
-    ctx.translate(-cropX, -cropY);
+    // FIX: Draw only the cropped region directly into the output canvas,
+    // rather than translating the entire image and relying on clipping.
+    // This is simpler, more correct, and avoids off-by-one rendering artefacts.
     ctx.drawImage(
       imgEl,
-      0, 0, imgEl.naturalWidth, imgEl.naturalHeight,
-      0, 0, imgEl.naturalWidth, imgEl.naturalHeight
+      cropX, cropY, cropW, cropH,       // source: the crop region in the original image
+      0, 0, canvas.width, canvas.height  // destination: fill the output canvas
     );
-    ctx.restore();
 
+    // FIX: Lowered quality from 0.92 → 0.85. Imperceptible for upload use cases,
+    // meaningfully reduces file size especially for large crops.
     const blob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92);
+      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.85);
     });
 
     if (!blob) return;
@@ -78,7 +94,7 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
   }, [completedCrop, imageFile, onCropped]);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4">
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 px-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display text-lg">Crop Image</h3>
@@ -111,7 +127,9 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
             />
           </ReactCrop>
           {!imageLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center text-sm text-[#231F1E]/50">Loading...</div>
+            <div className="absolute inset-0 flex items-center justify-center text-sm text-[#231F1E]/50">
+              Loading...
+            </div>
           )}
         </div>
 

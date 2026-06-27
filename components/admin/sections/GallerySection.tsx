@@ -48,7 +48,6 @@ export default function GallerySection() {
     const timer = window.setTimeout(() => {
       void fetchPhotos();
     }, 0);
-
     return () => window.clearTimeout(timer);
   }, [fetchPhotos]);
 
@@ -58,43 +57,56 @@ export default function GallerySection() {
     setSaving(true);
     setError(null);
     setUploadProgress(0);
+
     try {
       const total = files.length;
       let done = 0;
       const { compressImageFile } = await import("@/lib/compress");
 
       const uploads = Array.from(files).map(async (file, i) => {
-        const compressed = await compressImageFile(file, {
-          maxDimension: 1600,
-          quality: 0.78,
-          preferWebp: true,
-        });
+        // Validate MIME type before compression or upload
+        if (!file.type.startsWith("image/")) {
+          throw new Error(`"${file.name}" is not a valid image file.`);
+        }
 
-        const path = `${Date.now()}-${i}-${compressed.name}`;
+        // Per-file compression with fallback to original if compression fails
+        let toUpload: File = file;
+        try {
+          toUpload = await compressImageFile(file, {
+            maxDimension: 1600,
+            quality: 0.78,
+            preferWebp: true,
+          });
+        } catch {
+          toUpload = file;
+        }
+
+        const path = `${Date.now()}-${i}-${toUpload.name}`;
         const { error: uploadError } = await supabase.storage
           .from("gallery-media")
-          .upload(path, compressed);
+          .upload(path, toUpload);
 
         if (uploadError) throw new Error(uploadError.message);
-        const { data } = supabase.storage
-          .from("gallery-media")
-          .getPublicUrl(path);
+
+        const { data } = supabase.storage.from("gallery-media").getPublicUrl(path);
         if (!data?.publicUrl)
           throw new Error("Unable to create public URL for uploaded file.");
+
         done++;
         setUploadProgress(Math.round((done / total) * 100));
+
         return {
           photo_url: data.publicUrl,
           caption: caption || null,
           event_tag: eventTag || null,
         };
       });
+
       const rows = await Promise.all(uploads);
+
       const response = await fetch("/api/admin/gallery", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rows }),
       });
 
@@ -116,83 +128,63 @@ export default function GallerySection() {
       const insertedRows = (() => {
         if (typeof result !== "object" || result === null) return undefined;
         const maybe = result as Record<string, unknown>;
-        const rows = maybe["insertedRows"];
-        return Array.isArray(rows) ? rows : undefined;
+        const r = maybe["insertedRows"];
+        return Array.isArray(r) ? r : undefined;
       })();
 
       if (!response.ok) {
-        throw new Error(
-          errorFromApi || responseText || "Failed to save gallery rows.",
-        );
+        throw new Error(errorFromApi || responseText || "Failed to save gallery rows.");
       }
 
       const latestId = (() => {
         if (!insertedRows?.length) return "none";
         const first = insertedRows[0] as Record<string, unknown>;
         const id = first?.["id"];
-        return typeof id === "string" || typeof id === "number"
-          ? String(id)
-          : "none";
+        return typeof id === "string" || typeof id === "number" ? String(id) : "none";
       })();
 
-      setDebugInfo(
-        `Inserted ${insertedRows?.length ?? 0} rows. Latest id: ${latestId}`,
-      );
+      setDebugInfo(`Inserted ${insertedRows?.length ?? 0} rows. Latest id: ${latestId}`);
       setFiles(null);
       setCaption("");
       setEventTag("");
       setUploadProgress(null);
       fetchPhotos();
     } catch (err) {
-      setError(
-        `Upload failed: ${err instanceof Error ? err.message : "Please try again."}`,
-      );
+      setError(`Upload failed: ${err instanceof Error ? err.message : "Please try again."}`);
       setDebugInfo(null);
     } finally {
       setSaving(false);
     }
   }
 
-  async function updateCaptionTag(
-    id: string,
-    nextCaption: string,
-    nextEventTag: string,
-  ) {
+  async function updateCaptionTag(id: string, nextCaption: string, nextEventTag: string) {
     const response = await fetch("/api/admin/gallery", {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id,
         caption: nextCaption.trim() === "" ? null : nextCaption,
         event_tag: nextEventTag.trim() === "" ? null : nextEventTag,
       }),
     });
-
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || "Failed to update gallery item.");
     }
-
     return response;
   }
 
   async function handleDelete(id: string) {
     const response = await fetch("/api/admin/gallery", {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-
     if (!response.ok) {
       const errorText = await response.text();
       setError(`Delete failed: ${errorText}`);
       return;
     }
-
     setConfirmDeleteId(null);
     fetchPhotos();
   }
@@ -214,7 +206,17 @@ export default function GallerySection() {
           files={files}
           progress={uploadProgress}
           multiple
-          onChange={(f) => setFiles(f)}
+          onChange={(f) => {
+            if (!f) return setFiles(null);
+            const invalid = Array.from(f).find(
+              (file) => !file.type.startsWith("image/"),
+            );
+            if (invalid) {
+              alert(`"${invalid.name}" is not a valid image. Please select image files only.`);
+              return;
+            }
+            setFiles(f);
+          }}
         />
         <input
           type="text"
@@ -250,23 +252,20 @@ export default function GallerySection() {
         />
       )}
 
-      {/* Edit modal */}
-
       {editingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="font-display text-lg mb-5">Edit Gallery Photo</h2>
-            <div className="rounded-xl overflow-hidden border bg-gray-50 mb-4">
+            <div className="relative rounded-xl overflow-hidden border bg-gray-50 mb-4 h-40">
               <Image
                 src={editingPhoto!.photo_url}
                 alt={String(editingPhoto?.caption || "")}
                 fill
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                sizes="(max-width: 640px) 100vw, 400px"
                 style={{ objectFit: "cover" }}
-                quality={100}
+                quality={75}
               />
             </div>
-
             <form
               className="space-y-4"
               onSubmit={(e) => {
@@ -275,20 +274,14 @@ export default function GallerySection() {
                   try {
                     setSaving(true);
                     setError(null);
-                    await updateCaptionTag(
-                      editingId!,
-                      editCaption,
-                      editEventTag,
-                    );
+                    await updateCaptionTag(editingId!, editCaption, editEventTag);
                     setEditingId(null);
                     setEditCaption("");
                     setEditEventTag("");
                     await fetchPhotos();
                   } catch (err) {
                     setError(
-                      `Update failed: ${
-                        err instanceof Error ? err.message : "Please try again."
-                      }`,
+                      `Update failed: ${err instanceof Error ? err.message : "Please try again."}`,
                     );
                   } finally {
                     setSaving(false);
@@ -310,9 +303,7 @@ export default function GallerySection() {
                 onChange={(e) => setEditEventTag(e.target.value)}
                 className={inputCls}
               />
-
               {error && <p className="text-sm text-red-600">{error}</p>}
-
               <div className="flex gap-3 pt-1">
                 <button
                   type="submit"
@@ -351,21 +342,16 @@ export default function GallerySection() {
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               style={{ objectFit: "cover" }}
-              quality={100}
+              quality={75}
             />
             <div className="p-2">
               {photo.event_tag && (
-                <p className="text-xs text-[#6B1F2A] truncate">
-                  {photo.event_tag}
-                </p>
+                <p className="text-xs text-[#6B1F2A] truncate">{photo.event_tag}</p>
               )}
               {photo.caption && (
-                <p className="text-xs text-[#231F1E]/60 truncate">
-                  {photo.caption}
-                </p>
+                <p className="text-xs text-[#231F1E]/60 truncate">{photo.caption}</p>
               )}
             </div>
-
             <div className="absolute top-2 left-2 flex gap-2 opacity-100 transition-opacity">
               <button
                 onClick={() => {
@@ -380,7 +366,6 @@ export default function GallerySection() {
                 Edit
               </button>
             </div>
-
             <button
               onClick={() => setConfirmDeleteId(photo.id)}
               className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
@@ -390,9 +375,7 @@ export default function GallerySection() {
           </div>
         ))}
         {photos.length === 0 && (
-          <p className="text-sm text-[#231F1E]/50 col-span-full">
-            No photos yet.
-          </p>
+          <p className="text-sm text-[#231F1E]/50 col-span-full">No photos yet.</p>
         )}
       </div>
     </div>

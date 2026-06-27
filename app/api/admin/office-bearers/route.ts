@@ -3,9 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 
 function getServerSupabase(request: NextRequest, response: NextResponse) {
+  // FIX: Use non-NEXT_PUBLIC_ env vars for server-side client.
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -34,8 +35,12 @@ function errorResponse(message: string, status: number) {
   return jsonResponse({ error: message }, { status });
 }
 
-export async function POST(request: NextRequest) {
-  const response = NextResponse.next();
+// FIX: Same admin guard as gallery route — checks app_metadata.role === "admin"
+// before allowing any service-role DB mutation.
+async function requireAdmin(
+  request: NextRequest,
+  response: NextResponse,
+): Promise<{ error: NextResponse } | { ok: true }> {
   const serverSupabase = getServerSupabase(request, response);
   const {
     data: { session },
@@ -43,10 +48,36 @@ export async function POST(request: NextRequest) {
   } = await serverSupabase.auth.getSession();
 
   if (sessionError || !session) {
-    return errorResponse("Unauthorized", 401);
+    return { error: errorResponse("Unauthorized", 401) };
   }
 
+  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
+  if (role !== "admin") {
+    return { error: errorResponse("Forbidden", 403) };
+  }
+
+  return { ok: true };
+}
+
+function getServiceSupabase() {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("Supabase service role key is not configured.");
+  }
+  return createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
+
+export async function POST(request: NextRequest) {
+  const response = NextResponse.next();
+  const auth = await requireAdmin(request, response);
+  if ("error" in auth) return auth.error;
+
+  let serviceSupabase;
+  try {
+    serviceSupabase = getServiceSupabase();
+  } catch {
     return errorResponse("Supabase service role key is not configured.", 500);
   }
 
@@ -54,14 +85,8 @@ export async function POST(request: NextRequest) {
   const { action } = payload as { action?: string };
 
   if (action === "create_person") {
-    const { name, role, photo_url, phone, email, bio, team_id, display_order } =
-      payload;
+    const { name, role, photo_url, phone, email, bio, team_id, display_order } = payload;
     if (!name) return errorResponse("Name is required.", 400);
-
-    const serviceSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
 
     const { data, error } = await serviceSupabase
       .from("office_bearers")
@@ -86,11 +111,6 @@ export async function POST(request: NextRequest) {
     if (!id) return errorResponse("Person ID is required.", 400);
     if (!name) return errorResponse("Name is required.", 400);
 
-    const serviceSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
-
     const { error } = await serviceSupabase
       .from("office_bearers")
       .update({
@@ -112,15 +132,11 @@ export async function POST(request: NextRequest) {
     const { id } = payload;
     if (!id) return errorResponse("Person ID is required.", 400);
 
-    const serviceSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
-
     const { error } = await serviceSupabase
       .from("office_bearers")
       .delete()
       .eq("id", id);
+
     if (error) return errorResponse(error.message, 500);
     return new NextResponse(null, { status: 204 });
   }
@@ -128,11 +144,6 @@ export async function POST(request: NextRequest) {
   if (action === "create_team") {
     const { name, display_order } = payload;
     if (!name) return errorResponse("Team name is required.", 400);
-
-    const serviceSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
 
     const { data, error } = await serviceSupabase
       .from("teams")
@@ -147,12 +158,11 @@ export async function POST(request: NextRequest) {
     const { id } = payload;
     if (!id) return errorResponse("Team ID is required.", 400);
 
-    const serviceSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+    const { error } = await serviceSupabase
+      .from("teams")
+      .delete()
+      .eq("id", id);
 
-    const { error } = await serviceSupabase.from("teams").delete().eq("id", id);
     if (error) return errorResponse(error.message, 500);
     return new NextResponse(null, { status: 204 });
   }

@@ -1,15 +1,7 @@
-# TODO
-
-- [x] Update `community-site/app/page.tsx` to add two new homepage sections after `HeroSlider`:
-  - [x] Upcoming Events (show exactly 2 upcoming events; include events spanning full month)
-  - [x] Recent Blog & News (show recent published posts; truncate content to a few lines and add “Read more” links)
-
-- [x] Run lint/build in `community-site/`
-- [ ] Verify homepage rendering (events date ranges, blog excerpt + links)
-
-- [ ] Remove PDF compression feature to reduce complexity
-  - [ ] Delete `app/api/compress-pdf/route.ts`
-  - [ ] Remove `compressPdfFile` exports/usages from `lib/compress/pdf.ts` and `lib/compress/index.ts`
-  - [ ] Ensure no remaining imports of `compressPdfFile`
-  - [ ] Run lint/typecheck/build
+- [ ] Gather repo context for linting setup (package.json scripts, ESLint config files, ignore rules).
+- [ ] Identify why eslint is linting Next build artifacts (.next).
+- [ ] Propose an edit plan to adjust ESLint ignores so lint only scans source.
+- [ ] After plan approval, implement edits to eslint config / ignore files.
+- [ ] Rerun `npm run lint` and verify .next build output is ignored.
+- [ ] Update TODO to mark completion steps.
 
