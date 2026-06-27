@@ -1,4 +1,8 @@
-- [ ] Fix `proxy.ts` cookie handling in Supabase SSR middleware (do not mutate `request.cookies`; write to a single `NextResponse` instance).
-- [x] Re-test: make changes in admin page, then use browser Back/Forward and confirm login is not required again.
-
+- [ ] Diagnose why /login returns 404 on deployed Vercel build
+- [ ] Verify existing route structure for app/login
+- [ ] Ensure /login page exists and renders AdminLoginPage
+- [ ] Ensure middleware (if any) does not block /login
+- [ ] Commit and push fix
+- [ ] Create PR if required
+- [ ] Deploy and verify https://community-site-drab.vercel.app/login
 

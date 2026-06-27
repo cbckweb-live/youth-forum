@@ -98,7 +98,11 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-5 max-h-[95vh] overflow-y-auto flex flex-col">
+      <div
+        className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-5 max-h-[95vh] overflow-y-auto flex flex-col"
+        data-cropper-root="true"
+      >
+
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display text-lg">Crop Image</h3>
           <button

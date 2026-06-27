@@ -68,7 +68,20 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
   return (
     <div
       className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-[#6B1F2A] transition-colors cursor-pointer"
-      onClick={() => inputRef.current?.click()}
+      onClick={() => {
+        // Prevent cropper interactions from triggering the hidden file input.
+        // Only trigger file dialog when the click originates from the wrapper.
+        if (document.activeElement && document.activeElement !== inputRef.current) {
+          return;
+        }
+        inputRef.current?.click();
+      }}
+      onMouseDown={(e) => {
+        // If user clicks/drag-selects inside the crop UI overlay, avoid opening file picker.
+        // This also prevents ReactCrop pointer events from bubbling to the wrapper.
+        const target = e.target as HTMLElement | null;
+        if (target?.closest?.("[data-cropper-root='true']")) return;
+      }}
     >
       <input
         ref={inputRef}
