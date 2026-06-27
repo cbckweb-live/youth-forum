@@ -188,9 +188,6 @@ export default async function HomePage() {
                       sizes="(max-width: 768px) 100vw, 33vw"
                       style={{ objectFit: "cover" }}
                       quality={85}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
-                      }}
                     />
                   </div>
                 )}
