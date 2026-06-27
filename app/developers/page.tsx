@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { cookies } from "next/headers";
+
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 
