@@ -69,10 +69,16 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
   return (
     <div
       className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-[#6B1F2A] transition-colors cursor-pointer"
-      onClick={() => inputRef.current?.click()}
-      onMouseDown={(e) => {
+      onClick={(e) => {
         const target = e.target as HTMLElement | null;
         if (target?.closest?.("[data-cropper-root='true']")) return;
+        inputRef.current?.click();
+      }}
+      onMouseDown={(e) => {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest?.("[data-cropper-root='true']")) {
+          e.stopPropagation();
+        }
       }}
     >
       <input
