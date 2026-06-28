@@ -18,6 +18,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "CBCK | Youth Forum",
   description: "News, events, and people of our youth forum",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"),
 };
 
 export default function RootLayout({

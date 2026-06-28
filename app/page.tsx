@@ -11,6 +11,16 @@ import Image from "next/image";
 import { truncate } from "@/lib/truncate";
 import { CATEGORY_LABELS } from "@/lib/categories";
 
+function ensureAbsoluteImageUrl(url: string) {
+  // Supabase public URLs should already be absolute.
+  // If a relative storage path is stored in DB, convert it to a public URL.
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const supabaseBase = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Most setups use /storage/v1/object/public/<bucket>/<path>
+  if (supabaseBase) return `${supabaseBase}/storage/v1/object/public/${url}`;
+  return url;
+}
+
 export const revalidate = 0;
 
 type Event = {
@@ -92,7 +102,12 @@ export default async function HomePage() {
 
   const upcoming = events
     .filter((e) => (e.event_end_date ?? e.event_date) >= today)
-    .slice(0, 2);
+    .slice(0, 2)
+    .map((e) => ({
+      ...e,
+      image_url:
+        typeof e.image_url === "string" ? ensureAbsoluteImageUrl(e.image_url) : null,
+    }));
 
   const { data: recentPosts } = await supabase
     .from("posts")
@@ -164,7 +179,7 @@ export default async function HomePage() {
                 {event.image_url && (
                   <div className="flex-shrink-0 w-full sm:w-36 sm:h-36 rounded-xl overflow-hidden relative">
                     <Image
-                      src={event.image_url}
+                      src={event.image_url ?? ""}
                       alt={event.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 144px"
