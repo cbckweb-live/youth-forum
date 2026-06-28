@@ -18,10 +18,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "CBCK | Youth Forum",
   description: "News, events, and people of our youth forum",
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
 };
 
 export default function RootLayout({
