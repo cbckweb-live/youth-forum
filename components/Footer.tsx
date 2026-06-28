@@ -27,7 +27,7 @@ export default function Footer() {
           <div className="flex items-start gap-4">
             <div className="flex-1">
               <p className="text-sm text-gray-600">
-                cbckyouthministry@email.com
+                cbckyouthministry@gmail.com
               </p>
               <p className="text-sm text-gray-600">+91 00000 00000</p>
             </div>

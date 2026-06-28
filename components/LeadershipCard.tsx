@@ -12,7 +12,7 @@ type LeadershipCardProps = {
 
 export default function LeadershipCard({ id, name, role, photo_url, phone, email }: LeadershipCardProps) {
   return (
-    <div className="bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-xl p-6 text-center">
+    <div className="bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-2xl p-6 text-center">
       {photo_url && (
         <Image src={photo_url} alt={name} width={96} height={96} quality={100} className="w-24 h-24 rounded-full object-cover mx-auto mb-4" />
       )}
