@@ -140,11 +140,13 @@ export default async function HomePage() {
         ) : (
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {upcoming.map((event) => (
-              <div
+              <Link
                 key={event.id}
-                className="flex flex-col sm:flex-row sm:items-stretch gap-6 border border-[#231F1E]/10 rounded-2xl p-6 shadow-md bg-white"
+                href="/events"
+                className="flex flex-col sm:flex-row sm:items-stretch gap-6 border border-[#231F1E]/10 rounded-2xl p-6 shadow-md bg-white hover:shadow-lg transition-shadow"
               >
                 <CalendarDate startDate={event.event_date} endDate={event.event_end_date} />
+
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                   <p className="text-xs text-[#6B1F2A] mb-2">
                     {formatRange(event.event_date, event.event_end_date ?? event.event_date)}
@@ -158,7 +160,21 @@ export default async function HomePage() {
                     </p>
                   )}
                 </div>
-              </div>
+
+                {event.image_url && (
+                  <div className="flex-shrink-0 w-full sm:w-36 sm:h-36 rounded-xl overflow-hidden relative">
+                    <Image
+                      src={event.image_url}
+                      alt={event.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 144px"
+                      style={{ objectFit: "cover" }}
+                      quality={85}
+                      priority
+                    />
+                  </div>
+                )}
+              </Link>
             ))}
           </div>
         )}
