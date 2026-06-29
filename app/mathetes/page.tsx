@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import MathetesCard from "@/components/MathetesCard";
 import LeadershipCard from "@/components/LeadershipCard";
+export const revalidate = 0;
 
 export default async function MathetesPage() {
   const { data: entries, error } = await supabase
@@ -66,7 +67,7 @@ export default async function MathetesPage() {
       {/* Mathetes In-Charges — at the bottom */}
       {incharges && incharges.length > 0 && (
         <section className="mt-20 pt-12 border-t border-[#231F1E]/10">
-          <h2 className="font-display text-2xl mb-6">Mathetes In-Charges</h2>
+          <h2 className="font-display text-2xl mb-6">Mathetes In-Charge&apos;s</h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
             {incharges.map((person) => (
               <LeadershipCard key={person.id} {...person} />
