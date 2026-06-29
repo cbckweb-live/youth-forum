@@ -157,6 +157,7 @@ export async function PUT(request: NextRequest) {
 
   const payload = (await request.json()) as {
     id?: string;
+    photo_url?: string;
     caption?: string | null;
     event_tag?: string | null;
   };
@@ -165,12 +166,18 @@ export async function PUT(request: NextRequest) {
     return errorResponse("Missing gallery photo id.", 400);
   }
 
+  const updateData: { caption: string | null; event_tag: string | null; photo_url?: string } = {
+    caption: payload.caption ?? null,
+    event_tag: payload.event_tag ?? null,
+  };
+  
+  if (payload.photo_url !== undefined) {
+    updateData.photo_url = payload.photo_url;
+  }
+
   const { data, error } = await serviceSupabase
     .from("gallery")
-    .update({
-      caption: payload.caption ?? null,
-      event_tag: payload.event_tag ?? null,
-    })
+    .update(updateData)
     .eq("id", payload.id)
     .select();
 

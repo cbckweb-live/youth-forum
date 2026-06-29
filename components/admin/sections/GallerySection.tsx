@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import ImageCropper from "@/components/admin/ImageCropper";
 import Image from "next/image";
 
 type Photo = {
@@ -29,6 +30,18 @@ export default function GallerySection() {
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [editCaption, setEditCaption] = useState("");
   const [editEventTag, setEditEventTag] = useState("");
+  const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null);
+  const [editCropFile, setEditCropFile] = useState<File | null>(null);
+  const editPhotoPreviewUrl = useMemo(() => 
+    editPhotoFile ? URL.createObjectURL(editPhotoFile) : null, 
+    [editPhotoFile]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (editPhotoPreviewUrl) URL.revokeObjectURL(editPhotoPreviewUrl);
+    };
+  }, [editPhotoPreviewUrl]);
 
   const fetchPhotos = useCallback(async () => {
     const { data, error } = await supabase
@@ -188,12 +201,13 @@ export default function GallerySection() {
     }
   }
 
-  async function updateCaptionTag(id: string, nextCaption: string, nextEventTag: string) {
+  async function updatePhoto(id: string, photoUrl: string, nextCaption: string, nextEventTag: string) {
     const response = await fetch("/api/admin/gallery", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id,
+        photo_url: photoUrl,
         caption: nextCaption.trim() === "" ? null : nextCaption,
         event_tag: nextEventTag.trim() === "" ? null : nextEventTag,
       }),
@@ -291,16 +305,26 @@ export default function GallerySection() {
             <h2 className="font-display text-lg mb-5">Edit Gallery Photo</h2>
             <div className="relative rounded-xl overflow-hidden border bg-gray-50 mb-4 h-40">
               <Image
-                src={editingPhoto!.photo_url}
+                src={editPhotoPreviewUrl || editingPhoto!.photo_url}
                 alt={String(editingPhoto?.caption || "")}
                 fill
                 sizes="(max-width: 640px) 100vw, 400px"
                 style={{ objectFit: "cover" }}
                 quality={75}
+                unoptimized={!!editPhotoFile}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
                 }}
               />
+              {editPhotoFile && (
+                <button
+                  type="button"
+                  onClick={() => setEditCropFile(editPhotoFile)}
+                  className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white text-xs px-2 py-1 rounded-md transition-colors"
+                >
+                  Crop
+                </button>
+              )}
             </div>
             <form
               className="space-y-4"
@@ -310,10 +334,34 @@ export default function GallerySection() {
                   try {
                     setSaving(true);
                     setError(null);
-                    await updateCaptionTag(editingId!, editCaption, editEventTag);
+                    
+                    let photoUrl = editingPhoto!.photo_url;
+                    if (editPhotoFile) {
+                      const formData = new FormData();
+                      formData.append("file", editPhotoFile);
+                      formData.append("type", "photo");
+                      formData.append("bucket", "gallery-media");
+                      
+                      const uploadResp = await fetch("/api/admin/media/upload", {
+                        method: "POST",
+                        body: formData,
+                      });
+                      
+                      if (!uploadResp.ok) {
+                        const errorText = await uploadResp.text();
+                        throw new Error(errorText || "Failed to upload photo.");
+                      }
+                      
+                      const uploadResult = await uploadResp.json();
+                      photoUrl = (uploadResult as Record<string, unknown>).url as string;
+                      if (!photoUrl) throw new Error("No URL returned from server.");
+                    }
+                    
+                    await updatePhoto(editingId!, photoUrl, editCaption, editEventTag);
                     setEditingId(null);
                     setEditCaption("");
                     setEditEventTag("");
+                    setEditPhotoFile(null);
                     await fetchPhotos();
                   } catch (err) {
                     setError(
@@ -325,6 +373,22 @@ export default function GallerySection() {
                 })();
               }}
             >
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) setEditPhotoFile(file);
+                }}
+                className="hidden"
+                id="edit-photo-upload"
+              />
+              <label
+                htmlFor="edit-photo-upload"
+                className="flex items-center justify-center gap-2 w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-[#231F1E]/70 hover:bg-gray-50 cursor-pointer"
+              >
+                Change Photo
+              </label>
               <input
                 type="text"
                 placeholder="Caption"
@@ -354,6 +418,7 @@ export default function GallerySection() {
                     setEditingId(null);
                     setEditCaption("");
                     setEditEventTag("");
+                    setEditPhotoFile(null);
                     setError(null);
                   }}
                   className="text-sm text-[#231F1E]/50 hover:underline"
@@ -364,6 +429,17 @@ export default function GallerySection() {
             </form>
           </div>
         </div>
+      )}
+
+      {editCropFile && (
+        <ImageCropper
+          imageFile={editCropFile}
+          onCropped={(cropped) => {
+            setEditCropFile(null);
+            if (cropped) setEditPhotoFile(cropped);
+          }}
+          onCancel={() => setEditCropFile(null)}
+        />
       )}
 
       <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-4">
