@@ -21,17 +21,29 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
   useEffect(() => {
     async function verifySession() {
       const supabase = createSupabaseBrowserClient();
+
       const { data, error } = await supabase.auth.getSession();
+
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      const isInviteType = hashParams.get("type") === "invite" || hashParams.get("type") === "signup";
+
+      if (isInviteType || (!data.session && !error)) {
+        const { data: exchangeData } = await supabase.auth.exchangeCodeForSession();
+        if (exchangeData?.session) {
+          if (!exchangeData.session.user.last_sign_in_at) {
+            setIsInvite(true);
+          }
+          setStatus("idle");
+          return;
+        }
+      }
 
       if (error || !data.session) {
         setStatus("error");
         return;
       }
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const isInviteType = urlParams.get("type") === "invite";
-
-      if (isInviteType || !data.session.user.last_sign_in_at) {
+      if (!data.session.user.last_sign_in_at) {
         setIsInvite(true);
       }
 
