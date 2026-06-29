@@ -120,22 +120,36 @@ export default async function HomePage() {
 
   return (
     <main className="bg-white text-[#231F1E]">
-      <section className="px-4 sm:px-8 py-12 sm:py-16 max-w-2xl mx-auto text-center">
-        <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3">
-          Welcome
-        </p>
-        <h1 className="font-display text-2xl sm:text-4xl leading-tight mb-4">
-          Chakhesang Baptist Church Kohima,
-          <br /> Youth Ministry
-        </h1>
-        <p className="text-[#231F1E]/80 leading-relaxed">
-          A community built on shared faith and shared ground — gathering for
-          fellowship, supporting one another, and growing together year after
-          year.
-        </p>
+      <section
+        className="px-4 sm:px-8 py-10 sm:py-14 lg:py-18 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative"
+        style={{
+          backgroundImage: "url('/background.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: "rgba(255,255,255,0.75)" }}
+        ></div>
+        <div className="relative">
+          <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3">
+            Welcome
+          </p>
+          <h1 className="font-display text-2xl sm:text-4xl leading-tight mb-4">
+            Chakhesang Baptist Church Kohima,
+            <br /> Youth Ministry
+          </h1>
+          <p className="text-[#231F1E]/80 leading-relaxed">
+            A community built on shared faith and shared ground — gathering for
+            fellowship, supporting one another, and growing together year after
+            year.
+          </p>
+        </div>
       </section>
 
-      <section className="px-4 sm:px-8 pb-12 sm:pb-16">
+      <section className="px-4 sm:px-8 pb-12 sm:pb-16 mt-8 sm:mt-12">
         <HeroSlider />
       </section>
 
