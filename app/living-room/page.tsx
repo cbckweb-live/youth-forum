@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { createClient } from "@supabase/supabase-js";
 import { getYouTubeEmbedUrl } from "@/lib/utils";
+import { createClient } from "@supabase/supabase-js";
 
 export const metadata: Metadata = {
   title: "The Living Room | Youth Forum",
@@ -8,11 +8,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 0;
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!,
-);
 
 interface Episode {
   id: string;
@@ -23,6 +18,12 @@ interface Episode {
 }
 
 export default async function LivingRoomPage() {
+  // Create client inside the async function
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
   const { data: episodes, error } = await supabase
     .from("living_room_seasons")
     .select("*")
