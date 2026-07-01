@@ -64,7 +64,7 @@ export default function OfficeBearersClient({ featured, standalone, rest, teams 
         </section>
       )}
 
-      <h1 className="font-display text-center text-justify text-3xl mb-10">Office Bearers</h1>
+      <h1 className="font-display text-center text-3xl mb-10">Office Bearers</h1>
 
       {/* Standalone */}
       {filteredStandalone.length > 0 && (

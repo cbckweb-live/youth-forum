@@ -33,12 +33,9 @@ export default async function OfficeBearerDetailPage({
       <p className="text-[#6B1F2A] uppercase tracking-wide mb-6">
         {person.role}
       </p>
-      <div
-        className="text-[#231F1E]/80 leading-relaxed prose prose-sm max-w-none [&_blockquote]:border-l-0 [&_blockquote]:pl-0"
-        dangerouslySetInnerHTML={{
-          __html: person.bio || "Their story will be added here soon.",
-        }}
-      />
+      <p className="text-[#231F1E]/80 leading-relaxed text-justify">
+        {person.bio || "Their story will be added here soon."}
+      </p>
     </main>
   );
 }
