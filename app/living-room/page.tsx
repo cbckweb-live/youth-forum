@@ -1,20 +1,26 @@
-import { supabase } from "@/lib/supabase";
-import Image from "next/image";
+import type { Metadata } from "next";
+import { createClient } from "@supabase/supabase-js";
+import { getYouTubeEmbedUrl } from "@/lib/utils";
+import { notFound } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "The Living Room | Youth Forum",
+  description: "Explore thought-provoking discussions and video content in The Living Room.",
+};
 
 export const revalidate = 0;
 
-type Episode = {
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_ANON_KEY!,
+);
+
+interface Episode {
   id: string;
   title: string;
   description: string | null;
   youtube_url: string | null;
   display_order: number;
-};
-
-function getYouTubeId(url: string | null): string | null {
-  if (!url) return null;
-  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\?]{11})/);
-  return match ? match[1] : null;
 }
 
 export default async function LivingRoomPage() {
@@ -23,61 +29,70 @@ export default async function LivingRoomPage() {
     .select("*")
     .order("display_order", { ascending: false });
 
-  const episodeList = (episodes as Episode[]) || [];
+  if (error) {
+    console.error("Failed to fetch episodes:", error);
+    return (
+      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto">
+        <h1 className="font-display text-3xl text-[#6B1F2A] mb-6">
+          The Living Room
+        </h1>
+        <p className="text-[#231F1E]">Unable to load episodes at this time.</p>
+      </main>
+    );
+  }
+
+  if (!episodes || episodes.length === 0) {
+    notFound(); // Creates proper 404 page
+  }
 
   return (
-    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-5xl mx-auto">
-      <div className="flex justify-center mb-8">
-        <Image
-          src="/livingroom.png"
-          alt="Living Room"
-          width={400}
-          height={200}
-          className="h-auto w-full max-w-[240px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
-          priority
-        />
-      </div>
+    <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto">
+      <h1 className="font-display text-3xl text-[#6B1F2A] mb-12">
+        The Living Room
+      </h1>
 
-      <h1 className="font-['Copperplate',_serif] font-bold text-3xl mb-4 text-center">Living Room</h1>
+      <div className="space-y-12">
+        {episodes.map((episode: Episode, index: number) => {
+          const embedUrl = getYouTubeEmbedUrl(episode.youtube_url || "");
 
-      <div className="mx-auto text-[#231F1E]/80 leading-relaxed mb-10 max-w-2xl space-y-4 text-justify">
-        <p>
-          The Living Room is a space where we welcome people we love, and people who
-          inspire others. But above all, it&apos;s a place to listen — as our
-          guests share their stories, glorify God&apos;s name, and testify to His
-          love.
-        </p>
-      </div>
-
-      {error && (
-        <p className="text-red-600">Something went wrong loading episodes.</p>
-      )}
-      {episodeList.length === 0 && !error && (
-        <p className="text-[#231F1E]/60 text-center">No episodes have been added yet.</p>
-      )}
-
-      <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
-        {episodeList.map((episode) => {
-          const youtubeId = getYouTubeId(episode.youtube_url);
           return (
-            <div key={episode.id} className="break-inside-avoid">
-              <div className="bg-white rounded-2xl p-5 shadow-md">
-                <h3 className="font-display text-lg mb-2">{episode.title}</h3>
-                {episode.description && (
-                  <p className="text-sm text-[#231F1E]/70 mb-3">{episode.description}</p>
-                )}
-                {youtubeId && (
-                  <div className="relative w-full pt-[56.25%]">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${youtubeId}`}
-                      title={episode.title}
-                      className="absolute inset-0 w-full h-full rounded-lg"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
+            <div key={episode.id}>
+              <div className="grid grid-cols-10 gap-8 items-center">
+                {/* Left Side - Content */}
+                <div className="col-span-10 md:col-span-6 bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-xl p-6">
+                  <h2 className="font-display text-2xl text-[#6B1F2A] mb-3">
+                    {episode.title}
+                  </h2>
+                  {episode.description && (
+                    <p className="text-[#231F1E] font-body leading-relaxed">
+                      {episode.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Right Side - Video */}
+                <div className="col-span-10 md:col-span-4">
+                  {embedUrl ? (
+                    <div className="aspect-video rounded-xl overflow-hidden shadow-md">
+                      <iframe
+                        src={embedUrl}
+                        title={episode.title}
+                        className="w-full h-full"
+                        allowFullScreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-gray-300 rounded-xl flex items-center justify-center text-[#231F1E] text-sm">
+                      No video available
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {index < episodes.length - 1 && (
+                <hr className="border-white/20 my-8" />
+              )}
             </div>
           );
         })}

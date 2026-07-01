@@ -11,7 +11,7 @@ const navigation = [
   { name: "Events", href: "/events" },
   { name: "Mathetes", href: "/mathetes" },
   { name: "Office Bearers", href: "/office-bearers" },
-  { name: "Cezo Mepu", href: "/cezo-mepu" },
+  { name: "The Living Room", href: "/living-room" },
 ];
 
 export default function Navbar() {

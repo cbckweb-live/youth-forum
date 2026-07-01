@@ -219,9 +219,14 @@ export default function LivingRoomSection() {
                 type="number"
                 placeholder="Display Order"
                 value={form.display_order}
-                onChange={(e) =>
-                  setForm({ ...form, display_order: Number(e.target.value) })
-                }
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 1;
+                  setForm({
+                    ...form,
+                    display_order: Math.max(1, value), // Clamp to minimum of 1
+                  });
+                }}
+                min="1"
                 className={inputCls}
               />
               {error && <p className="text-sm text-red-600">{error}</p>}
