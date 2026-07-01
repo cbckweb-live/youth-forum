@@ -21,8 +21,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class:
-          "min-h-[240px] px-4 py-3 focus:outline-none prose prose-sm max-w-none",
+        class: "min-h-[240px] px-4 py-3 focus:outline-none prose prose-sm max-w-none [&_blockquote]:border-l-0 [&_blockquote]:pl-0",
       },
     },
   });

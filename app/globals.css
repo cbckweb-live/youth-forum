@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@layer base {
+  .prose blockquote {
+    border-left: 0 !important;
+    padding-left: 0 !important;
+  }
+  .prose blockquote::before,
+  .prose blockquote::after {
+    content: none !important;
+  }
+}
+
 :root {
   --color-ink: #1c1b1a;
   --color-ivory: #f7f3ea;
