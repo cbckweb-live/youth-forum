@@ -33,8 +33,8 @@ export default async function OfficeBearerDetailPage({
       <p className="text-[#6B1F2A] uppercase tracking-wide mb-6">
         {person.role}
       </p>
-      <p
-        className="text-[#231F1E]/80 leading-relaxed text-justify"
+      <div
+        className="text-[#231F1E]/80 leading-relaxed prose prose-sm max-w-none"
         dangerouslySetInnerHTML={{
           __html: person.bio || "Their story will be added here soon.",
         }}
