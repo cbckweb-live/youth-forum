@@ -95,9 +95,9 @@ export default async function LivingRoomPage() {
 
           return (
             <div key={episode.id}>
-              <div className="grid grid-cols-10 gap-8 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-10 gap-8 items-start">
                 {/* Left Side - Content */}
-                <div className="col-span-10 md:col-span-6 bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-xl p-6">
+                <div className="md:col-span-6 bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-xl p-6">
                   <p className="text-xs text-[#231F1E]/50 mb-2">
                     Episode {toRomanNumeral(episode.display_order)}
                   </p>
@@ -112,7 +112,7 @@ export default async function LivingRoomPage() {
                 </div>
 
                 {/* Right Side - Video */}
-                <div className="col-span-10 md:col-span-4">
+                <div className="md:col-span-4 w-full">
                   {embedUrl ? (
                     <div className="aspect-video rounded-xl overflow-hidden shadow-md">
                       <iframe

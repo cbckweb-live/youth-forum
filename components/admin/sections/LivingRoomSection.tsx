@@ -136,7 +136,7 @@ export default function LivingRoomSection() {
               <div>
                 <p className="font-medium text-sm">{episode.title}</p>
                 <p className="text-xs text-[#231F1E]/50">
-                  Order: {episode.display_order}
+                  Episode #{episode.display_order}
                 </p>
               </div>
               <div className="flex gap-3 text-sm">
@@ -217,7 +217,7 @@ export default function LivingRoomSection() {
               </div>
               <input
                 type="number"
-                placeholder="Display Order"
+                placeholder="Episode Number"
                 value={form.display_order}
                 onChange={(e) => {
                   const value = parseInt(e.target.value) || 1;
