@@ -24,12 +24,17 @@ export async function proxy(request: NextRequest) {
   }
 
   // System Core / Framework Layout Assets Exclusions
+  // System Core / Framework Layout Assets Exclusions
   const isAssetOrSystem = 
     url.pathname.startsWith('/_next') || 
     url.pathname.startsWith('/api') ||
     url.pathname === '/coming-soon' ||
-    url.pathname === '/favicon.ico';
+    url.pathname === '/favicon.ico' ||
+    url.pathname.endsWith('.png') ||   // 👈 ALLOW ALL PNG IMAGES
+    url.pathname.endsWith('.jpg') ||   // 👈 ALLOW ALL JPG IMAGES
+    url.pathname.endsWith('.svg');     // 👈 ALLOW ALL SVG GRAPHICS
 
+    
   // Check if visitor possesses the team bypass credentials cookie
   const bypassCookie = request.cookies.get(BYPASS_COOKIE_NAME);
   const isTeamMember = bypassCookie?.value === BYPASS_SECRET_VALUE;
