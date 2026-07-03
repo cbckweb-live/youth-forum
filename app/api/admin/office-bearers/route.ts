@@ -69,6 +69,43 @@ function getServiceSupabase() {
   );
 }
 
+function extractStorageLocationFromPublicUrl(publicUrl: string) {
+  const url = new URL(publicUrl);
+  const marker = "/object/public/";
+  const markerIndex = url.pathname.indexOf(marker);
+
+  if (markerIndex === -1) {
+    return null;
+  }
+
+  const storagePath = url.pathname.slice(markerIndex + marker.length);
+  const [bucket, ...pathParts] = storagePath.split("/").filter(Boolean);
+
+  if (!bucket || pathParts.length === 0) {
+    return null;
+  }
+
+  return {
+    bucket,
+    filePath: pathParts.join("/"),
+  };
+}
+
+async function deleteStorageObject(serviceSupabase: ReturnType<typeof createClient>, publicUrl: string) {
+  const storageLocation = extractStorageLocationFromPublicUrl(publicUrl);
+  if (!storageLocation) {
+    return;
+  }
+
+  const { error } = await serviceSupabase.storage
+    .from(storageLocation.bucket)
+    .remove([storageLocation.filePath]);
+
+  if (error) {
+    console.error("Failed to delete file:", error);
+  }
+}
+
 export async function POST(request: NextRequest) {
   const response = NextResponse.next();
   const auth = await requireAdmin(request, response);
@@ -107,7 +144,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "update_person") {
-    const { id, name, role, photo_url, phone, email, bio, team_id } = payload;
+    const { id, name, role, photo_url, previous_photo_url, phone, email, bio, team_id } = payload;
     if (!id) return errorResponse("Person ID is required.", 400);
     if (!name) return errorResponse("Name is required.", 400);
 
@@ -125,6 +162,17 @@ export async function POST(request: NextRequest) {
       .eq("id", id);
 
     if (error) return errorResponse(error.message, 500);
+
+    if (
+      typeof previous_photo_url === "string" &&
+      previous_photo_url &&
+      typeof photo_url === "string" &&
+      photo_url &&
+      previous_photo_url !== photo_url
+    ) {
+      await deleteStorageObject(serviceSupabase, previous_photo_url);
+    }
+
     return new NextResponse(null, { status: 204 });
   }
 
@@ -132,12 +180,25 @@ export async function POST(request: NextRequest) {
     const { id } = payload;
     if (!id) return errorResponse("Person ID is required.", 400);
 
+    const { data: person, error: fetchError } = await serviceSupabase
+      .from("office_bearers")
+      .select("photo_url")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (fetchError) return errorResponse(fetchError.message, 500);
+
     const { error } = await serviceSupabase
       .from("office_bearers")
       .delete()
       .eq("id", id);
 
     if (error) return errorResponse(error.message, 500);
+
+    if (person?.photo_url) {
+      await deleteStorageObject(serviceSupabase, person.photo_url);
+    }
+
     return new NextResponse(null, { status: 204 });
   }
 

@@ -66,6 +66,28 @@ function getServiceSupabase() {
   );
 }
 
+function extractStorageLocationFromPublicUrl(publicUrl: string) {
+  const url = new URL(publicUrl);
+  const marker = "/object/public/";
+  const markerIndex = url.pathname.indexOf(marker);
+
+  if (markerIndex === -1) {
+    return null;
+  }
+
+  const storagePath = url.pathname.slice(markerIndex + marker.length);
+  const [bucket, ...pathParts] = storagePath.split("/").filter(Boolean);
+
+  if (!bucket || pathParts.length === 0) {
+    return null;
+  }
+
+  return {
+    bucket,
+    filePath: pathParts.join("/"),
+  };
+}
+
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
@@ -135,21 +157,16 @@ export async function DELETE(request: NextRequest) {
     return errorResponse("URL is required.", 400);
   }
 
-  // Extract the path from the URL (remove domain and bucket prefix)
   try {
-    const urlObj = new URL(url);
-    const path = urlObj.pathname.split("/").slice(3).join("/"); // Remove /storage/v1/object/ prefix parts
+    const storageLocation = extractStorageLocationFromPublicUrl(url);
 
-    if (!path) {
+    if (!storageLocation) {
       return errorResponse("Invalid URL format.", 400);
     }
 
-    // Try to find the bucket from the path
-    const bucketMatch = path.match(/^([^/]+)\//);
-    const bucket = bucketMatch ? bucketMatch[1] : "posts-media";
-    const filePath = path.replace(/^[^/]+\//, "");
-
-    const { error } = await serviceSupabase.storage.from(bucket).remove([filePath]);
+    const { error } = await serviceSupabase.storage
+      .from(storageLocation.bucket)
+      .remove([storageLocation.filePath]);
 
     if (error) {
       // Log but don't fail if file doesn't exist

@@ -40,6 +40,7 @@ export default function OfficeBearersSection() {
   const [people, setPeople] = useState<Person[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [form, setForm] = useState(emptyPerson());
+  const [originalPhotoUrl, setOriginalPhotoUrl] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTeamsModal, setShowTeamsModal] = useState(false);
@@ -121,14 +122,44 @@ export default function OfficeBearersSection() {
     return url;
   }
 
+  async function deletePhotoByUrl(photoUrl: string): Promise<void> {
+    const response = await fetch("/api/admin/media/upload", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: photoUrl }),
+    });
+
+    const responseText = await response.text();
+    if (!response.ok) {
+      let errorMessage = responseText || "Failed to delete photo.";
+      try {
+        const parsed = responseText ? JSON.parse(responseText) : null;
+        if (parsed && typeof parsed === "object") {
+          const maybeError = (parsed as Record<string, unknown>).error;
+          if (typeof maybeError === "string") {
+            errorMessage = maybeError;
+          }
+        }
+      } catch {
+        // Keep the raw response text if it is not JSON.
+      }
+      throw new Error(errorMessage);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
     setUploadProgress(null);
+    const previousPhotoUrl = originalPhotoUrl;
+    let uploadedPhotoUrl: string | null = null;
     try {
       let photo_url = form.photo_url;
-      if (photoFile) photo_url = await uploadPhoto(photoFile);
+      if (photoFile) {
+        photo_url = await uploadPhoto(photoFile);
+        uploadedPhotoUrl = photo_url;
+      }
       const payload = { ...form, photo_url };
 
       const response = await fetch("/api/admin/office-bearers", {
@@ -137,6 +168,7 @@ export default function OfficeBearersSection() {
         body: JSON.stringify({
           action: editingId ? "update_person" : "create_person",
           id: editingId,
+          previous_photo_url: editingId ? previousPhotoUrl : null,
           ...payload,
           display_order: editingId ? undefined : people.length,
         }),
@@ -165,11 +197,15 @@ export default function OfficeBearersSection() {
 
       setForm(emptyPerson());
       setEditingId(null);
+      setOriginalPhotoUrl(null);
       setPhotoFile(null);
       setUploadProgress(null);
       setShowEditModal(false);
       fetchData();
     } catch (err) {
+      if (uploadedPhotoUrl) {
+        deletePhotoByUrl(uploadedPhotoUrl).catch(console.error);
+      }
       setError(
         err instanceof Error
           ? err.message
@@ -182,6 +218,7 @@ export default function OfficeBearersSection() {
 
   function handleEdit(person: Person) {
     setEditingId(person.id);
+    setOriginalPhotoUrl(person.photo_url);
     setForm({
       name: person.name,
       role: person.role,
@@ -199,6 +236,7 @@ export default function OfficeBearersSection() {
   function handleCloseModal() {
     setForm(emptyPerson());
     setEditingId(null);
+    setOriginalPhotoUrl(null);
     setPhotoFile(null);
     setUploadProgress(null);
     setError(null);
@@ -226,20 +264,21 @@ export default function OfficeBearersSection() {
     }
   }
 
-  function handleRemovePhoto() {
-    // Extract path from URL to delete from storage
+  async function handleRemovePhoto() {
     const photoUrl = form.photo_url;
-    if (photoUrl) {
-      // Clear the photo from form state immediately
-      setForm({ ...form, photo_url: null });
-      setPhotoFile(null);
+    if (!photoUrl) return;
 
-      // Delete from storage asynchronously
-      fetch("/api/admin/media/upload", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: photoUrl }),
-      }).catch(console.error);
+    try {
+      await deletePhotoByUrl(photoUrl);
+      setForm((current) => ({ ...current, photo_url: null }));
+      setPhotoFile(null);
+      if (originalPhotoUrl === photoUrl) {
+        setOriginalPhotoUrl(null);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete photo.",
+      );
     }
   }
 
@@ -404,7 +443,7 @@ export default function OfficeBearersSection() {
           placeholder="Search by name or role..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-full px-5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] flex-1 min-w-[200px]"
+          className="border border-gray-300 rounded-full px-5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] flex-1 min-w-50"
         />
         <div className="flex gap-2">
           <button
