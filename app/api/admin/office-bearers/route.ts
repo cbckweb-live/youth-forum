@@ -91,7 +91,15 @@ function extractStorageLocationFromPublicUrl(publicUrl: string) {
   };
 }
 
-async function deleteStorageObject(serviceSupabase: ReturnType<typeof createClient>, publicUrl: string) {
+type StorageDeleteClient = {
+  storage: {
+    from: (bucket: string) => {
+      remove: (paths: string[]) => Promise<{ error: unknown }>;
+    };
+  };
+};
+
+async function deleteStorageObject(serviceSupabase: StorageDeleteClient, publicUrl: string) {
   const storageLocation = extractStorageLocationFromPublicUrl(publicUrl);
   if (!storageLocation) {
     return;

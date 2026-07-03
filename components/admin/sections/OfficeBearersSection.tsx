@@ -318,8 +318,8 @@ export default function OfficeBearersSection() {
 
       setNewTeamName("");
       fetchData();
-    } catch {
-      // error already handled via UI where applicable
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add team.");
     }
   }
 
