@@ -5,9 +5,10 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
 const images = [
-  "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Events/A7402285.jpg",
-  "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Events/DSCF5603.JPG",
-  "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Events/DSCF4958.JPG",
+  "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Hero%20Slider/A7402285.jpg",
+  "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Hero%20Slider/DSCF5603.JPG",
+  "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Hero%20Slider/DSCF4958.JPG",
+  "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Hero%20Slider/Heroslider.jpeg",
 ];
 
 export default function HeroSlider() {
