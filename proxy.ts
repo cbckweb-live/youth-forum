@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const url = request.nextUrl;
-  
+ /* 
   // ==========================================
   // 1. "COMING SOON" LAUNCH GATEKEEPER LOGIC
   // ==========================================
@@ -46,7 +46,7 @@ export async function proxy(request: NextRequest) {
   if (!isAssetOrSystem && !isTeamMember && !isAdminPath) {
     return NextResponse.rewrite(new URL('/coming-soon', request.url));
   }
-
+*/
   // ==========================================
   // 2. YOUR EXISTING SUPABASE AUTH LAYER
   // ==========================================
@@ -88,9 +88,9 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-// ⚠️ THE STRICT EXCLUSION MATCHER (Ensures the root '/' is matched explicitly)
+// ⚠️ THE STRICT EXCLUSION MATCHER ["/admin/dashboard/:path*"],
 export const config = {
-  matcher: [
+  matcher: [ "/admin/dashboard/:path*"
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)
@@ -98,6 +98,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    // '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
