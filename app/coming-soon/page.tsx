@@ -13,11 +13,11 @@ export default function ComingSoonPage() {
 
         {/* Project Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             CBCK Youth Forum
           </h1>
           <p className="text-base text-slate-400 max-w-sm mx-auto">
-            We are building a brand new digital space for our youth community. Stay tuned!
+            We are building a brand new digital home for our youth community. Stay tuned!
           </p>
         </div>
 

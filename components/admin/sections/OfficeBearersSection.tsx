@@ -25,17 +25,7 @@ type Team = {
   display_order: number;
 };
 
-type PersonForm = {
-  name: string;
-  role: string | null;
-  photo_url: string | null;
-  phone: string | null;
-  email: string | null;
-  bio: string | null;
-  team_id: string | null;
-};
-
-const emptyPerson = (): PersonForm => ({
+const emptyPerson = (): Omit<Person, "id" | "display_order"> => ({
   name: "",
   role: "",
   photo_url: null,
