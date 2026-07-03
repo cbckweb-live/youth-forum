@@ -22,7 +22,10 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://cbckyouthforum.live"),
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function RootLayout({
