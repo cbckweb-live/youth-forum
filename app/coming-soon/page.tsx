@@ -17,7 +17,7 @@ export default function ComingSoonPage() {
             CBCK Youth Forum
           </h1>
           <p className="text-base text-slate-400 max-w-sm mx-auto">
-            We are building a brand new digital home for our youth community. Stay tuned!
+            We are just waiting for your photos to be uploaded!. Stay tuned!
           </p>
         </div>
 
