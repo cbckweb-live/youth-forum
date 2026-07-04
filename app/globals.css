@@ -37,3 +37,13 @@
     var(--color-ochre) 12px
   );
 }
+
+/* Custom Branding for NProgress Loading Bar */
+#nprogress .bar {
+  background: #6B1F2A !important; /* Oxblood Maroon */
+  height: 3px !important;       /* Clean, thin bar height */
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #6B1F2A, 0 0 5px #6B1F2A !important; /* Subtle glowing edge */
+}

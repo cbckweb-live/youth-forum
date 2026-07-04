@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { Lora, Inter } from "next/font/google";
 import "./globals.css";
+import "nprogress/nprogress.css"; // Import basic NProgress styles
+
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ProgressBar from "@/components/ProgressBar";
+import { Suspense } from "react";
 
+// 1. Configure Fonts
 const lora = Lora({
   variable: "--font-display",
   subsets: ["latin"],
@@ -15,6 +20,7 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+// 2. Set Metadata Global Settings
 export const metadata: Metadata = {
   title: "CBCK | Youth Forum",
   description: "News, events, and people of our youth forum",
@@ -28,14 +34,20 @@ export const metadata: Metadata = {
   },
 };
 
+// 3. Unified Root Layout
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${lora.variable} ${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-white text-[#231F1E] font-body">
+        {/* Next.js navigation hooks require Suspense wrap structures when rendered statically */}
+        <Suspense fallback={null}>
+          <ProgressBar />
+        </Suspense>
+        
         <Navbar />
-        <div className="flex-1">{children}</div>
+        <main className="flex-1">{children}</main>
         <Footer />
       </body>
     </html>
