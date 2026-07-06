@@ -9,11 +9,11 @@ export default function GalleryItem({ photo_url, caption, event_tag }: GalleryIt
   return (
     <div className="group relative rounded-lg overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md">
       <div className="relative h-56">
-        <Image
+          <Image
           src={photo_url}
           alt={caption || "Gallery photo"}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw"
           style={{ objectFit: "cover" }}
           quality={100}
         />

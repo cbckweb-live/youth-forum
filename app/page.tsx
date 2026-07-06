@@ -14,11 +14,20 @@ import { CATEGORY_LABELS } from "@/lib/categories";
 function ensureAbsoluteImageUrl(url: string) {
   // Supabase public URLs should already be absolute.
   // If a relative storage path is stored in DB, convert it to a public URL.
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  // Also strip query params so identical images don't become "different" URLs.
+
+  const stripQuery = (u: string) => u.split("?")[0].split("#")[0];
+
+  if (url.startsWith("http://") || url.startsWith("https://")) return stripQuery(url);
+
   const supabaseBase = process.env.NEXT_PUBLIC_SUPABASE_URL;
   // Most setups use /storage/v1/object/public/<bucket>/<path>
-  if (supabaseBase) return `${supabaseBase}/storage/v1/object/public/${url}`;
-  return url;
+  if (supabaseBase)
+    return stripQuery(
+      `${supabaseBase}/storage/v1/object/public/${url}`
+    );
+
+  return stripQuery(url);
 }
 
 export const revalidate = 0;
@@ -71,7 +80,7 @@ function CalendarDate({ startDate, endDate }: { startDate: string; endDate?: str
   const endDay = isMultiday ? new Date(endDate).getDate() : null;
 
   return (
-    <div className="flex flex-col items-center justify-center border border-[#231F1E]/10 rounded-xl shadow-sm bg-white w-16 h-16 flex-shrink-0">
+    <div className="flex flex-col items-center justify-center border border-[#231F1E]/10 rounded-xl shadow-sm bg-white w-16 h-16 shrink-0">
       <span className="text-[10px] uppercase tracking-wider text-[#6B1F2A] font-medium leading-none mb-0.5">
         {startMonth}
       </span>
@@ -142,6 +151,7 @@ export default async function HomePage() {
             <br /> Youth Ministry
           </h1>
           <p className="text-[#231F1E]/80 leading-relaxed">
+            The official Youth Forum of Chakhesang Baptist Church Kohima.
             A community built on shared faith and shared ground — gathering for
             fellowship, supporting one another, and growing together year after
             year.

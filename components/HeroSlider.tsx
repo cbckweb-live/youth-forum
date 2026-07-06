@@ -48,11 +48,11 @@ export default function HeroSlider() {
       className="relative w-full max-w-6xl mx-auto h-[220px] sm:h-[320px] md:h-[420px] rounded-xl border border-white/40 bg-white/30 backdrop-blur-sm shadow-lg overflow-hidden p-1 touch-pan-y"
     >
       <div className="absolute inset-0 w-full h-full">
-        <Image
+          <Image
           src={images[index]}
           alt="Community highlight"
           fill
-          sizes="100vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1080px) 100vw, 56vw"
           style={{ objectFit: "cover" }}
           quality={85}
         />

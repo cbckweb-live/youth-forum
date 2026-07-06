@@ -14,12 +14,12 @@ export default function MathetesCard({
   return (
     <div className="rounded-xl overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md">
       {photo_url && (
-        <Image
+          <Image
           src={photo_url}
           alt={title}
           width={800}
           height={600}
-          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1080px) 100vw, 33vw"
           style={{ width: "100%", height: "auto" }}
           quality={100}
           className="block"

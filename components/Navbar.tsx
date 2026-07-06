@@ -62,7 +62,13 @@ export default function Navbar() {
           <div className="flex flex-1 items-center justify-center sm:justify-start">
             <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
               <div className="relative h-12 w-32">
-                <Image src="/logo.png" alt="Youth Forum" fill style={{ objectFit: "contain" }} />
+                <Image
+                  src="/logo.png"
+                  alt="Youth Forum"
+                  fill
+                  unoptimized
+                  style={{ objectFit: "contain" }}
+                />
               </div>
             </Link>
 
