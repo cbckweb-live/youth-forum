@@ -43,6 +43,29 @@ function errorResponse(message: string, status: number) {
   return jsonResponse({ error: message }, { status });
 }
 
+function extractStorageFilePathFromPublicUrl(publicUrl: string) {
+  try {
+    const url = new URL(publicUrl);
+    const marker = "/object/public/";
+    const markerIndex = url.pathname.indexOf(marker);
+
+    if (markerIndex === -1) {
+      return null;
+    }
+
+    const storagePath = url.pathname.slice(markerIndex + marker.length);
+    const pathParts = storagePath.split("/").filter(Boolean);
+
+    if (pathParts.length < 2) {
+      return null;
+    }
+
+    return pathParts.slice(1).join("/");
+  } catch {
+    return null;
+  }
+}
+
 /**
  * FIX: Centralised auth + role guard used by every handler in this route.
  *
@@ -134,12 +157,45 @@ export async function DELETE(request: NextRequest) {
     return errorResponse("Missing gallery photo id.", 400);
   }
 
+  const { data: photo, error: fetchError } = await serviceSupabase
+    .from("gallery")
+    .select("photo_url")
+    .eq("id", payload.id)
+    .maybeSingle();
+
+  if (fetchError) {
+    return errorResponse(fetchError.message, 500);
+  }
+
+  if (!photo) {
+    return errorResponse("Gallery photo not found.", 404);
+  }
+
+  if (typeof photo.photo_url !== "string" || !photo.photo_url) {
+    return errorResponse("Gallery photo is missing a storage URL.", 500);
+  }
+
+  const filePath = extractStorageFilePathFromPublicUrl(photo.photo_url);
+  if (!filePath) {
+    return errorResponse("Unable to extract gallery storage path from photo_url.", 500);
+  }
+
+  const { error: deleteError } = await serviceSupabase.storage
+    .from("gallery-media")
+    .remove([filePath]);
+
+  if (deleteError) {
+    return errorResponse(`Failed to delete gallery file from storage: ${deleteError.message}`, 500);
+  }
+
   const { error } = await serviceSupabase
     .from("gallery")
     .delete()
     .eq("id", payload.id);
 
-  if (error) return errorResponse(error.message, 500);
+  if (error) {
+    return errorResponse(`Storage file deleted, but database row could not be removed: ${error.message}`, 500);
+  }
   return new NextResponse(null, { status: 204 });
 }
 

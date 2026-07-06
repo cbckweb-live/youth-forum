@@ -226,10 +226,25 @@ export default function GallerySection() {
       body: JSON.stringify({ id }),
     });
     if (!response.ok) {
-      const errorText = await response.text();
-      setError(`Delete failed: ${errorText}`);
+      const responseText = await response.text();
+      let result: unknown;
+      try {
+        result = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        result = { error: responseText };
+      }
+
+      const errorFromApi = (() => {
+        if (typeof result !== "object" || result === null) return undefined;
+        const maybe = result as Record<string, unknown>;
+        const err = maybe["error"];
+        return typeof err === "string" ? err : undefined;
+      })();
+
+      setError(`Delete failed: ${errorFromApi || responseText || "Please try again."}`);
       return;
     }
+    setError(null);
     setConfirmDeleteId(null);
     fetchPhotos();
   }
