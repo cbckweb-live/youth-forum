@@ -4,14 +4,14 @@ export default function ComingSoonPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center select-none">
       <div className="max-w-md space-y-8">
-        {/* Hype Badge */}
+        {"Are you ready? "}
         <div>
           <span className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-full tracking-wider uppercase">
             Something Big is Coming
           </span>
         </div>
 
-        {/* Project Header */}
+        {"Youth Ministry Official Webiste"}
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             CBCK Youth Forum
