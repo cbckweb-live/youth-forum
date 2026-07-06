@@ -131,15 +131,15 @@ export default async function HomePage() {
   return (
     <main className="bg-white text-[#231F1E]">
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
-      <section
-        className="mt-6 px-4 sm:px-8 pt-20 pb-10 sm:pt-28 sm:pb-14 lg:pt-36 lg:pb-18 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative"
-        style={{
-          backgroundImage: "url('/background.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
+<section
+  className="mt-6 px-4 sm:px-8 pt-8 pb-24 sm:pt-10 sm:pb-32 lg:pt-14 lg:pb-40 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative"
+  style={{
+    backgroundImage: "url('/background.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+>
         <div
           className="absolute inset-0"
           style={{ backgroundColor: "rgba(255,255,255,0.90)" }}
