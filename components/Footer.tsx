@@ -37,7 +37,7 @@ export default function Footer() {
               <p className="text-sm text-gray-600">
                 cbckyouthministry@gmail.com
               </p>
-              <p className="text-sm text-gray-600">+91 00000 00000</p>
+              <p className="text-sm text-gray-600">+91 8974494949</p>
             </div>
           </div>
 
