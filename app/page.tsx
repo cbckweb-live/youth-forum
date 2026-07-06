@@ -68,6 +68,7 @@ function formatRange(startISO: string, endISO?: string | null) {
     year: "numeric",
   });
 
+  // Uses a slightly longer em-dash (—) for clean typography range separation
   return `${startStr} — ${endStr}`;
 }
 
@@ -129,8 +130,9 @@ export default async function HomePage() {
 
   return (
     <main className="bg-white text-[#231F1E]">
-    <section
-        className="mt-6 mx-auto px-4 sm:px-8 pt-20 pb-10 sm:pt-28 sm:pb-14 lg:pt-36 lg:pb-18 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl text-center relative"
+      {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
+      <section
+        className="mt-6 px-4 sm:px-8 pt-20 pb-10 sm:pt-28 sm:pb-14 lg:pt-36 lg:pb-18 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative"
         style={{
           backgroundImage: "url('/background.jpg')",
           backgroundSize: "cover",
@@ -142,30 +144,30 @@ export default async function HomePage() {
           className="absolute inset-0"
           style={{ backgroundColor: "rgba(255,255,255,0.85)" }}
         ></div>
-        <div className="relative">
-          <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3">
+        <div className="relative text-center">
+          <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3 text-center mx-auto">
             Welcome
           </p>
-          <h1 className="font-display text-2xl sm:text-4xl leading-tight mb-4">
+          <h1 className="font-display text-2xl sm:text-4xl leading-tight mb-4 text-center">
             Chakhesang Baptist Church Kohima,
             <br /> Youth Ministry
           </h1>
           <p className="text-[#231F1E] leading-relaxed max-w-3xl text-center mx-auto">
-            Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
+            Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima—
             a community of young believers growing together in faith, fellowship, 
             and service under the spiritual guidance of the Church.
           </p>
           <br/>
           <p className="text-[#231F1E] leading-relaxed max-w-3xl text-center mx-auto"> 
-          Established in 1968, with a growing family of over 1,000 members, 
-          we continue to cultivate a Christ-centred community where worship, discipleship, fellowship,
-          leadership, creativity, service, and spiritual care to shape every aspect of our journey together.
+            Established in 1968, with a growing family of over 1,000 members, 
+            we continue to cultivate a Christ-centred community where worship, discipleship, fellowship,
+            leadership, creativity, service, and spiritual care to shape every aspect of our journey together.
           </p>
           <br/>
           <p className="text-[#231F1E] leading-relaxed max-w-3xl text-center mx-auto">
-          Whether you are visiting for the first time, seeking a place to belong,
-           or looking to deepen your walk with God, we warmly welcome you to be part of this growing family. 
-           Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community. 
+            Whether you are visiting for the first time, seeking a place to belong,
+            or looking to deepen your walk with God, we warmly welcome you to be part of this growing family. 
+            Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community. 
           </p>
           <br/>
         </div>
