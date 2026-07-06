@@ -11,7 +11,7 @@ export default function ComingSoonPage() {
           </span>
         </div>
 
-        {"Youth Ministry Official Webiste"}
+        {}
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             CBCK Youth Forum
