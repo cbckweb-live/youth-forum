@@ -140,7 +140,7 @@ export default async function HomePage() {
       >
         <div
           className="absolute inset-0"
-          style={{ backgroundColor: "rgba(255,255,255,0.75)" }}
+          style={{ backgroundColor: "rgba(255,255,255,0.85)" }}
         ></div>
         <div className="relative">
           <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3">
@@ -150,19 +150,19 @@ export default async function HomePage() {
             Chakhesang Baptist Church Kohima,
             <br /> Youth Ministry
           </h1>
-          <p className="text-[#231F1E]/80 leading-relaxed">
-            Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima- 
+          <p className="text-[#231F1E] leading-relaxed max-w-3xl">
+            Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima-- 
             a community of young believers growing together in faith, fellowship, 
             and service under the spiritual guidance of the Church.
           </p>
           <br/>
-          <p className="text-[#231F1E]/80 leading-relaxed"> 
-          Established in 1968, wiyh a growing family of over 1,000 members, 
+          <p className="text-[#231F1E] leading-relaxed max-w-3xl"> 
+          Established in 1968, with a growing family of over 1,000 members, 
           we continue to cultivate a Christ-centred community where worship, discipleship, fellowship,
           leadership, creativity, service, and spiritual care to shape every aspect of our journey together.
           </p>
           <br/>
-          <p className="text-[#231F1E]/80 leading-relaxed">
+          <p className="text-[#231F1E] leading-relaxed max-w-3xl">
           Whether you are visiting for the first time, seeking a place to belong,
            or looking to deepen your walk with God, we warmly welcome you to be part of this growing family. 
            Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community. 
