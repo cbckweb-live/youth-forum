@@ -54,7 +54,10 @@ function extractStorageFilePathFromPublicUrl(publicUrl: string) {
     }
 
     const storagePath = url.pathname.slice(markerIndex + marker.length);
-    const pathParts = storagePath.split("/").filter(Boolean);
+    const pathParts = storagePath
+      .split("/")
+      .filter(Boolean)
+      .map((segment) => decodeURIComponent(segment));
 
     if (pathParts.length < 2) {
       return null;
