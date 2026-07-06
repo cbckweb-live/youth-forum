@@ -17,14 +17,14 @@ export default function ComingSoonPage() {
             CBCK Youth Forum
           </h1>
           <p className="text-base text-slate-400 max-w-sm mx-auto">
-            We are just waiting for your photos to be uploaded!. Stay tuned!
+            An exciting new platform for youth engagement. Stay tuned!
           </p>
         </div>
 
         {/* Event Details */}
         <div className="border-t border-slate-900 pt-6">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Official Launch Event</p>
-          <p className="text-xl font-bold text-slate-200 mt-2">Coming Your Way Soon</p>
+          <p className="text-xl font-bold text-slate-200 mt-2">On 26 July 2026</p>
         </div>
       </div>
     </div>
