@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import SharePostButtons from "@/components/SharePostButtons";
 import { headers } from "next/headers";
+import DOMPurify from "isomorphic-dompurify";
 
 export const revalidate = 0;
 
@@ -109,7 +110,7 @@ export default async function BlogNewsPage({
                 <div
                   className="text-sm text-[#231F1E]/60 line-clamp-3"
                   dangerouslySetInnerHTML={{
-                    __html: post.content.replace(/<[^>]+>/g, " ").slice(0, 120) + "...",
+                    __html: DOMPurify.sanitize(post.content.replace(/<[^>]+>/g, " ").slice(0, 120) + "..."),
                   }}
                 />
                 <div className="mt-4 flex items-center justify-between text-xs text-[#231F1E]/40">
