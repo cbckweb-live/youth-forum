@@ -151,7 +151,7 @@ export default async function HomePage() {
             <br /> Youth Ministry
           </h1>
           <p className="text-[#231F1E] leading-relaxed max-w-3xl text-center mx-auto">
-            Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima-
+            Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
             a community of young believers growing together in faith, fellowship, 
             and service under the spiritual guidance of the Church.
           </p>
