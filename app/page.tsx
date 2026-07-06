@@ -153,13 +153,16 @@ export default async function HomePage() {
           <p className="text-[#231F1E]/80 leading-relaxed">
             Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima—a community of young believers growing together in faith, fellowship, and service under the spiritual guidance of the Church.
           </p>
+          <br/>
           <p className="text-[#231F1E]/80 leading-relaxed">
           Our emblem beautifully reflects who we are and what we aspire to become. At its centre stands the Cross of Jesus Christ, proclaiming His victory over the world and affirming that He alone is the Way, the Truth, and the Life. Established in 1968, our ministry has been committed to nurturing generations of young people to become mature disciples of Jesus Christ. Today, with more than 1,000 members, we continue to cultivate a Christ-centred community where worship, discipleship, fellowship, leadership, creativity, service, and spiritual care shape every aspect of our journey together.
           </p>
+          <br/>
           <p className="text-[#231F1E]/80 leading-relaxed">
           Whether you are visiting for the first time, seeking a place to belong, or looking to deepen your walk with God, we warmly welcome you to be part of this growing family. Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community. 
 
           </p>
+          <br/>
         </div>
       </section>
 
@@ -205,7 +208,7 @@ export default async function HomePage() {
                 </div>
 
                 {event.image_url && (
-                  <div className="flex-shrink-0 w-full sm:w-36 sm:h-36 rounded-xl overflow-hidden relative">
+                  <div className="shrink-0 w-full sm:w-36 sm:h-36 rounded-xl overflow-hidden relative">
                     <Image
                       src={event.image_url ?? ""}
                       alt={event.title}
