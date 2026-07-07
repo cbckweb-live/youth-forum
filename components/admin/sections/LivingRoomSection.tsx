@@ -30,12 +30,21 @@ export default function LivingRoomSection() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fetchEpisodes = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("living_room_seasons")
       .select("*")
       .order("display_order", { ascending: false });
+
+    if (error) {
+      setError(error.message);
+      setEpisodes([]);
+      return;
+    }
+
+    setError(null);
     setEpisodes((data as Episode[]) || []);
   }, [supabase]);
+
 
   useEffect(() => {
     const id = window.setTimeout(() => {
