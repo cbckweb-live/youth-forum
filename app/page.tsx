@@ -138,9 +138,7 @@ export default async function HomePage() {
   return (
     <main className="bg-white text-[#231F1E]">
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
-        <div className="relative z-10 flex justify-center">
-    <HeroSlider />
-  </div>
+
 <section
   className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
   style={{
@@ -195,6 +193,11 @@ export default async function HomePage() {
     <p className="font-display mt-3 text-sm text-[#27060b]">
       — 1 Timothy 4:12
     </p>
+  </div>
+</section>
+<section className="px-4 sm:px-8 py-12 sm:py-16">
+          <div className="relative z-10 flex justify-center">
+    <HeroSlider />
   </div>
 </section>
 
