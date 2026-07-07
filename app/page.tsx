@@ -132,7 +132,7 @@ export default async function HomePage() {
     <main className="bg-white text-[#231F1E]">
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
 <section
-  className="mt-10 sm:mt-20 lg:mt-24 px-4 sm:px-8 pt-4 pb-24 sm:pt-6 sm:pb-32 lg:pt-8 lg:pb-40 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
+  className="mt-10 sm:mt-20 lg:mt-24 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
   style={{
     backgroundImage: "url('/background.jpg')",
     backgroundSize: "cover",
@@ -182,30 +182,9 @@ export default async function HomePage() {
     <p className="font-display italic text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.
     </p>
-    <p className="font-display mt-3 text-sm text-[#6B1F2A]">
+    <p className="font-display mt-3 text-sm text-[#27060b]">
       — 1 Timothy 4:12
     </p>
-  </div>
-
-  {/* Verse & Call-to-Action */}
-  <div className="mt-6 text-center">
-    
-
-    <div className="mt-6 flex flex-col sm:flex-row sm:items-stretch sm:justify-center gap-4">
-      <a
-        href="/blogs"
-        className="w-full sm:w-auto sm:min-w-[160px] text-center bg-[#6B1F2A] text-white rounded-xl px-6 py-3 font-medium transition-colors hover:bg-[#5A1723]"
-      >
-        Read Blogs
-      </a>
-
-      <a
-        href="/events"
-        className="w-full sm:w-auto sm:min-w-[160px] text-center border-2 border-[#6B1F2A] text-[#6B1F2A] rounded-xl px-6 py-3 font-medium transition-colors hover:bg-[#6B1F2A] hover:text-white"
-      >
-        Explore Events
-      </a>
-    </div>
   </div>
 </section>
 
