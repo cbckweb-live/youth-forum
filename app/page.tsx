@@ -140,13 +140,17 @@ export default async function HomePage() {
     backgroundRepeat: "no-repeat",
   }}
 >
-  {/* Full-image frosted overlay for consistent readability */}
+  {/* Gradient: heavy white at top, fading toward bottom */}
   <div
-    className="absolute inset-0 backdrop-blur-[3px]"
-    style={{ backgroundColor: "rgba(255,255,255,0.90)" }}
+    className="absolute inset-0"
+    style={{
+      background:
+        "linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.45) 40%, rgba(255,255,255,0.3) 70%, rgba(255,255,255,0.15) 100%)",
+    }}
   ></div>
 
-  <div className="relative text-center font-display px-4 sm:px-10 py-6 sm:py-10">
+  {/* Frosted card behind text, stronger blur + opacity for readability */}
+  <div className="relative text-center bg-white/50 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10 font-display">
     <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-semibold text-center mx-auto">
       Welcome
     </p>
@@ -177,10 +181,6 @@ export default async function HomePage() {
     </p>
   </div>
 </section>
-
-      <section className="px-4 sm:px-8 pb-12 sm:pb-16 mt-8 sm:mt-12">
-        <HeroSlider />
-      </section>
 
       {/* Upcoming Events */}
       <section className="px-4 sm:px-8 py-12 sm:py-16">
