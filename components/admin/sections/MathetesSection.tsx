@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import FileUploadInput from "@/components/admin/FileUploadInput";
@@ -31,8 +31,19 @@ function truncateText(text: string, maxChars: number) {
   return `${text.slice(0, maxChars).trimEnd()}…`;
 }
 
+async function assertValidSession(supabase: ReturnType<typeof createSupabaseBrowserClient>) {
+  const { data } = await supabase.auth.getSession();
+  const currentSession = data.session;
+  if (!currentSession) {
+    const refreshed = await supabase.auth.refreshSession();
+    if (refreshed.error || !refreshed.data.session) {
+      throw new Error("Your session has expired or is invalid. Please log in again.");
+    }
+  }
+}
+
 export default function MathetesSection() {
-  const supabase = createSupabaseBrowserClient();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [entries, setEntries] = useState<MathetesEntry[]>([]);
   const [form, setForm] = useState<MathetesForm>(emptyForm());
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -47,21 +58,28 @@ export default function MathetesSection() {
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("mathetes")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("mathetes")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setEntries([]);
+        setLoading(false);
+        return;
+      }
+
+      setError(null);
+      setEntries((data as MathetesEntry[]) || []);
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to fetch Mathetes entries:", err);
+      setError("Unable to load Mathetes entries. Please try again.");
       setEntries([]);
       setLoading(false);
-      return;
     }
-
-    setError(null);
-    setEntries((data as MathetesEntry[]) || []);
-    setLoading(false);
   }, [supabase]);
 
   useEffect(() => {
@@ -73,6 +91,14 @@ export default function MathetesSection() {
   }, [fetchEntries]);
 
   async function uploadPhoto(file: File): Promise<string> {
+    try {
+      await assertValidSession(supabase);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Session validation failed. Please log in again.";
+      setError(message);
+      throw new Error(message);
+    }
+
     setUploadProgress(10);
     const formData = new FormData();
     formData.append("file", file);
@@ -101,6 +127,7 @@ export default function MathetesSection() {
     })();
 
     if (!response.ok) {
+      console.error("Upload API error response:", { status: response.status, body: responseText });
       throw new Error(errorFromApi || responseText || "Failed to upload photo.");
     }
 
@@ -133,6 +160,8 @@ export default function MathetesSection() {
     let uploadedPhotoUrl: string | null = null;
 
     try {
+      await assertValidSession(supabase);
+
       let photo_url = form.photo_url;
       if (photoFile) {
         if (!photoFile.type.startsWith("image/")) {
@@ -180,6 +209,7 @@ export default function MathetesSection() {
       closeModal();
       await fetchEntries();
     } catch (err) {
+      console.error("Mathetes submit error:", err);
       if (uploadedPhotoUrl) {
         void deleteUploadedPhoto(uploadedPhotoUrl);
       }
@@ -214,6 +244,8 @@ export default function MathetesSection() {
 
   async function handleDelete(id: string) {
     try {
+      await assertValidSession(supabase);
+
       const response = await fetch("/api/admin/mathetes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
