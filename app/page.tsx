@@ -151,19 +151,19 @@ export default async function HomePage() {
 
   {/* Frosted card sitting over the text, on top of the radial gradient */}
   <div className="relative text-center bg-white/75 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10">
-    <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-semibold text-center mx-auto">
-      Welcome
-    </p>
-    <h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black font-bold">
-      Chakhesang Baptist Church Kohima,
-      <br /> Youth Ministry
-    </h1>
-    <h3 className="text-black text-xl sm:text-2xl leading-tight mb-2 text-center font-semibold">
-      Theme: Renew Thy Church
-    </h3>
-    <h3 className="text-black text-xl sm:text-2xl leading-tight mb-4 text-center font-semibold">
-      Book Focus: Revelations
-    </h3>
+    <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-medium text-center mx-auto">
+  Welcome
+</p>
+<h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black font-semibold">
+  Chakhesang Baptist Church Kohima,
+  <br /> Youth Ministry
+</h1>
+<h3 className="text-black text-xl sm:text-2xl leading-tight mb-2 text-center font-normal">
+  Theme: Renew Thy Church
+</h3>
+<h3 className="text-black text-xl sm:text-2xl leading-tight mb-4 text-center font-normal">
+  Book Focus: Revelations
+</h3>
     <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
       a community of young believers growing together in faith, fellowship,
