@@ -28,16 +28,20 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
 
       // If we don't yet have a session, try exchanging the auth code (e.g. invite/forgot-password flow).
       if (!data.session && !error) {
-        const { data: codeData, error: exchangeError } =
-          await supabase.auth.exchangeCodeForSession();
+        const code = new URL(window.location.href).searchParams.get("code");
 
-        if (codeData?.session && !exchangeError) {
-          const lastSignInAt = (codeData.session.user as { last_sign_in_at?: string | null })
-            ?.last_sign_in_at;
-          setIsInvite(!lastSignInAt);
+        if (code) {
+          const { data: codeData, error: exchangeError } =
+            await supabase.auth.exchangeCodeForSession(code);
 
-          setStatus("idle");
-          return;
+          if (codeData?.session && !exchangeError) {
+            const lastSignInAt = (codeData.session.user as { last_sign_in_at?: string | null })
+              ?.last_sign_in_at;
+            setIsInvite(!lastSignInAt);
+
+            setStatus("idle");
+            return;
+          }
         }
       }
 
