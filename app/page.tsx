@@ -142,7 +142,7 @@ export default async function HomePage() {
 >
         <div
           className="absolute inset-0"
-          style={{ backgroundColor: "rgba(255,255,255,0.90)" }}
+          style={{ backgroundColor: "rgba(255,255,255,0.80)" }}
         ></div>
         <div className="relative text-center">
           <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3 text-center mx-auto">
