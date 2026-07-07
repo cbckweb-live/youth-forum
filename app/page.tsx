@@ -93,17 +93,34 @@ function CalendarDate({ startDate, endDate }: { startDate: string; endDate?: str
   );
 }
 
+type Person = {
+  id: string;
+  name: string;
+  role: string | null;
+  photo_url: string | null;
+  phone: string | null;
+  email: string | null;
+  bio: string | null;
+  team_id: string | null;
+  display_order: number;
+};
+
 export default async function HomePage() {
   const { data: leadership } = await supabase
     .from("office_bearers")
     .select("*")
     .or("role.ilike.%youth director%,role.ilike.%pastor in charge%,role.ilike.%youth chairman%");
 
-  const roleOrder = ["youth director", "pastor in charge", "youth chairman"];
-  const sortedLeadership = (leadership ?? []).sort((a: any, b: any) => {
-    const aRole = (a.role || "").toLowerCase();
-    const bRole = (b.role || "").toLowerCase();
-    return roleOrder.indexOf(aRole) - roleOrder.indexOf(bRole);
+  const roleRank: Record<string, number> = {
+    "youth director": 0,
+    "pastor in charge": 1,
+    "youth chairman": 2,
+  };
+
+  const sortedLeadership = (leadership ?? []).sort((a: Person, b: Person) => {
+    const aRank = roleRank[(a.role || "").toLowerCase()] ?? 999;
+    const bRank = roleRank[(b.role || "").toLowerCase()] ?? 999;
+    return aRank - bRank;
   });
 
   const today = new Date().toISOString().split("T")[0];
@@ -194,13 +211,11 @@ export default async function HomePage() {
       — 1 Timothy 4:12
     </p>
   </div>
-</section>
-<section className="px-4 sm:px-8 py-12 sm:py-16">
-          <div className="relative z-10 flex justify-center">
+
+  <div className="relative z-10 flex justify-center mt-8">
     <HeroSlider />
   </div>
 </section>
-
 
       {/* Upcoming Events */}
       <section className="px-4 sm:px-8 py-12 sm:py-16">
