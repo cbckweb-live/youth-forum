@@ -178,7 +178,7 @@ export default async function HomePage() {
     <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
       a community of young believers growing together in faith, fellowship,
-      and service under the spiritual guidance of the Church.
+      and service.
     </p>
     <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Established in 1968, with a growing family of over 1,000 members,
@@ -188,7 +188,6 @@ export default async function HomePage() {
     <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Whether you are visiting for the first time, seeking a place to belong,
       or looking to deepen your walk with God, we warmly welcome you to be part of this growing family.
-      Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community.
     </p>
     <p className="font-display italic text-black leading-relaxed max-w-3xl mx-auto mb-6">
       &quot;Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.&quot;
