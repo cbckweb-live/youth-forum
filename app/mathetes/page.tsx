@@ -69,8 +69,8 @@ export default async function MathetesPage() {
       <section className="mb-20">
         <div className="flex items-end justify-between gap-4 mb-6">
           <div>
-            <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">Mathetes Updates</p>
-            <h2 className="font-display text-2xl">Recent Entries</h2>
+            <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">Updates</p>
+            <h2 className="font-display text-2xl">Mathetes Diaries</h2>
           </div>
         </div>
 
