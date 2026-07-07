@@ -132,7 +132,7 @@ export default async function HomePage() {
     <main className="bg-white text-[#231F1E]">
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
 <section
-  className="mt-6 px-4 sm:px-8 pt-8 pb-24 sm:pt-10 sm:pb-32 lg:pt-14 lg:pb-40 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
+  className="mt-16 sm:mt-20 lg:mt-24 px-4 sm:px-8 pt-4 pb-24 sm:pt-6 sm:pb-32 lg:pt-8 lg:pb-40 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
   style={{
     backgroundImage: "url('/background.jpg')",
     backgroundSize: "cover",
@@ -145,7 +145,7 @@ export default async function HomePage() {
     className="absolute inset-0"
     style={{
       background:
-        "linear-gradient(to bottom, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.05) 100%)",
+        "linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.70) 30%, rgba(255,255,255,0.40) 55%, rgba(255,255,255,0.20) 80%, rgba(255,255,255,0.10) 100%)",
     }}
   ></div>
 
@@ -157,7 +157,7 @@ export default async function HomePage() {
       Chakhesang Baptist Church Kohima,
       <br /> Youth Ministry
     </h1>
-    <h3 className="text-mist-800 font-display text-2xl sm:text-4xl leading-tight mb-4 text-center">
+    <h3 className="text-mist-800 font-display text-xl sm:text-2xl leading-tight mb-4 text-center">
       Theme: Renew Thy Church
     </h3>
     <p className="text-[#000000] leading-relaxed max-w-3xl mx-auto mb-6 font-serif">
