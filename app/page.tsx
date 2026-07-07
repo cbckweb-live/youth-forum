@@ -211,8 +211,10 @@ export default async function HomePage() {
       — 1 Timothy 4:12
     </p>
   </div>
+</section>
 
-  <div className="relative z-10 flex justify-center mt-8">
+<section className="px-4 sm:px-8 py-8 sm:py-10">
+  <div className="relative z-10 flex justify-center">
     <HeroSlider />
   </div>
 </section>
