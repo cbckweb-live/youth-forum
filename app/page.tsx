@@ -143,7 +143,7 @@ export default async function HomePage() {
   {/* Full-image frosted overlay for consistent readability */}
   <div
     className="absolute inset-0 backdrop-blur-[3px]"
-    style={{ backgroundColor: "rgba(255,255,255,0.55)" }}
+    style={{ backgroundColor: "rgba(255,255,255,0.90)" }}
   ></div>
 
   <div className="relative text-center font-display px-4 sm:px-10 py-6 sm:py-10">
