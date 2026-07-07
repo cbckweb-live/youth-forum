@@ -27,9 +27,9 @@ export default function MathetesCard({
           width={800}
           height={600}
           sizes="(max-width: 640px) 100vw, (max-width: 1080px) 100vw, 33vw"
-          style={{ width: "100%", height: "auto" }}
           quality={100}
-          className="block"
+          className="block h-auto w-full"
+          style={{ height: "auto" }}
         />
       ) : (
         <div className="flex h-56 items-center justify-center bg-gradient-to-br from-[#6B1F2A]/15 via-white to-[#C8A46A]/20 px-6 text-center">

@@ -77,7 +77,7 @@ export default async function MathetesPage() {
         {entries && entries.length === 0 ? (
           <p className="text-[#231F1E]/60">No Mathetes entries yet.</p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-start">
             {(entries as MathetesEntry[] | null | undefined)?.map((entry) => (
               <MathetesCard
                 key={entry.id}
