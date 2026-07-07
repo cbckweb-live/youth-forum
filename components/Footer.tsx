@@ -35,7 +35,7 @@ export default function Footer() {
           <div className="flex items-start gap-4">
             <div className="flex-1">
               <p className="text-sm text-gray-600">
-                cbckyouthministry@gmail.com
+                cbckyouthministry&#64;gmail.com
               </p>
               <p className="text-sm text-gray-600">+91 8974494949</p>
             </div>
