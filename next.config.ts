@@ -10,7 +10,7 @@ const securityHeaders = [
   { 
     key: 'Content-Security-Policy', 
     // Basic CSP allowing Next.js internals, local styles, and HTTPS images (like Supabase storage)
-    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://emsfthlfptmysgzpectv.supabase.co https://*.supabase.co;" 
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://emsfthlfptmysgzpectv.supabase.co https://*.supabase.co; frame-src https://www.google.com https://google.com;" 
   }
 ];
 
