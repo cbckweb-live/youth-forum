@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
   const file = formData.get("file") as File | null;
   const bucket = (formData.get("bucket") as string | null) || "posts-media";
   const mediaType = (formData.get("type") as string | null) || "photo";
+  const folder = (formData.get("folder") as string | null) || "";
 
   if (!file) {
     return errorResponse("No file provided.", 400);
@@ -128,7 +129,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const path = `${Date.now()}-${file.name}`;
+  const normalizedFolder = folder
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter((segment) => segment && segment !== "." && segment !== "..")
+    .join("/");
+
+  const path = `${normalizedFolder ? `${normalizedFolder}/` : ""}${Date.now()}-${file.name}`;
   const { error } = await serviceSupabase.storage
     .from(bucket)
     .upload(path, file);

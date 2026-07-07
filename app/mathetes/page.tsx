@@ -3,6 +3,15 @@ import MathetesCard from "@/components/MathetesCard";
 import LeadershipCard from "@/components/LeadershipCard";
 
 export const revalidate = 0;
+export const dynamic = "force-dynamic";
+
+type MathetesEntry = {
+  id: string;
+  title: string;
+  description: string | null;
+  photo_url: string | null;
+  created_at: string;
+};
 
 export default async function MathetesPage() {
   const { data: entries, error } = await supabase
@@ -27,15 +36,15 @@ export default async function MathetesPage() {
   return (
     <main className="px-8 py-16 max-w-5xl mx-auto">
       <img
-          src="/mathetes logo.png"
-          alt="Mathetes Fellowship"
-          className="mx-auto mb-8 h-auto w-full max-w-[240px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
-        />
+        src="/mathetes logo.png"
+        alt="Mathetes Fellowship"
+        className="mx-auto mb-8 h-auto w-full max-w-60 sm:max-w-80 md:max-w-100 lg:max-w-120"
+      />
 
-  <h1 className="font-['Copperplate',_serif] font-bold text-3xl mb-4 text-center">Mathetes</h1>
-<h3 className="font-['Copperplate',_serif] font-bold text-xl mb-4 text-center">&quot; The way to Jesus &quot;</h3>
-  {/* ...rest stays the same */}
-     <div className="mx-auto text-[#231F1E]/80 leading-relaxed mb-10 max-w-2xl space-y-4 text-justify">
+      <h1 className="font-['Copperplate',serif] font-bold text-3xl mb-4 text-center">Mathetes</h1>
+      <h3 className="font-['Copperplate',serif] font-bold text-xl mb-4 text-center">&quot; The way to Jesus &quot;</h3>
+
+      <div className="mx-auto text-[#231F1E]/80 leading-relaxed mb-10 max-w-2xl space-y-4 text-justify">
         <p>
           The Mathetes Fellowship is a Youth Ministry initiative that bridges
           the gap between Sunday School and Youth Ministry, nurturing spiritual
@@ -56,22 +65,30 @@ export default async function MathetesPage() {
       {error && (
         <p className="text-red-600">Something went wrong loading this page.</p>
       )}
-      {entries && entries.length === 0 && (
-        <p className="text-[#231F1E]/60">No entries have been added yet.</p>
-      )}
 
-      {/* Cards / photos / events */}
-      <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
-        {entries?.map((entry) => (
-          <div key={entry.id} className="break-inside-avoid">
-            <MathetesCard
-              title={entry.title}
-              description={entry.description}
-              photo_url={entry.photo_url}
-            />
+      <section className="mb-20">
+        <div className="flex items-end justify-between gap-4 mb-6">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">Mathetes Updates</p>
+            <h2 className="font-display text-2xl">Recent Entries</h2>
           </div>
-        ))}
-      </div>
+        </div>
+
+        {entries && entries.length === 0 ? (
+          <p className="text-[#231F1E]/60">No Mathetes entries yet.</p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {(entries as MathetesEntry[] | null | undefined)?.map((entry) => (
+              <MathetesCard
+                key={entry.id}
+                title={entry.title}
+                description={entry.description}
+                photo_url={entry.photo_url}
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Mathetes In-Charges — at the bottom */}
       {incharges && incharges.length > 0 && (
