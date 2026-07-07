@@ -140,10 +140,17 @@ export default async function HomePage() {
     backgroundRepeat: "no-repeat",
   }}
 >
-  {/* Full-bleed frosted white cover over the entire photo */}
-  <div className="absolute inset-0 bg-white/75 backdrop-blur-md"></div>
+  {/* Radial gradient: clear/light center, darker white toward the edges */}
+  <div
+    className="absolute inset-0"
+    style={{
+      background:
+        "radial-gradient(ellipse at center, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.5) 35%, rgba(255,255,255,0.75) 65%, rgba(255,255,255,0.92) 100%)",
+    }}
+  ></div>
 
-  <div className="relative text-center font-display px-4 sm:px-10 py-6 sm:py-10">
+  {/* Frosted card sitting over the text, on top of the radial gradient */}
+  <div className="relative text-center bg-white/75 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10">
     <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-semibold text-center mx-auto">
       Welcome
     </p>
@@ -157,17 +164,17 @@ export default async function HomePage() {
     <h3 className="text-black text-xl sm:text-2xl leading-tight mb-4 text-center font-semibold">
       Book Focus: Revelations
     </h3>
-    <p className="text-black leading-relaxed max-w-3xl mx-auto mb-6">
+    <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
       a community of young believers growing together in faith, fellowship,
       and service under the spiritual guidance of the Church.
     </p>
-    <p className="text-black leading-relaxed max-w-3xl mx-auto mb-6">
+    <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Established in 1968, with a growing family of over 1,000 members,
       we continue to cultivate a Christ&ndash;centred community where worship, discipleship, fellowship,
       leadership, creativity, service, and spiritual care to shape every aspect of our journey together.
     </p>
-    <p className="text-black leading-relaxed max-w-3xl mx-auto mb-6">
+    <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Whether you are visiting for the first time, seeking a place to belong,
       or looking to deepen your walk with God, we warmly welcome you to be part of this growing family.
       Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community.
