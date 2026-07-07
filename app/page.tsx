@@ -154,7 +154,7 @@ export default async function HomePage() {
     <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-medium text-center mx-auto">
   Welcome
 </p>
-<h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black font-semibold">
+<h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black font-normal">
   Chakhesang Baptist Church Kohima,
   <br /> Youth Ministry
 </h1>
@@ -180,7 +180,7 @@ export default async function HomePage() {
       Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community.
     </p>
     <p className="font-display italic text-black leading-relaxed max-w-3xl mx-auto mb-6">
-      Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.
+      &quot;Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.&quot;
     </p>
     <p className="font-display mt-3 text-sm text-[#27060b]">
       — 1 Timothy 4:12

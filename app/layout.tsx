@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lora, Inter } from "next/font/google";
+import { Sora, Inter } from "next/font/google";
 import "./globals.css";
 import "nprogress/nprogress.css"; // Import basic NProgress styles
 
@@ -9,10 +9,10 @@ import ProgressBar from "@/components/ProgressBar";
 import { Suspense } from "react";
 
 // 1. Configure Fonts
-const lora = Lora({
+const sora = Sora({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const inter = Inter({
@@ -39,7 +39,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${lora.variable} ${inter.variable} h-full`}>
+    <html lang="en" className={`${sora.variable} ${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-white text-[#231F1E] font-body">
         {/* Next.js navigation hooks require Suspense wrap structures when rendered statically */}
         <Suspense fallback={null}>
