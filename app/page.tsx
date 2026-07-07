@@ -138,6 +138,9 @@ export default async function HomePage() {
   return (
     <main className="bg-white text-[#231F1E]">
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
+        <div className="relative z-10 flex justify-center">
+    <HeroSlider />
+  </div>
 <section
   className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
   style={{
@@ -156,9 +159,6 @@ export default async function HomePage() {
     }}
   ></div>
 
-  <div className="relative z-10 flex justify-center">
-    <HeroSlider />
-  </div>
 
   {/* Frosted card sitting over the text, on top of the radial gradient */}
   <div className="relative text-center bg-white/75 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10">
