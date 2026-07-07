@@ -4,8 +4,8 @@ import { createServerClient } from "@supabase/ssr";
 
 function getServerSupabase(request: NextRequest, response: NextResponse) {
   return createServerClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -61,7 +61,7 @@ function getServiceSupabase() {
     throw new Error("Supabase service role key is not configured.");
   }
   return createClient(
-    process.env.SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 }

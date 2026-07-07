@@ -9,12 +9,9 @@ type GalleryInsertRow = {
 };
 
 function getServerSupabase(request: NextRequest, response: NextResponse) {
-  // FIX: Use non-NEXT_PUBLIC_ env vars for server-side Supabase client.
-  // NEXT_PUBLIC_ vars are embedded in the client bundle; using them on the
-  // server is harmless but inconsistent and risks accidental exposure patterns.
   return createServerClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -106,9 +103,8 @@ function getServiceSupabase() {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error("Supabase service role key is not configured.");
   }
-  // FIX: Use non-NEXT_PUBLIC_ SUPABASE_URL for the service client too.
   return createClient(
-    process.env.SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 }
