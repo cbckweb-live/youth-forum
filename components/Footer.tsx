@@ -118,7 +118,7 @@ export default function Footer() {
         </div>
 
         {/* Section 5: Map */}
-        <div className="md:col-span-5">
+        <div>
           <iframe
             title="CBCK Youth Forum location map"
             className="mt-4 h-32 w-full rounded-lg border border-gray-200"
