@@ -132,7 +132,7 @@ export default async function HomePage() {
     <main className="bg-white text-[#231F1E]">
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
 <section
-  className="mt-6 px-4 sm:px-8 pt-8 pb-24 sm:pt-10 sm:pb-32 lg:pt-14 lg:pb-40 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative"
+  className="mt-6 px-4 sm:px-8 pt-8 pb-24 sm:pt-10 sm:pb-32 lg:pt-14 lg:pb-40 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
   style={{
     backgroundImage: "url('/background.jpg')",
     backgroundSize: "cover",
@@ -140,39 +140,46 @@ export default async function HomePage() {
     backgroundRepeat: "no-repeat",
   }}
 >
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: "rgba(255,255,255,0.80)" }}
-        ></div>
-        <div className="relative text-center">
-          <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3 text-center mx-auto">
-            Welcome
-          </p>
-          <h1 className="font-display text-2xl sm:text-4xl leading-tight mb-4 text-center">
-            Chakhesang Baptist Church Kohima,
-            <br /> Youth Ministry
-          </h1>
-          <h3 className="text-mist-800 font-display text-2xl sm:text-4xl leading-tight mb-4 text-center">
-            Theme: Renew Thy Church
-          </h3>
-<p className="text-[#000000] leading-relaxed max-w-3xl mx-auto mb-6 font-serif">
-  Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
-  a community of young believers growing together in faith, fellowship, 
-  and service under the spiritual guidance of the Church.
-</p>
-<p className="text-[#000000] leading-relaxed max-w-3xl mx-auto mb-6 font-serif"> 
-  Established in 1968, with a growing family of over 1,000 members, 
-  we continue to cultivate a Christ&ndash;centred community where worship, discipleship, fellowship,
-  leadership, creativity, service, and spiritual care to shape every aspect of our journey together.
-</p>
-<p className="text-[#000000] leading-relaxed max-w-3xl mx-auto mb-6 font-serif">
-  Whether you are visiting for the first time, seeking a place to belong,
-  or looking to deepen your walk with God, we warmly welcome you to be part of this growing family. 
-  Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community. 
-</p>
+  {/* Gradient overlay: heavy white at top, fades toward bottom */}
+  <div
+    className="absolute inset-0"
+    style={{
+      background:
+        "linear-gradient(to bottom, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 30%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.05) 100%)",
+    }}
+  ></div>
 
-        </div>
-      </section>
+  <div className="relative text-center">
+    <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3 text-center mx-auto">
+      Welcome
+    </p>
+    <h1 className="font-display text-2xl sm:text-4xl leading-tight mb-4 text-center text-black">
+      Chakhesang Baptist Church Kohima,
+      <br /> Youth Ministry
+    </h1>
+    <h3 className="text-mist-800 font-display text-2xl sm:text-4xl leading-tight mb-4 text-center">
+      Theme: Renew Thy Church
+    </h3>
+    <p className="text-[#000000] leading-relaxed max-w-3xl mx-auto mb-6 font-serif">
+      Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
+      a community of young believers growing together in faith, fellowship,
+      and service under the spiritual guidance of the Church.
+    </p>
+    <p className="text-[#000000] leading-relaxed max-w-3xl mx-auto mb-6 font-serif">
+      Established in 1968, with a growing family of over 1,000 members,
+      we continue to cultivate a Christ&ndash;centred community where worship, discipleship, fellowship,
+      leadership, creativity, service, and spiritual care to shape every aspect of our journey together.
+    </p>
+    <p
+      className="leading-relaxed max-w-3xl mx-auto mb-6 font-serif text-white"
+      style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}
+    >
+      Whether you are visiting for the first time, seeking a place to belong,
+      or looking to deepen your walk with God, we warmly welcome you to be part of this growing family.
+      Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community.
+    </p>
+  </div>
+</section>
 
       <section className="px-4 sm:px-8 pb-12 sm:pb-16 mt-8 sm:mt-12">
         <HeroSlider />
