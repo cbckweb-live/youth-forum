@@ -3,9 +3,14 @@ import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 
 function getServerSupabase(request: NextRequest, response: NextResponse) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  }
   return createServerClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -35,7 +40,13 @@ function errorResponse(message: string, status: number) {
 }
 
 async function requireAdmin(request: NextRequest, response: NextResponse) {
-  const serverSupabase = getServerSupabase(request, response);
+  let serverSupabase;
+  try {
+    serverSupabase = getServerSupabase(request, response);
+  } catch (e) {
+    console.error("[requireAdmin]", e);
+    return { error: errorResponse("Supabase client misconfigured.", 500) };
+  }
   const {
     data: { session },
     error: sessionError,
@@ -54,13 +65,14 @@ async function requireAdmin(request: NextRequest, response: NextResponse) {
 }
 
 function getServiceSupabase() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("Supabase service role key is not configured.");
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    const missing = [!url && "NEXT_PUBLIC_SUPABASE_URL", !key && "SUPABASE_SERVICE_ROLE_KEY"].filter(Boolean).join(", ");
+    console.error(`[getServiceSupabase] Missing env vars: ${missing}`);
+    throw new Error(`Missing env vars: ${missing}`);
   }
-  return createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
+  return createClient(url, key);
 }
 
 function extractStorageLocationFromPublicUrl(publicUrl: string) {
