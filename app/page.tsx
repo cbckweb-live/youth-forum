@@ -117,11 +117,17 @@ export default async function HomePage() {
     "youth chairman": 2,
   };
 
-  const sortedLeadership = (leadership ?? []).sort((a: Person, b: Person) => {
-    const aRank = roleRank[(a.role || "").toLowerCase()] ?? 999;
-    const bRank = roleRank[(b.role || "").toLowerCase()] ?? 999;
-    return aRank - bRank;
-  });
+  const getRoleRank = (role: string | null) => {
+    const r = (role || "").toLowerCase().trim();
+    for (const [key, rank] of Object.entries(roleRank)) {
+      if (r.includes(key)) return rank;
+    }
+    return 999;
+  };
+
+  const sortedLeadership = (leadership ?? []).sort((a: Person, b: Person) =>
+    getRoleRank(a.role) - getRoleRank(b.role)
+  );
 
   const today = new Date().toISOString().split("T")[0];
 
