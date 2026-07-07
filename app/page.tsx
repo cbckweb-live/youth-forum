@@ -99,6 +99,13 @@ export default async function HomePage() {
     .select("*")
     .or("role.ilike.%youth director%,role.ilike.%pastor in charge%,role.ilike.%youth chairman%");
 
+  const roleOrder = ["youth director", "pastor in charge", "youth chairman"];
+  const sortedLeadership = (leadership ?? []).sort((a: any, b: any) => {
+    const aRole = (a.role || "").toLowerCase();
+    const bRole = (b.role || "").toLowerCase();
+    return roleOrder.indexOf(aRole) - roleOrder.indexOf(bRole);
+  });
+
   const today = new Date().toISOString().split("T")[0];
 
   const { data: upcomingEvents } = await supabase
@@ -149,6 +156,10 @@ export default async function HomePage() {
     }}
   ></div>
 
+  <div className="relative z-10 flex justify-center">
+    <HeroSlider />
+  </div>
+
   {/* Frosted card sitting over the text, on top of the radial gradient */}
   <div className="relative text-center bg-white/75 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10">
     <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-medium text-center mx-auto">
@@ -158,10 +169,10 @@ export default async function HomePage() {
   Chakhesang Baptist Church Kohima,
   <br /> Youth Ministry
 </h1>
-<h3 className="text-black text-xl sm:text-2xl leading-tight mb-2 text-center font-normal">
-  Theme: Renew Thy Church
+<h3 className="text-[#6B1F2A] text-xl sm:text-2xl leading-tight mb-2 text-center font-normal">
+  Theme: &quot;Renew Thy Church&quot;
 </h3>
-<h3 className="text-black text-xl sm:text-2xl leading-tight mb-4 text-center font-normal">
+<h3 className="text-[#6B1F2A] text-xl sm:text-2xl leading-tight mb-4 text-center font-normal">
   Book Focus: Revelations
 </h3>
     <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
@@ -304,7 +315,7 @@ export default async function HomePage() {
           Our Leadership
         </h2>
         <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-          {leadership?.map((person) => (
+          {sortedLeadership?.map((person) => (
             <LeadershipCard key={person.id} {...person} />
           ))}
         </div>
