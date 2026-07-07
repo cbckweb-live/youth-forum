@@ -77,14 +77,17 @@ export default async function MathetesPage() {
         {entries && entries.length === 0 ? (
           <p className="text-[#231F1E]/60">No Mathetes entries yet.</p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-start">
+          <div
+            className="[column-count:1] [column-gap:1.5rem] sm:[column-count:2] lg:[column-count:3]"
+          >
             {(entries as MathetesEntry[] | null | undefined)?.map((entry) => (
-              <MathetesCard
-                key={entry.id}
-                title={entry.title}
-                description={entry.description}
-                photo_url={entry.photo_url}
-              />
+              <div key={entry.id} className="mb-6 break-inside-avoid">
+                <MathetesCard
+                  title={entry.title}
+                  description={entry.description}
+                  photo_url={entry.photo_url}
+                />
+              </div>
             ))}
           </div>
         )}
