@@ -145,7 +145,7 @@ export default async function HomePage() {
     className="absolute inset-0"
     style={{
       background:
-        "radial-gradient(ellipse at center, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.5) 35%, rgba(255,255,255,0.75) 65%, rgba(255,255,255,0.92) 100%)",
+        "radial-gradient(ellipse at center, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.45) 35%, rgba(255,255,255,0.75) 65%, rgba(255,255,255,0.95) 100%)",
     }}
   ></div>
 
@@ -179,8 +179,36 @@ export default async function HomePage() {
       or looking to deepen your walk with God, we warmly welcome you to be part of this growing family.
       Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community.
     </p>
+    <p className="font-display italic text-black leading-relaxed max-w-3xl mx-auto mb-6">
+      Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.
+    </p>
+    <p className="font-display mt-3 text-sm text-[#6B1F2A]">
+      — 1 Timothy 4:12
+    </p>
+  </div>
+
+  {/* Verse & Call-to-Action */}
+  <div className="mt-6 text-center">
+    
+
+    <div className="mt-6 flex flex-col sm:flex-row sm:items-stretch sm:justify-center gap-4">
+      <a
+        href="/blogs"
+        className="w-full sm:w-auto sm:min-w-[160px] text-center bg-[#6B1F2A] text-white rounded-xl px-6 py-3 font-medium transition-colors hover:bg-[#5A1723]"
+      >
+        Read Blogs
+      </a>
+
+      <a
+        href="/events"
+        className="w-full sm:w-auto sm:min-w-[160px] text-center border-2 border-[#6B1F2A] text-[#6B1F2A] rounded-xl px-6 py-3 font-medium transition-colors hover:bg-[#6B1F2A] hover:text-white"
+      >
+        Explore Events
+      </a>
+    </div>
   </div>
 </section>
+
 
       {/* Upcoming Events */}
       <section className="px-4 sm:px-8 py-12 sm:py-16">
