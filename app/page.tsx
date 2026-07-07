@@ -140,51 +140,37 @@ export default async function HomePage() {
     backgroundRepeat: "no-repeat",
   }}
 >
+  {/* Full-image frosted overlay for consistent readability */}
   <div
-    className="absolute inset-0"
-    style={{
-      background:
-        "linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.45) 40%, rgba(255,255,255,0.3) 70%, rgba(255,255,255,0.15) 100%)",
-    }}
+    className="absolute inset-0 backdrop-blur-[3px]"
+    style={{ backgroundColor: "rgba(255,255,255,0.55)" }}
   ></div>
 
-  <div className="relative text-center bg-white/30 backdrop-blur-[2px] rounded-2xl px-4 py-8 sm:px-10 sm:py-10 font-lora">
-    <p className="text-sm uppercase tracking-widest text-[#6B1F2A] mb-3 text-center mx-auto">
+  <div className="relative text-center font-display px-4 sm:px-10 py-6 sm:py-10">
+    <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-semibold text-center mx-auto">
       Welcome
     </p>
-    <h1
-      className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black"
-      style={{ textShadow: "0 1px 4px rgba(255,255,255,0.8)" }}
-    >
+    <h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black">
       Chakhesang Baptist Church Kohima,
       <br /> Youth Ministry
     </h1>
-    <h3
-      className="text-mist-800 text-2xl sm:text-4xl leading-tight mb-4 text-center"
-      style={{ textShadow: "0 1px 4px rgba(255,255,255,0.8)" }}
-    >
+    <h3 className="text-mist-800 text-xl sm:text-2xl leading-tight mb-2 text-center">
       Theme: Renew Thy Church
     </h3>
-    <p
-      className="text-black leading-relaxed max-w-3xl mx-auto mb-6"
-      style={{ textShadow: "0 1px 4px rgba(255,255,255,0.8)" }}
-    >
+    <h3 className="text-mist-800 text-xl sm:text-2xl leading-tight mb-4 text-center">
+      Book Focus: Revelations
+    </h3>
+    <p className="text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
       a community of young believers growing together in faith, fellowship,
       and service under the spiritual guidance of the Church.
     </p>
-    <p
-      className="text-black leading-relaxed max-w-3xl mx-auto mb-6"
-      style={{ textShadow: "0 1px 4px rgba(255,255,255,0.8)" }}
-    >
+    <p className="text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Established in 1968, with a growing family of over 1,000 members,
       we continue to cultivate a Christ&ndash;centred community where worship, discipleship, fellowship,
       leadership, creativity, service, and spiritual care to shape every aspect of our journey together.
     </p>
-    <p
-      className="text-black leading-relaxed max-w-3xl mx-auto mb-6"
-      style={{ textShadow: "0 1px 4px rgba(255,255,255,0.8)" }}
-    >
+    <p className="text-black leading-relaxed max-w-3xl mx-auto mb-6">
       Whether you are visiting for the first time, seeking a place to belong,
       or looking to deepen your walk with God, we warmly welcome you to be part of this growing family.
       Together, let us grow in faith, stand firm in Christ, and faithfully serve God and our community.
