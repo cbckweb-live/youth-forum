@@ -5,7 +5,8 @@ import Image from "next/image";
 import { decodeHtmlEntities } from "@/lib/utils";
 import SharePostButtons from "@/components/SharePostButtons";
 import { headers } from "next/headers";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
+
 
 export default async function PostDetailPage({
   params,
@@ -71,7 +72,7 @@ export default async function PostDetailPage({
 
       <div
         className="prose prose-sm sm:prose max-w-none text-[#231F1E] prose-headings:font-display prose-a:text-[#6B1F2A]"
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(decodeHtmlEntities(post.content)) }}
+dangerouslySetInnerHTML={{ __html: sanitizeHtml(decodeHtmlEntities(post.content)) }}
       />
 
       <SharePostButtons title={post.title} url={`${baseUrl}/about/blog-news/${post.slug}`} />

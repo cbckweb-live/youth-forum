@@ -1,7 +1,9 @@
-# TODO - Upcoming Events homepage
+# TODO
 
-- [x] Repo inspected: homepage and events page structure.
-- [x] Update `app/page.tsx` upcoming events UI:
-  - [x] Render `event.image_url` thumbnail for each upcoming event.
-  - [x] Make each upcoming event card clickable and navigate to `/events`.
+- [x] Root cause: `isomorphic-dompurify` pulls `jsdom/html-encoding-sniffer` which triggers the ESM/CJS crash under Turbopack SSR
+- [x] Added `sanitize-html`
+- [x] Replaced DOMPurify usage in `app/about/blog-news/page.tsx` and `app/about/blog-news/[slug]/page.tsx` with `sanitize-html`
+- [x] Added local TS declaration for `sanitize-html` under `types/`
+- [ ] Verify Turbopack SSR in production for `/about/blog-news`
+
 
