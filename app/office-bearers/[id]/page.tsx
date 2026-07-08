@@ -1,7 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
-import { decodeHtmlEntities } from "@/lib/utils";
-import DOMPurify from "isomorphic-dompurify";
+import SanitizedHtml from "@/components/SanitizedHtml";
 
 export default async function OfficeBearerDetailPage({
   params,
@@ -36,9 +35,9 @@ export default async function OfficeBearerDetailPage({
         {person.role}
       </p>
       {person.bio ? (
-        <div
+        <SanitizedHtml
+          html={person.bio}
           className="prose prose-sm max-w-none text-[#231F1E]/80 prose-headings:font-display prose-a:text-[#6B1F2A] text-left"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(decodeHtmlEntities(person.bio)) }}
         />
       ) : (
         <p className="text-[#231F1E]/80 leading-relaxed text-justify">
