@@ -47,12 +47,10 @@
   },
   "resolutions": {
     "postcss": "^8.5.10",
-    "postcss-selector-parser": "^6.1.3",
-    "@exodus/bytes": "npm:@exodus/bytes-cjs-shim@*"
+    "postcss-selector-parser": "^6.1.3"
   },
   "overrides": {
     "postcss": "^8.5.10",
-    "postcss-selector-parser": "^6.1.3",
-    "@exodus/bytes": "npm:@exodus/bytes-cjs-shim@*"
+    "postcss-selector-parser": "^6.1.3"
   }
 }
