@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Fail fast if any ESM-only package sneaks into the dep tree
+      - name: Check for forbidden ESM-only transitive deps
+        run: node scripts/check-esm-deps.mjs
+
+      # Full production build — same Turbopack config as Vercel deploy
+      - name: Production build
+        run: npm run build
+
+      # Start the production server and run smoke tests against it
+      - name: Smoke tests
+        run: |
+          npm start &
+          SERVER_PID=$!
+          # Wait for server to be ready
+          npx wait-on http://localhost:3000 --timeout 30000
+          node tests/smoke.mjs
+          kill $SERVER_PID
