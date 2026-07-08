@@ -7,10 +7,24 @@ const securityHeaders = [
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' }, // Prevents clickjacking
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
-  { 
-    key: 'Content-Security-Policy', 
-    // Basic CSP allowing Next.js internals, local styles, and HTTPS images (like Supabase storage)
-    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://emsfthlfptmysgzpectv.supabase.co https://*.supabase.co; frame-src https://www.google.com https://google.com;" 
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      // Next.js requires 'unsafe-inline' and 'unsafe-eval' for hydration/dev overlay.
+      // script-src-elem is set explicitly so browsers don't fall back to script-src alone.
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
+      "script-src-elem 'self' 'unsafe-inline' https://vercel.live",
+      // Google Fonts stylesheet is loaded from fonts.googleapis.com.
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      // Google Fonts files are served from fonts.gstatic.com.
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https:",
+      // Supabase API + Vercel Live feedback widget both need connect-src.
+      "connect-src 'self' https://emsfthlfptmysgzpectv.supabase.co https://*.supabase.co https://vercel.live wss://ws-us3.pusher.com",
+      // Google Maps embed (Footer) + YouTube embeds (Living Room).
+      "frame-src https://www.google.com https://google.com https://www.youtube.com",
+    ].join('; '),
   }
 ];
 
