@@ -15,7 +15,7 @@ export default function GalleryItem({ photo_url, caption, event_tag }: GalleryIt
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw"
           style={{ objectFit: "cover" }}
-          quality={100}
+          unoptimized
         />
       </div>
       {(caption || event_tag) && (
