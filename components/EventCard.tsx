@@ -53,7 +53,7 @@ export default function EventCard({
                 fill
                 sizes="(max-width: 640px) 144px, (max-width: 1080px) 144px, 144px"
                 style={{ objectFit: "cover" }}
-                quality={100}
+                unoptimized
               />
           </button>
         )}
@@ -82,7 +82,7 @@ export default function EventCard({
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1080px) 90vw, 75vw"
                 style={{ objectFit: "contain" }}
-                quality={100}
+                unoptimized
               />
             </div>
             <p className="text-white text-center mt-3 font-display text-lg">

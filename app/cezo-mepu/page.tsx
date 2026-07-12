@@ -92,7 +92,7 @@ export default async function CezoMepuPage() {
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 208px"
                       style={{ objectFit: "cover" }}
-                      quality={80}
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full bg-[#231F1E]/05 flex flex-col items-center justify-center gap-2 text-[#231F1E]/30">
