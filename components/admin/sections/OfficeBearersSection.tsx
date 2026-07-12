@@ -479,7 +479,7 @@ export default function OfficeBearersSection() {
                     alt={person.name}
                     width={36}
                     height={36}
-                    quality={75}
+                    unoptimized
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
                     }}
