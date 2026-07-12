@@ -3,11 +3,16 @@ import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/admin/', '/developers/'], // Hides your admin routes from search engines
-    },
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+      },
+      {
+        userAgent: '*',
+        disallow: ['/admin/', '/developers/'],
+      }
+    ],
     sitemap: 'https://cbckyouthforum.live/sitemap.xml',
   };
 }
