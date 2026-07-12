@@ -147,6 +147,7 @@ export default async function CezoMepuPage() {
                                 width={20}
                                 height={20}
                                 quality={75}
+                                unoptimized
                                 className="w-5 h-5 rounded-full object-cover"
                               />
                             )}
