@@ -97,7 +97,7 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
             src={previewUrl}
             alt="Preview"
             fill
-            unoptimized={file !== null}
+            unoptimized
             sizes="(max-width: 768px) 100vw, 33vw"
             style={{ objectFit: "cover" }}
             quality={75}
