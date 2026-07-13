@@ -97,7 +97,7 @@ export default async function BlogNewsPage({
                     fill
                     sizes="(max-width: 639px) 100vw, (max-width: 767px) 50vw, 33vw"
                     style={{ objectFit: "cover" }}
-                    quality={100}
+                    unoptimized
                   />
                 </div>
               )}
