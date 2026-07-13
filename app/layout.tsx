@@ -29,9 +29,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://cbckyouthforum.live"),
-  alternates: {
-    canonical: '/',
-  },
+
 };
 
 // 3. Unified Root Layout
