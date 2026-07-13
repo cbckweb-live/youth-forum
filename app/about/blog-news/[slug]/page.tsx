@@ -74,9 +74,9 @@ export default async function PostDetailPage({
         html={post.content}
         className="prose prose-sm sm:prose max-w-none text-[#231F1E] prose-headings:font-display prose-a:text-[#6B1F2A]"
       />
-
+      <div>
       <SharePostButtons title={post.title} url={`${baseUrl}/about/blog-news/${post.slug}`} />
-
+      </div>
       {post.pdf_url && (
         <div className="mt-10 p-4 border border-[#231F1E]/10 rounded-xl flex items-center justify-between">
           <p className="text-sm font-medium">📄 Attached Document</p>
