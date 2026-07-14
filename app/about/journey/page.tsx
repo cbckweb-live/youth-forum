@@ -66,7 +66,8 @@ export default function JourneyPage() {
         {/* dark gradient overlay for legibility */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,rgba(10,8,6,0.55)_0%,rgba(10,8,6,0.45)_60%,rgba(10,8,6,0.70)_100%)]"
+          className="absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,rgba(10,8,6,0.40)_0%,rgba(10,8,6,0.32)_60%,rgba(10,8,6,0.55)_100%)]"
+
         />
 
         {/* text written directly over the image */}
