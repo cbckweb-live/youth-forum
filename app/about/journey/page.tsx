@@ -32,7 +32,7 @@ const chapters = [
     tag: "Present & Future",
     heading: "Mathetes — The Next Generation",
     body: "To better minister to the varying needs of young people, the ministry includes a dedicated group known as Mathetes, specifically for Class XI and XII students (approximately 16–18 years of age). This transitional group focuses on discipleship, spiritual formation, mentoring, and preparing young believers for greater involvement in the wider Youth Ministry. The ministry continues to widen its scope of outreach — with the purpose solely being transformation and to be a living witness of God's faithfulness.",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=900&q=80",
+    image: "/mathetesJ.webp",
     imageAlt: "Young students in a discipleship and mentorship circle",
     imageLeft: true,
     cta: { label: "Know More", href: "/mathetes" },
