@@ -96,8 +96,8 @@ export default function JourneyPage() {
           <p
             style={{
               color: "rgba(247,243,234,0.55)",
-              letterSpacing: "0.25em",
-              fontSize: "0.68rem",
+              letterSpacing: "0.35em",
+              fontSize: "0.78rem",
             }}
             className="uppercase font-semibold mb-3"
           >
@@ -110,7 +110,7 @@ export default function JourneyPage() {
             Our Journey
           </h1>
           <p
-            className="mx-auto text-base"
+            className="mx-auto text-base leading-relaxed mb-10 max-w-2xl space-y-4"
           >
             From a small fellowship planted in 1968 to a thriving community of over 1,000 members
             — this is the story of the CBCK Youth Ministry.
