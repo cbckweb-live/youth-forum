@@ -1,7 +1,3 @@
-/* ─── tokens ────────────────────────────────────────────────── */
-const INK   = "#1c1b1a";
-const IVORY = "#f7f3ea";
-
 /* ─── chapter data ───────────────────────────────────────────── */
 const chapters = [
   {
@@ -53,65 +49,34 @@ const pullQuote =
 
 export default function JourneyPage() {
   return (
-    <main
-      style={{
-        backgroundColor: "#ffffff",
-        color: INK,
-        fontFamily: "var(--font-body)",
-        minHeight: "100vh",
-      }}
-      className="overflow-x-hidden"
-    >
+    <main className="overflow-x-hidden bg-white text-[#1c1b1a] font-body min-h-screen">
       {/* ══ HERO ════════════════════════════════════════════════ */}
-
-      <section className="relative text-center overflow-hidden" style={{ minHeight: "420px" }}>
+      <section className="relative text-center overflow-hidden min-h-[420px]">
 
         {/* background image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/background.jpg"
-
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-          style={{ zIndex: 0 }}
+          className="absolute inset-0 w-full h-full object-cover object-center z-0"
         />
 
         {/* dark gradient overlay for legibility */}
         <div
           aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            zIndex: 1,
-            background:
-              "linear-gradient(to bottom, rgba(10,8,6,0.55) 0%, rgba(10,8,6,0.45) 60%, rgba(10,8,6,0.70) 100%)",
-          }}
+          className="absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,rgba(10,8,6,0.55)_0%,rgba(10,8,6,0.45)_60%,rgba(10,8,6,0.70)_100%)]"
         />
 
         {/* text written directly over the image */}
-        <div
-          className="relative z-10 py-32 px-6 flex flex-col items-center"
-          style={{ color: IVORY }}
-        >
-          <p
-            style={{
-              color: "#f8f8ff",
-              letterSpacing: "0.35em",
-              fontSize: "0.78rem",
-            }}
-            className="uppercase font-semibold mb-3"
-          >
+        <div className="relative z-10 py-32 px-6 flex flex-col items-center text-[#f7f3ea]">
+          <p className="uppercase font-semibold mb-3 text-[#f8f8ff] tracking-[0.35em] text-[0.78rem]">
             Our Story
           </p>
-          <h1
-            style={{ fontFamily: "var(--font-display)", color: "#c9a84c" }}
-            className="text-4xl md:text-6xl font-bold leading-tight mb-5"
-          >
+          <h1 className="font-display text-4xl md:text-6xl font-bold leading-tight mb-5 text-[#c9a84c]">
             Our Journey
           </h1>
-          <p
-            className="mx-auto text-base leading-relaxed mb-10 max-w-2xl space-y-4"
-          >
+          <p className="mx-auto text-base leading-relaxed mb-10 max-w-2xl">
             From a small fellowship planted in 1968 to a thriving community of over 1,000 members
             — this is the story of the CBCK Youth Ministry.
           </p>
@@ -120,14 +85,7 @@ export default function JourneyPage() {
 
       {/* ── thin lifted divider ── */}
       <div className="px-10 md:px-24" aria-hidden="true">
-        <div
-          style={{
-            height: "1px",
-            background: "rgba(28,27,26,0.10)",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.08)",
-            borderRadius: "9999px",
-          }}
-        />
+        <div className="h-px bg-[rgba(28,27,26,0.10)] shadow-[0_2px_8px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.08)] rounded-full" />
       </div>
 
       {/* ══ TIMELINE STRIP ════════════════════════════════════ */}
@@ -137,33 +95,19 @@ export default function JourneyPage() {
             <div className="relative flex items-start justify-between">
               {/* connecting line */}
               <div
-                className="absolute left-0 right-0"
-                style={{ backgroundColor: "rgba(120,30,30,0.22)", top: "14px", height: "3px", borderRadius: "9999px" }}
+                className="absolute left-0 right-0 top-[14px] h-[3px] rounded-full bg-[rgba(120,30,30,0.22)]"
                 aria-hidden="true"
               />
               {milestones.map((m) => (
                 <div key={m.year} className="relative z-10 flex flex-col items-center gap-3 flex-1">
                   {/* maroon dot */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <div
-                      style={{
-                        width: "28px", height: "28px",
-                        borderRadius: "9999px",
-                        backgroundColor: "#7b1f1f",
-                        boxShadow: "0 0 0 5px rgba(123,31,31,0.15), 0 0 0 9px rgba(123,31,31,0.06), 0 4px 10px rgba(0,0,0,0.20)",
-                      }}
-                    />
+                  <div className="flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-[#7b1f1f] shadow-[0_0_0_5px_rgba(123,31,31,0.15),0_0_0_9px_rgba(123,31,31,0.06),0_4px_10px_rgba(0,0,0,0.20)]" />
                   </div>
-                  <span
-                    style={{ color: INK, fontSize: "1rem" }}
-                    className="font-bold text-center"
-                  >
+                  <span className="font-bold text-center text-[#1c1b1a] text-base">
                     {m.year}
                   </span>
-                  <span
-                    style={{ color: "rgba(28,27,26,0.55)", fontSize: "0.75rem" }}
-                    className="text-center hidden sm:block leading-snug"
-                  >
+                  <span className="text-center hidden sm:block leading-snug text-[rgba(28,27,26,0.55)] text-xs">
                     {m.label}
                   </span>
                 </div>
@@ -184,13 +128,10 @@ export default function JourneyPage() {
             >
               {/* ── Image card ── */}
               <div className="w-full md:w-5/12 shrink-0">
-                <div className="glass-light rounded-2xl overflow-hidden h-full" style={{ minHeight: "280px" }}>
-                  <div className="relative overflow-hidden h-full" style={{ aspectRatio: "4/3" }}>
+                <div className="glass-light rounded-2xl overflow-hidden h-full min-h-[280px]">
+                  <div className="relative overflow-hidden h-full aspect-[4/3]">
                     {/* year badge — glass */}
-                    <div
-                      className="glass-light absolute top-3 left-3 z-10 px-2.5 py-1 rounded-md"
-                      style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", color: INK }}
-                    >
+                    <div className="glass-light absolute top-3 left-3 z-10 px-2.5 py-1 rounded-md text-[0.62rem] font-bold tracking-[0.1em] text-[#1c1b1a]">
                       {ch.year.toUpperCase()}
                     </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -207,28 +148,15 @@ export default function JourneyPage() {
               {/* ── Text card ── */}
               <div className="w-full md:w-7/12">
                 <div className="glass-light rounded-2xl px-8 py-8 h-full flex flex-col justify-center">
-                  <p
-                    style={{ color: "rgba(28,27,26,0.45)", letterSpacing: "0.2em", fontSize: "0.65rem" }}
-                    className="uppercase font-semibold mb-2"
-                  >
+                  <p className="uppercase font-semibold mb-2 text-[rgba(28,27,26,0.45)] tracking-[0.2em] text-[0.65rem]">
                     {ch.tag}
                   </p>
-                  <h2
-                    style={{ fontFamily: "var(--font-display)", color: INK }}
-                    className="text-2xl md:text-3xl font-bold leading-snug mb-4"
-                  >
+                  <h2 className="font-display text-2xl md:text-3xl font-bold leading-snug mb-4 text-[#1c1b1a]">
                     {ch.heading}
                   </h2>
-                  {/* subtle divider — no colour, just opacity */}
-                  <div
-                    style={{ backgroundColor: "rgba(28,27,26,0.2)" }}
-                    className="w-10 h-px mb-5"
-                    aria-hidden="true"
-                  />
-                  <p
-                    style={{ color: "rgba(28,27,26,0.72)", lineHeight: "1.85" }}
-                    className="text-sm md:text-base"
-                  >
+                  {/* subtle divider */}
+                  <div className="w-10 h-px mb-5 bg-[rgba(28,27,26,0.2)]" aria-hidden="true" />
+                  <p className="text-sm md:text-base text-[rgba(28,27,26,0.72)] leading-[1.85]">
                     {ch.body}
                   </p>
                   {ch.cta && (
@@ -247,39 +175,30 @@ export default function JourneyPage() {
       <section className="py-16 px-6">
         <div className="max-w-2xl mx-auto">
           {/* outer glow ring */}
-          <div className="rounded-3xl p-px" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.1) 100%)" }}>
-            <div
-              className="rounded-3xl px-10 py-14 text-center relative overflow-hidden"
-              style={{
-                background: "rgba(255,255,255,0.18)",
-                backdropFilter: "blur(22px)",
-                WebkitBackdropFilter: "blur(22px)",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.55)",
-              }}
-            >
+          <div className="rounded-3xl p-px bg-[linear-gradient(135deg,rgba(255,255,255,0.6)_0%,rgba(255,255,255,0.1)_100%)]">
+            <div className="rounded-3xl px-10 py-14 text-center relative overflow-hidden bg-[rgba(255,255,255,0.18)] backdrop-blur-[22px] shadow-[0_20px_60px_rgba(0,0,0,0.10),inset_0_1px_0_rgba(255,255,255,0.55)]">
               {/* soft maroon top accent bar */}
-              <div className="absolute top-0 inset-x-0 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(123,31,31,0.35), transparent)" }} aria-hidden="true" />
+              <div
+                className="absolute top-0 inset-x-0 h-px bg-[linear-gradient(90deg,transparent,rgba(123,31,31,0.35),transparent)]"
+                aria-hidden="true"
+              />
 
               {/* decorative quote mark */}
               <p
                 aria-hidden="true"
-                className="text-8xl leading-none font-serif mb-0"
-                style={{ color: "rgba(28,27,26,0.06)", fontFamily: "Georgia, serif", lineHeight: 1 }}
+                className="text-8xl leading-none font-serif mb-0 text-[rgba(28,27,26,0.06)] [font-family:Georgia,serif] [line-height:1]"
               >
                 &ldquo;
               </p>
 
-              <blockquote
-                style={{ fontFamily: "var(--font-display)", color: "rgba(28,27,26,0.82)" }}
-                className="text-xl md:text-2xl font-semibold leading-relaxed -mt-4 mb-6"
-              >
+              <blockquote className="font-display text-xl md:text-2xl font-semibold leading-relaxed -mt-4 mb-6 text-[rgba(28,27,26,0.82)]">
                 {pullQuote}
               </blockquote>
 
               {/* thin separator */}
-              <div className="w-12 h-px mx-auto mb-4" style={{ background: "rgba(123,31,31,0.30)" }} aria-hidden="true" />
+              <div className="w-12 h-px mx-auto mb-4 bg-[rgba(123,31,31,0.30)]" aria-hidden="true" />
 
-              <p className="text-xs tracking-widest uppercase" style={{ color: "#c9a84c" }}>
+              <p className="text-xs tracking-widest uppercase text-[#c9a84c]">
                 CBCK Youth Ministry &mdash; Golden Jubilee 2018
               </p>
             </div>
@@ -290,16 +209,10 @@ export default function JourneyPage() {
       {/* ══ CLOSING CTA ═════════════════════════════════════════ */}
       <section className="py-16 px-6 text-center">
         <div className="glass-mid rounded-2xl max-w-xl mx-auto px-8 py-10">
-          <h2
-            style={{ fontFamily: "var(--font-display)", color: INK }}
-            className="text-2xl md:text-3xl font-bold mb-3"
-          >
+          <h2 className="font-display text-2xl md:text-3xl font-bold mb-3 text-[#1c1b1a]">
             The Next Chapter Is Being Written
           </h2>
-          <p
-            style={{ color: "rgba(28,27,26,0.60)", maxWidth: "28rem" }}
-            className="mx-auto text-sm leading-relaxed mb-7"
-          >
+          <p className="mx-auto text-sm leading-relaxed mb-7 text-[rgba(28,27,26,0.60)] max-w-[28rem]">
             Whether you have been a part of the Youth Forum for decades or are just discovering it —
             there is a place for you here.
           </p>
