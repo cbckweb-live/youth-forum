@@ -104,7 +104,7 @@ export default function JourneyPage() {
             Our Story
           </p>
           <h1
-            style={{ fontFamily: "var(--font-display)", color: "#ffcc00" }}
+            style={{ fontFamily: "var(--font-display)", color: "#c9a84c" }}
             className="text-4xl md:text-6xl font-bold leading-tight mb-5"
           >
             Our Journey
