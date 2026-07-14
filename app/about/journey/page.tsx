@@ -98,8 +98,9 @@ export default function JourneyPage() {
                 className="absolute left-0 right-0 top-[14px] h-[3px] rounded-full bg-[rgba(120,30,30,0.22)]"
                 aria-hidden="true"
               />
-              {milestones.map((m) => (
+              {milestones.map((m, idx) => (
                 <div key={m.year} className="relative z-10 flex flex-col items-center gap-3 flex-1">
+
                   {/* maroon dot */}
                   <div className="flex items-center justify-center">
                     <div className="w-7 h-7 rounded-full bg-[#7b1f1f] shadow-[0_0_0_5px_rgba(123,31,31,0.15),0_0_0_9px_rgba(123,31,31,0.06),0_4px_10px_rgba(0,0,0,0.20)]" />
@@ -107,9 +108,14 @@ export default function JourneyPage() {
                   <span className="font-bold text-center text-[#1c1b1a] text-base">
                     {m.year}
                   </span>
-                  <span className="text-center hidden sm:block leading-snug text-[rgba(28,27,26,0.55)] text-xs">
+                  <span
+                    className={`text-center leading-snug text-[rgba(28,27,26,0.55)] text-xs sm:block transform transition-transform duration-200 ${
+                      idx % 2 === 0 ? "-translate-y-2" : "translate-y-2"
+                    } sm:translate-y-0`}
+                  >
                     {m.label}
                   </span>
+
                 </div>
               ))}
             </div>
@@ -213,7 +219,7 @@ export default function JourneyPage() {
             The Next Chapter Is Being Written
           </h2>
           <p className="mx-auto text-sm leading-relaxed mb-7 text-[rgba(28,27,26,0.60)] max-w-[28rem]">
-            Whether you have been a part of the Youth Forum for decades or are just discovering it —
+            Whether you have been a part of the Youth Ministry for decades or are just discovering it —
             there is a place for you here.
           </p>
           <a href="/events" className="btn-glass-cta">
