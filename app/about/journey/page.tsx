@@ -42,7 +42,7 @@ const chapters = [
 /* ─── timeline ───────────────────────────────────────────────── */
 const milestones = [
   { year: "1960", label: "Church founded" },
-  { year: "1968", label: "Ministry established" },
+  { year: "1968", label: "Youth Ministry established" },
   { year: "2018", label: "Golden Jubilee" },
   { year: "Today", label: "1,000+ members" },
 ];
@@ -69,7 +69,8 @@ export default function JourneyPage() {
         {/* background image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://github.com/cbckweb-live/youth-forum/blob/706fbc6c0d047a79ffe0f2246c7d765e2958d4a0/public/background.jpg"
+          src="/background.jpg"
+
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-center"
@@ -299,7 +300,7 @@ export default function JourneyPage() {
             style={{ color: "rgba(28,27,26,0.60)", maxWidth: "28rem" }}
             className="mx-auto text-sm leading-relaxed mb-7"
           >
-            Whether you have been a part of this community for decades or are just discovering it —
+            Whether you have been a part of the Youth Forum for decades or are just discovering it —
             there is a place for you here.
           </p>
           <a href="/events" className="btn-glass-cta">
