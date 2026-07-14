@@ -95,7 +95,7 @@ export default function JourneyPage() {
         >
           <p
             style={{
-              color: "rgba(247,243,234,0.55)",
+              color: "#f8f8ff",
               letterSpacing: "0.35em",
               fontSize: "0.78rem",
             }}
@@ -104,7 +104,7 @@ export default function JourneyPage() {
             Our Story
           </p>
           <h1
-            style={{ fontFamily: "var(--font-display)", color: "#d4a94a" }}
+            style={{ fontFamily: "var(--font-display)", color: "#ffcc00" }}
             className="text-4xl md:text-6xl font-bold leading-tight mb-5"
           >
             Our Journey
