@@ -47,3 +47,80 @@
 #nprogress .peg {
   box-shadow: 0 0 10px #6B1F2A, 0 0 5px #6B1F2A !important; /* Subtle glowing edge */
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Journey page shared styles
+   (moved from app/about/journey/page.tsx <style> tag)
+───────────────────────────────────────────────────────────── */
+.glass-light {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.75);
+}
+
+.glass-dark {
+  background: rgba(20,18,15,0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+}
+
+.glass-mid {
+  background: rgba(255,255,255,0.30);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.50);
+}
+
+.btn-glass {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.55rem 1.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  color: rgba(28,27,26,0.85);
+  background: rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.70);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-glass:hover {
+  background: rgba(255,255,255,0.72);
+  border-color: rgba(255,255,255,0.90);
+}
+
+.btn-glass-cta {
+  display: inline-block;
+  padding: 0.7rem 2.2rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  color: rgba(28,27,26,0.9);
+  background: rgba(247,243,234,0.55);
+  border: 1px solid rgba(247,243,234,0.80);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s;
+}
+
+.btn-glass-cta:hover {
+  background: rgba(247,243,234,0.80);
+}
+
+.img-zoom {
+  transition: transform 0.5s ease;
+}
+
+.img-zoom:hover {
+  transform: scale(1.04);
+}
+
