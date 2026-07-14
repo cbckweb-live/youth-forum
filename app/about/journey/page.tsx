@@ -59,7 +59,8 @@ export default function JourneyPage() {
           src="/background.jpg"
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center z-0"
+          className="absolute inset-0 w-full h-full object-cover object-center z-0 blur-sm scale-110"
+
         />
 
         {/* dark gradient overlay for legibility */}
@@ -110,7 +111,8 @@ export default function JourneyPage() {
                   </span>
                   <span
                     className={`text-center leading-snug text-[rgba(28,27,26,0.55)] text-xs sm:block transform transition-transform duration-200 ${
-                      idx % 2 === 0 ? "-translate-y-2" : "translate-y-2"
+                    idx % 2 === 0 ? "-translate-y-2" : "translate-y-2"
+
                     } sm:translate-y-0`}
                   >
                     {m.label}
