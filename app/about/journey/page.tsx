@@ -69,7 +69,7 @@ export default function JourneyPage() {
         {/* background image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="C:\Website\youth-forum\public\background.jpg"
+          src="https://github.com/cbckweb-live/youth-forum/blob/706fbc6c0d047a79ffe0f2246c7d765e2958d4a0/public/background.jpg"
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-center"
