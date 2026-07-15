@@ -1,6 +1,16 @@
+import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import EventCard from "@/components/EventCard";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Events Archive | CBCK Youth Forum",
+  description: "Browse past events from the CBCK Youth Ministry calendar.",
+  openGraph: {
+    title: "Events Archive | CBCK Youth Forum",
+    description: "Browse past events from the CBCK Youth Ministry calendar.",
+  },
+};
 
 export default async function EventsArchivePage() {
   const currentYear = new Date().getFullYear();

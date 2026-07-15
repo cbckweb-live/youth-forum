@@ -1,6 +1,32 @@
+import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import EventCard from "@/components/EventCard";
 import Link from "next/link";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const today = new Date().toISOString().split("T")[0];
+  const { data: firstEvent } = await supabase
+    .from("events")
+    .select("title, image_url")
+    .gte("event_date", today)
+    .order("event_date", { ascending: true })
+    .limit(1)
+    .single();
+
+  const images = firstEvent?.image_url
+    ? [{ url: firstEvent.image_url, width: 1200, height: 630 }]
+    : [];
+
+  return {
+    title: "Events | CBCK Youth Forum",
+    description: "Browse upcoming and past events from the CBCK Youth Ministry calendar.",
+    openGraph: {
+      title: "Events | CBCK Youth Forum",
+      description: "Browse upcoming and past events from the CBCK Youth Ministry calendar.",
+      images,
+    },
+  };
+}
 
 export const revalidate = 0;
 

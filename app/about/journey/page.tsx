@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 /* ─── chapter data ───────────────────────────────────────────── */
 const chapters = [
   {
@@ -46,6 +48,15 @@ const milestones = [
 /* ─── pull quote ─────────────────────────────────────────────── */
 const pullQuote =
   "Fifty years of God's faithfulness, spiritual growth, and dedicated service — and still, the best is yet to come.";
+
+export const metadata: Metadata = {
+  title: "Our Journey | CBCK Youth Forum",
+  description: "From a small fellowship planted in 1968 to a thriving community of over 1,000 members — the story of the CBCK Youth Ministry.",
+  openGraph: {
+    title: "Our Journey | CBCK Youth Forum",
+    description: "From a small fellowship planted in 1968 to a thriving community of over 1,000 members — the story of the CBCK Youth Ministry.",
+  },
+};
 
 export default function JourneyPage() {
   return (

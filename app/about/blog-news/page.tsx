@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import Image from "next/image";
@@ -5,6 +6,14 @@ import SharePostButtons from "@/components/SharePostButtons";
 import { headers } from "next/headers";
 import sanitizeHtml from "sanitize-html";
 
+export const metadata: Metadata = {
+  title: "Blog & News | CBCK Youth Forum",
+  description: "Updates, stories, and opinions from the CBCK Youth Ministry community.",
+  openGraph: {
+    title: "Blog & News | CBCK Youth Forum",
+    description: "Updates, stories, and opinions from the CBCK Youth Ministry community.",
+  },
+};
 
 export const revalidate = 0;
 

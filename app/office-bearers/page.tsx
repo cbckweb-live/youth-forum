@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import OfficeBearersClient from "@/components/OfficeBearersClient";
+
+export const metadata: Metadata = {
+  title: "Office Bearers | CBCK Youth Forum",
+  description: "Meet the leadership team of the CBCK Youth Ministry — Youth Directors, Pastors-in-Charge, and dedicated office bearers serving our community.",
+  openGraph: {
+    title: "Office Bearers | CBCK Youth Forum",
+    description: "Meet the leadership team of the CBCK Youth Ministry.",
+  },
+};
 
 export const revalidate = 0;
 

@@ -1,4 +1,10 @@
 import React from 'react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Coming Soon | CBCK Youth Forum",
+  description: "Something exciting is coming — stay tuned for the CBCK Youth Forum launch.",
+};
 
 export default function ComingSoonPage() {
   return (

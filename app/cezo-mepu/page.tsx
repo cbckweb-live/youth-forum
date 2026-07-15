@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "Cezo Mepu | CBCK Youth Forum",
+  description: "Cezo Mepu represents the nine regional youth groups under the Chakhesang Baptist Church, Kohima Youth Ministry.",
+  openGraph: {
+    title: "Cezo Mepu | CBCK Youth Forum",
+    description: "Cezo Mepu represents the nine regional youth groups under the Chakhesang Baptist Church, Kohima Youth Ministry.",
+  },
+};
 
 export const revalidate = 0;
 

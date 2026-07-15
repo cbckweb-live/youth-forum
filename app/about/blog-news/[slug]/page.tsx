@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +8,36 @@ import SharePostButtons from "@/components/SharePostButtons";
 import { headers } from "next/headers";
 import SanitizedHtml from "@/components/SanitizedHtml";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const { data: post } = await supabase
+    .from("posts")
+    .select("title, photo_url, content")
+    .eq("slug", slug)
+    .eq("published", true)
+    .single();
+
+  if (!post) {
+    return { title: "Post Not Found" };
+  }
+
+  const cleanDesc = post.content.replace(/<[^>]+>/g, " ").slice(0, 160);
+  const images = post.photo_url ? [{ url: post.photo_url, width: 1200, height: 630 }] : [];
+
+  return {
+    title: `${post.title} | CBCK Youth Forum`,
+    description: cleanDesc,
+    openGraph: {
+      title: post.title,
+      description: cleanDesc,
+      images,
+    },
+  };
+}
 
 export default async function PostDetailPage({
   params,

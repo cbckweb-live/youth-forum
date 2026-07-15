@@ -24,6 +24,7 @@
     "@tiptap/pm": "^3.27.1",
     "@tiptap/react": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
+    "@vercel/analytics": "^2.0.1",
     "html-to-text": "^10.0.0",
     "next": "16.2.9",
     "nprogress": "^0.2.0",

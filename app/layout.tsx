@@ -6,6 +6,7 @@ import "nprogress/nprogress.css"; // Import basic NProgress styles
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProgressBar from "@/components/ProgressBar";
+import { Analytics } from "@vercel/analytics/react";
 import SentryProvider from "@/components/SentryProvider";
 import { Suspense } from "react";
 
@@ -49,6 +50,7 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
+          <Analytics />
         </SentryProvider>
       </body>
     </html>

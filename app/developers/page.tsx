@@ -1,11 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
-
-
+export const metadata: Metadata = {
+  title: "Developers | CBCK Youth Forum",
+  description: "Meet the developers and collaborators behind the CBCK Youth Forum website.",
+  openGraph: {
+    title: "Developers | CBCK Youth Forum",
+    description: "Meet the team behind this site.",
+  },
+};
 
 type Developer = {
   id: string;

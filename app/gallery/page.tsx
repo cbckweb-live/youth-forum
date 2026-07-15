@@ -1,5 +1,29 @@
+import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { data: latestPhoto } = await supabase
+    .from("gallery")
+    .select("photo_url, caption, event_tag")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  const ogImage = latestPhoto?.photo_url
+    ? [{ url: latestPhoto.photo_url, width: 1200, height: 630 }]
+    : [];
+
+  return {
+    title: "Gallery | CBCK Youth Forum",
+    description: "Browse photos from CBCK Youth Ministry events and activities.",
+    openGraph: {
+      title: "Gallery | CBCK Youth Forum",
+      description: "Browse photos from CBCK Youth Ministry events and activities.",
+      images: ogImage,
+    },
+  };
+}
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";

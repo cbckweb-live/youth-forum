@@ -1,6 +1,17 @@
+import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import MathetesCard from "@/components/MathetesCard";
 import LeadershipCard from "@/components/LeadershipCard";
+
+export const metadata: Metadata = {
+  title: "Mathetes Fellowship | CBCK Youth Forum",
+  description: "The Mathetes Fellowship bridges Sunday School and Youth Ministry, nurturing discipleship, leadership, and fellowship among young believers.",
+  openGraph: {
+    title: "Mathetes Fellowship | CBCK Youth Forum",
+    description: "The Mathetes Fellowship bridges Sunday School and Youth Ministry, nurturing discipleship, leadership, and fellowship among young believers.",
+    images: [{ url: "/mathetes logo.png", width: 800, height: 400 }],
+  },
+};
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
