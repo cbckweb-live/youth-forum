@@ -75,7 +75,7 @@ export default function JourneyPage() {
             Our Journey
           </h1>
           <p className="mx-auto text-base leading-relaxed mb-10 max-w-2xl">
-            From a small fellowship planted in 1968 to a thriving community of over 1,000 members
+            From a small fellowship planted in 1968 to a thriving Youth community of over 1,000 members
             — this is the story of the CBCK Youth Ministry.
           </p>
         </div>

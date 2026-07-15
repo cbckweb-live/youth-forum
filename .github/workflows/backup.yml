@@ -1,0 +1,78 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Runs every Sunday at 4:00 AM UTC
+    - cron: '0 4 * * 0'
+  workflow_dispatch: {} # allows manual trigger from the Actions tab
+
+env:
+  # Exclude internal Supabase schemas that don't need backing up
+  PGDUMP_EXTRA_ARGS: --no-owner --no-acl --exclude-schema=supabase_realtime
+
+jobs:
+  pg_dump:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate database URL secret exists
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+        run: |
+          if [ -z "$DB_URL" ]; then
+            echo "❌ SUPABASE_DATABASE_URL secret is not set."
+            echo "   Expected format: postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
+            echo "   Find this in: Supabase Dashboard → Project Settings → Database → Connection string"
+            exit 1
+          fi
+          echo "✅ SUPABASE_DATABASE_URL secret is configured."
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Verify pg_dump is available
+        run: pg_dump --version
+
+      - name: Create backup
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H-%M-%SZ")
+          FILENAME="cbck-youth-forum-${TIMESTAMP}.sql.gz"
+
+          pg_dump \
+            ${{ env.PGDUMP_EXTRA_ARGS }} \
+            "$DB_URL" \
+            | gzip > "${FILENAME}"
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+
+          echo "backup_file=${FILENAME}" >> $GITHUB_ENV
+          echo "Backup created: ${FILENAME}"
+
+      - name: Check backup file size
+        run: |
+          SIZE=$(stat --format=%s "${{ env.backup_file }}")
+          echo "Backup size: $(numfmt --to=iec $SIZE)"
+
+          # Fail if backup is suspiciously small (< 1 KB)
+          if [ "$SIZE" -lt 1024 ]; then
+            echo "❌ Backup file is too small (${SIZE} bytes) — possible failure."
+            exit 1
+          fi
+
+          echo "✅ Backup size looks healthy."
+
+      - name: Upload backup to workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.backup_file }}
+          path: ${{ env.backup_file }}
+          # Keep backups for 30 days before automatic deletion
+          retention-days: 30
+
+      - name: Notify success
+        run: echo "✅ Database backup completed successfully. Artifact will be retained for 30 days."
