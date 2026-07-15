@@ -5,7 +5,14 @@ const envSchema = z.object({
   SUPABASE_URL: z.string().url({ message: "Must be a valid URL" }),
   SUPABASE_ANON_KEY: z.string().min(1, { message: "Supabase Anon Key is required" }),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, { message: "Supabase Service Role Key is required" }),
-  
+
+  // Sentry (optional during development)
+  SENTRY_DSN: z.string().url({ message: "Must be a valid Sentry DSN URL" }).optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().url({ message: "Must be a valid Sentry DSN URL" }).optional(),
+  SENTRY_ORG: z.string().optional(),
+  SENTRY_PROJECT: z.string().optional(),
+  SENTRY_AUTH_TOKEN: z.string().optional(),
+
   // Environment tracking
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
