@@ -1,36 +1,48 @@
+name: Supabase Database Backup
+
+on:
+  schedule:
+    # Runs every Sunday at 03:00 UTC. Adjust as needed.
+    - cron: "0 3 * * 0"
+  workflow_dispatch: {} # lets you trigger it manually from the Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
       - name: Create dump
         env:
-          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          echo "Checking connection string..."
-          if [ -z "$SUPABASE_DATABASE_URL" ]; then
-            echo "❌ SUPABASE_DATABASE_URL secret is not set."
-            echo "Expected format: postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
-            echo "Find this in: Supabase Dashboard -> Project Settings -> Database -> Connection string"
-            exit 1
-          fi
-
           mkdir -p backups
           TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
-          DUMP_FILE="backups/backup_${TIMESTAMP}.sql.gz"
-          echo "DUMP_FILE=$DUMP_FILE" >> $GITHUB_ENV
-          pg_dump "$SUPABASE_DATABASE_URL" --no-owner --no-privileges --sslmode=require | gzip > "$DUMP_FILE"
+          echo "DUMP_FILE=backups/backup_${TIMESTAMP}.sql.gz" >> $GITHUB_ENV
+          pg_dump "$SUPABASE_DB_URL" --no-owner --no-privileges | gzip > "backups/backup_${TIMESTAMP}.sql.gz"
 
       - name: Upload dump to Supabase Storage
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          echo "DUMP_FILE is: $DUMP_FILE"
-          if [ -z "$DUMP_FILE" ]; then
-            echo "❌ DUMP_FILE is empty!"
-            exit 1
-          fi
           FILENAME=$(basename "$DUMP_FILE")
-          echo "Uploading to: $SUPABASE_URL/storage/v1/object/db-backups/$FILENAME"
           curl -X POST \
             "$SUPABASE_URL/storage/v1/object/db-backups/$FILENAME" \
             -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Content-Type: application/gzip" \
             --data-binary "@$DUMP_FILE" \
             --fail-with-body
+
+      - name: Upload dump as workflow artifact (extra safety net)
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup
+          path: ${{ env.DUMP_FILE }}
+          retention-days: 90
