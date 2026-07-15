@@ -1,76 +1,48 @@
-name: Database Backup
+name: Supabase Database Backup
 
 on:
   schedule:
-    # Runs every Sunday at 4:00 AM UTC
-    - cron: '0 4 * * 0'
-  workflow_dispatch: {} # allows manual trigger from the Actions tab
-
-env:
-  # Exclude internal Supabase schemas that don't need backing up
-  PGDUMP_EXTRA_ARGS: --no-owner --no-acl --exclude-schema=supabase_realtime --sslmode=require
+    # Runs every Sunday at 03:00 UTC. Adjust as needed.
+    - cron: "0 3 * * 0"
+  workflow_dispatch: {} # lets you trigger it manually from the Actions tab
 
 jobs:
-  pg_dump:
+  backup:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Validate database URL secret exists
-        env:
-          DB_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
-        run: |
-          if [ -z "$DB_URL" ]; then
-            echo "SUPABASE_DATABASE_URL secret is not set."
-            echo "Expected format: postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
-            echo "Find this in: Supabase Dashboard -> Project Settings -> Database -> Connection string"
-            exit 1
-          fi
-          echo "SUPABASE_DATABASE_URL secret is configured."
 
       - name: Install PostgreSQL client
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-client
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
-      - name: Verify pg_dump is available
-        run: pg_dump --version
-
-      - name: Create backup
-        run: |
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H-%M-%SZ")
-          FILENAME="cbck-youth-forum-${TIMESTAMP}.sql.gz"
-
-          pg_dump \
-            ${{ env.PGDUMP_EXTRA_ARGS }} \
-            "$DB_URL" \
-            | gzip > "${FILENAME}"
-
-          echo "backup_file=${FILENAME}" >> $GITHUB_ENV
-          echo "Backup created: ${FILENAME}"
+      - name: Create dump
         env:
-          DB_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
-
-      - name: Check backup file size
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          SIZE=$(stat --format=%s "${{ env.backup_file }}")
-          echo "Backup size: $(numfmt --to=iec $SIZE)"
+          mkdir -p backups
+          TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
+          echo "DUMP_FILE=backups/backup_${TIMESTAMP}.sql.gz" >> $GITHUB_ENV
+          pg_dump "$SUPABASE_DB_URL" --no-owner --no-privileges | gzip > "backups/backup_${TIMESTAMP}.sql.gz"
 
-          if [ "$SIZE" -lt 1024 ]; then
-            echo "Backup file is too small (${SIZE} bytes) - possible failure."
-            exit 1
-          fi
+      - name: Upload dump to Supabase Storage
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          FILENAME=$(basename "$DUMP_FILE")
+          curl -X POST \
+            "$SUPABASE_URL/storage/v1/object/db-backups/$FILENAME" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/gzip" \
+            --data-binary "@$DUMP_FILE" \
+            --fail-with-body
 
-          echo "Backup size looks healthy."
-
-      - name: Upload backup to workflow artifacts
+      - name: Upload dump as workflow artifact (extra safety net)
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.backup_file }}
-          path: ${{ env.backup_file }}
-          retention-days: 30
-
-      - name: Notify success
-        run: echo "Database backup completed successfully. Artifact will be retained for 30 days."
+          name: db-backup
+          path: ${{ env.DUMP_FILE }}
+          retention-days: 90
