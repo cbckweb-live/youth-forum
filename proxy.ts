@@ -30,9 +30,10 @@ export async function proxy(request: NextRequest) {
     url.pathname.startsWith('/api') ||
     url.pathname === '/coming-soon' ||
     url.pathname === '/favicon.ico' ||
-    url.pathname.endsWith('.png') ||   // 👈 ALLOW ALL PNG IMAGES
-    url.pathname.endsWith('.jpg') ||   // 👈 ALLOW ALL JPG IMAGES
-    url.pathname.endsWith('.svg');     // 👈 ALLOW ALL SVG GRAPHICS
+    url.pathname === '/sentry-test' ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.svg');
 
     
   // Check if visitor possesses the team bypass credentials cookie
