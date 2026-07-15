@@ -197,7 +197,7 @@ export default async function HomePage() {
   Book Focus: Revelations
 </h3>
     <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
-      Welcome to the Youth Ministry of Chakhesang Baptist Church, Kohima &mdash;
+      The official Youth Forum of Chakhesang Baptist Church Kohima &mdash;
       a community of young believers growing together in faith, fellowship,
       and service.
     </p>
