@@ -59,16 +59,12 @@ export default function JourneyPage() {
           src="/background.jpg"
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center z-0 blur-sm scale-110"
+          className="absolute inset-0 w-full h-full object-cover object-center z-0"
 
         />
 
-        {/* dark gradient overlay for legibility */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,rgba(10,8,6,0.40)_0%,rgba(10,8,6,0.32)_60%,rgba(10,8,6,0.55)_100%)]"
-
-        />
+        {/* subtle dark overlay for text legibility */}
+        <div className="absolute inset-0 z-[1] bg-black/45" aria-hidden="true" />
 
         {/* text written directly over the image */}
         <div className="relative z-10 py-32 px-6 flex flex-col items-center text-[#f7f3ea]">
