@@ -23,12 +23,12 @@ jobs:
           DB_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
         run: |
           if [ -z "$DB_URL" ]; then
-            echo "❌ SUPABASE_DATABASE_URL secret is not set."
-            echo "   Expected format: postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
-            echo "   Find this in: Supabase Dashboard → Project Settings → Database → Connection string"
+            echo "SUPABASE_DATABASE_URL secret is not set."
+            echo "Expected format: postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
+            echo "Find this in: Supabase Dashboard -> Project Settings -> Database -> Connection string"
             exit 1
           fi
-          echo "✅ SUPABASE_DATABASE_URL secret is configured."
+          echo "SUPABASE_DATABASE_URL secret is configured."
 
       - name: Install PostgreSQL client
         run: |
@@ -47,32 +47,30 @@ jobs:
             ${{ env.PGDUMP_EXTRA_ARGS }} \
             "$DB_URL" \
             | gzip > "${FILENAME}"
-        env:
-          DB_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
 
           echo "backup_file=${FILENAME}" >> $GITHUB_ENV
           echo "Backup created: ${FILENAME}"
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
 
       - name: Check backup file size
         run: |
           SIZE=$(stat --format=%s "${{ env.backup_file }}")
           echo "Backup size: $(numfmt --to=iec $SIZE)"
 
-          # Fail if backup is suspiciously small (< 1 KB)
           if [ "$SIZE" -lt 1024 ]; then
-            echo "❌ Backup file is too small (${SIZE} bytes) — possible failure."
+            echo "Backup file is too small (${SIZE} bytes) - possible failure."
             exit 1
           fi
 
-          echo "✅ Backup size looks healthy."
+          echo "Backup size looks healthy."
 
       - name: Upload backup to workflow artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.backup_file }}
           path: ${{ env.backup_file }}
-          # Keep backups for 30 days before automatic deletion
           retention-days: 30
 
       - name: Notify success
-        run: echo "✅ Database backup completed successfully. Artifact will be retained for 30 days."
+        run: echo "Database backup completed successfully. Artifact will be retained for 30 days."
