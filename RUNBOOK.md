@@ -17,6 +17,8 @@
 6. [How to Restore from a Backup](#6-how-to-restore-from-a-backup)
 7. [Pre-Launch Gatekeeper](#7-pre-launch-gatekeeper)
 8. [How to Add a New Admin User](#8-how-to-add-a-new-admin-user)
+9. [SEO & Metadata](#9-seo--metadata)
+10. [Vercel Analytics](#10-vercel-analytics)
 
 ---
 
@@ -33,6 +35,8 @@
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ Yes | Supabase service_role key (admin bypass — keep secret) |
 | `SENTRY_DSN` | Optional | Server-side Sentry error tracking DSN |
 | `NEXT_PUBLIC_SENTRY_DSN` | Optional | Browser-side Sentry error tracking DSN |
+
+**Note:** `@vercel/analytics` requires **no environment variables** — it works out of the box once installed and added to the layout.
 
 **Where to find Supabase values:**  
 Supabase Dashboard → **Project Settings** → **API** → Project URL (for `SUPABASE_URL`) and `anon` / `service_role` keys.
@@ -98,6 +102,8 @@ vercel deploy --prod --yes
 - [ ] Visit `/admin` — login page loads
 - [ ] Check Vercel deployment logs for build errors
 - [ ] Verify Sentry is capturing errors (trigger a test or check dashboard)
+- [ ] Check Vercel Analytics dashboard for page view data
+- [ ] Verify `sitemap.xml` is accessible at `/sitemap.xml`
 
 ---
 
@@ -349,6 +355,131 @@ Tell the new admin:
 2. **Dashboard URL:** `https://cbckyouthforum.live/admin/dashboard`
 3. They can change their password at `/auth/update-password`
 4. They'll need admin bypass cookie: visit `/?preview=true` first (if gatekeeper is active)
+
+---
+
+---
+
+## 9. SEO & Metadata
+
+All public pages on the site have SEO metadata configured for better search engine visibility and social sharing.
+
+### Static Metadata (12 pages)
+
+Each page exports `metadata` with a `title`, `description`, and `openGraph` tags:
+
+| Page Route | Title Pattern |
+|---|---|
+| `/` (Homepage) | Inherits from layout — "CBCK \| Youth Forum" |
+| `/events` | Events \| CBCK Youth Forum |
+| `/events/archive` | Events Archive \| CBCK Youth Forum |
+| `/gallery` | Gallery \| CBCK Youth Forum |
+| `/about/blog-news` | Blog & News \| CBCK Youth Forum |
+| `/about/blog-news/[slug]` | Dynamic — post title + OG image |
+| `/about/journey` | Our Journey \| CBCK Youth Forum |
+| `/about/aims` | Aims and Goals \| CBCK Youth Forum |
+| `/office-bearers` | Office Bearers \| CBCK Youth Forum |
+| `/mathetes` | Mathetes Fellowship \| CBCK Youth Forum |
+| `/cezo-mepu` | Cezo Mepu \| CBCK Youth Forum |
+| `/living-room` | The Living Room \| Youth Forum |
+| `/developers` | Developers \| CBCK Youth Forum |
+| `/coming-soon` | Coming Soon \| CBCK Youth Forum |
+
+### Dynamic OG Images
+
+Three pages use `generateMetadata` to pull database images as Open Graph images:
+
+| Page | OG Image Source |
+|---|---|
+| `/events` | First upcoming event's `image_url` |
+| `/gallery` | Latest uploaded gallery photo |
+| `/about/blog-news/[slug]` | The individual post's `photo_url` |
+
+If no image is available, the OG image is omitted gracefully (no broken images).
+
+### Sitemap & Robots
+
+- **Sitemap:** `app/sitemap.ts` — generates `/sitemap.xml` with all major routes, last-modified dates, change frequencies, and priority rankings
+- **Robots:** `app/robots.ts` — allows all crawlers on public pages, disallows `/admin/` and `/developers/`, and points to the sitemap URL
+
+Both are auto-served by Next.js App Router — no build step needed.
+
+### Adding Metadata to a New Page
+
+```typescript
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Page Name | CBCK Youth Forum",
+  description: "Brief description for search engines.",
+  openGraph: {
+    title: "Page Name | CBCK Youth Forum",
+    description: "Brief description for social sharing.",
+    images: [{ url: "/path-to-image.jpg", width: 1200, height: 630 }],
+  },
+};
+```
+
+For dynamic pages (data-driven), use `generateMetadata`:
+
+```typescript
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { data } = await supabase.from("table").select("title, image_url").single();
+  return {
+    title: `${data.title} | CBCK Youth Forum`,
+    openGraph: { images: data.image_url ? [{ url: data.image_url }] : [] },
+  };
+}
+```
+
+---
+
+## 10. Vercel Analytics
+
+**Package:** `@vercel/analytics`  
+**Added in:** Root `layout.tsx`
+
+### What It Tracks
+
+Vercel Analytics provides privacy-focused, lightweight page view and visitor analytics:
+
+- **Page views** — every navigation event
+- **Visitors** — unique user sessions
+- **Top pages** — most-viewed routes
+- **Referrers** — where traffic comes from
+- **Durations** — time spent per page
+
+No cookies are used. No GDPR consent banner needed. Works immediately on the Vercel Hobby plan at no extra cost.
+
+### How It Works
+
+The `<Analytics />` component is placed in `app/layout.tsx`, so it fires on every page navigation automatically:
+
+```typescript
+import { Analytics } from "@vercel/analytics/react";
+// ...
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {children}
+        <Analytics />
+      </body>
+    </html>
+  );
+}
+```
+
+### Viewing Analytics
+
+1. Go to **Vercel Dashboard → youth-forum → Analytics** tab
+2. Data appears within minutes of the first deploy with `<Analytics />` installed
+3. Filter by date range, device type, or geography
+
+### Troubleshooting
+
+- **No data after deploy:** Ensure the deploy included the `<Analytics />` component in the layout. Check Vercel deployment logs for build success.
+- **Only showing / routes:** This is normal — the gatekeeper rewrites most paths to `/coming-soon` for non-team visitors. Data will be more meaningful after launch.
 
 ---
 
