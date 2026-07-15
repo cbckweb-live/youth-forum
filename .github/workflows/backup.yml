@@ -8,7 +8,7 @@ on:
 
 env:
   # Exclude internal Supabase schemas that don't need backing up
-  PGDUMP_EXTRA_ARGS: --no-owner --no-acl --exclude-schema=supabase_realtime
+  PGDUMP_EXTRA_ARGS: --no-owner --no-acl --exclude-schema=supabase_realtime --sslmode=require
 
 jobs:
   pg_dump:
