@@ -30,6 +30,8 @@ export async function proxy(request: NextRequest) {
     url.pathname.startsWith('/api') ||
     url.pathname === '/coming-soon' ||
     url.pathname === '/favicon.ico' ||
+    url.pathname === '/sitemap.xml' ||
+    url.pathname === '/robots.txt' ||
     url.pathname.endsWith('.png') ||
     url.pathname.endsWith('.jpg') ||
     url.pathname.endsWith('.svg');
