@@ -24,6 +24,21 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.cbckyouthforum.live',
+          },
+        ],
+        destination: 'https://cbckyouthforum.live/:path*',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
