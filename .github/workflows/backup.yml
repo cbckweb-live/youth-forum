@@ -20,12 +20,20 @@ jobs:
 
       - name: Create dump
         env:
-          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
         run: |
+          echo "Checking connection string..."
+          if [ -z "$SUPABASE_DATABASE_URL" ]; then
+            echo "❌ SUPABASE_DATABASE_URL secret is not set."
+            echo "Expected format: postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
+            echo "Find this in: Supabase Dashboard -> Project Settings -> Database -> Connection string"
+            exit 1
+          fi
+
           mkdir -p backups
           TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
           echo "DUMP_FILE=backups/backup_${TIMESTAMP}.sql.gz" >> $GITHUB_ENV
-          pg_dump "$SUPABASE_DB_URL" --no-owner --no-privileges | gzip > "backups/backup_${TIMESTAMP}.sql.gz"
+          pg_dump "$SUPABASE_DATABASE_URL" --no-owner --no-privileges --sslmode=require | gzip > "backups/backup_${TIMESTAMP}.sql.gz"
 
       - name: Upload dump to Supabase Storage
         env:
