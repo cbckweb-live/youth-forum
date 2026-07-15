@@ -55,6 +55,7 @@ export default function HeroSlider() {
           sizes="(max-width: 640px) 100vw, (max-width: 1080px) 100vw, 56vw"
           style={{ objectFit: "cover" }}
           quality={85}
+          unoptimized
         />
       </div>
 

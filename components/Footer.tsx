@@ -20,7 +20,7 @@ export default function Footer() {
         */}
         <div className="md:min-w-[240px] flex flex-col items-center text-center">
           <div className="relative h-12 w-32 mb-4">
-            <Image src="/logo.png" alt="Youth Forum" fill style={{ objectFit: "contain" }} />
+            <Image src="/logo.png" alt="Youth Forum" fill unoptimized style={{ objectFit: "contain" }} />
           </div>
           <h3 className="font-display text-lg mb-4 text-[#231F1E] leading-snug">
             Chakhesang Baptist Church Youth Ministry

@@ -120,6 +120,7 @@ export default async function GalleryPage() {
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                     style={{ objectFit: "cover" }}
                     quality={100}
+                    unoptimized
                   />
                 </div>
                 {photo.caption && (

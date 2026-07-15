@@ -27,6 +27,7 @@ export default async function OfficeBearerDetailPage({
           width={128}
           height={128}
           quality={100}
+          unoptimized
           className="w-32 h-32 rounded-full object-cover mx-auto mb-6"
         />
       )}

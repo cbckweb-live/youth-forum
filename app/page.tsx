@@ -272,6 +272,7 @@ export default async function HomePage() {
                       style={{ objectFit: "cover" }}
                       quality={85}
                       priority
+                      unoptimized
                     />
                   </div>
                 )}
@@ -311,6 +312,7 @@ export default async function HomePage() {
                       sizes="(max-width: 768px) 100vw, 33vw"
                       style={{ objectFit: "cover" }}
                       quality={85}
+                      unoptimized
                     />
                   </div>
                 )}

@@ -14,7 +14,7 @@ export default function LeadershipCard({ id, name, role, photo_url, phone, email
   return (
     <div className="bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-2xl p-6 text-center">
       {photo_url && (
-        <Image src={photo_url} alt={name} width={96} height={96} quality={100} className="w-24 h-24 rounded-full object-cover mx-auto mb-4" />
+        <Image src={photo_url} alt={name} width={96} height={96} unoptimized className="w-24 h-24 rounded-full object-cover mx-auto mb-4" />
       )}
       <h3 className="font-display text-lg">{name}</h3>
       <p className="text-sm text-[#6B1F2A] uppercase tracking-wide mb-2">{role}</p>

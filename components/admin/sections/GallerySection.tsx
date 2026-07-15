@@ -467,6 +467,7 @@ export default function GallerySection() {
               src={photo.photo_url}
               alt={String(photo.caption || "")}
               fill
+              unoptimized
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               style={{ objectFit: "cover" }}
               quality={75}
