@@ -6,6 +6,7 @@ import "nprogress/nprogress.css"; // Import basic NProgress styles
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProgressBar from "@/components/ProgressBar";
+import SentryProvider from "@/components/SentryProvider";
 import { Suspense } from "react";
 
 // 1. Configure Fonts
@@ -39,14 +40,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sora.variable} ${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-white text-[#231F1E] font-body">
-        {/* Next.js navigation hooks require Suspense wrap structures when rendered statically */}
-        <Suspense fallback={null}>
-          <ProgressBar />
-        </Suspense>
-        
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <SentryProvider>
+          {/* Next.js navigation hooks require Suspense wrap structures when rendered statically */}
+          <Suspense fallback={null}>
+            <ProgressBar />
+          </Suspense>
+          
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </SentryProvider>
       </body>
     </html>
   );

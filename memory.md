@@ -242,6 +242,11 @@ All planned features have been implemented. The TODO.md file is empty of remaini
 
 All notable changes to this project will be documented in this section.
 
+### 2026-07-15 — v1.0.1
+
+- 🔧 **Sentry integration redesigned for Next.js 16.** Removed `withSentryConfig` (incompatible with Turbopack). Server-side init via `src/instrumentation.ts` (native `register()` hook + `onRequestError`). Browser-side init via new `components/SentryProvider.tsx` (client component with session replay).
+- 🔥 Removed unused `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts` (were only loaded by removed webpack plugin).
+
 ### 2026-07-15 — v1.0.0
 
 - 🎉 **v1.0.0 Initial release.** All 10 build phases marked complete.

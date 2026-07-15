@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
 import "./lib/env";
 
 const securityHeaders = [
@@ -62,12 +61,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: "cbck",
-  project: "javascript-nextjs",
-  silent: true,
-  // Disable source map upload for non-production builds
-  sourcemaps: {
-    disable: process.env.NODE_ENV !== "production",
-  },
-});
+export default nextConfig;
