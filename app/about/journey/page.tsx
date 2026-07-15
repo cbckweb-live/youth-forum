@@ -47,7 +47,7 @@ const milestones = [
 
 /* ─── pull quote ─────────────────────────────────────────────── */
 const pullQuote =
-  "Fifty years of God's faithfulness, spiritual growth, and dedicated service — and still, the best is yet to come.";
+  "Fifty years of God's faithfulness, spiritual growth, and dedicated service — the journey continues.";
 
 export const metadata: Metadata = {
   title: "Our Journey | CBCK Youth Forum",

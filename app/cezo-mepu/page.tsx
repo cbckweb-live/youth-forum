@@ -68,9 +68,9 @@ export default async function CezoMepuPage() {
       <h1 className="font-display text-2xl sm:text-3xl mb-4">Cezo Mepu</h1>
       <p className="text-[#231F1E]/70 leading-relaxed max-w-2xl mb-12">
         Cezo Mepu represents the nine regional local Colony Churches under the Chakhesang
-        Baptist Church, Kohima. Each location has their own youth community and is guided by
-        dedicated Youth Supervisors who shepherd and serve their local
-        communities.
+        Baptist Church, Kohima. Each Cezo Mepu has their own youth community and is guided by
+        dedicated Youth Supervisors who shepherds and serve their local
+        Church.
       </p>
 
       {error && (
