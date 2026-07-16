@@ -47,7 +47,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
-              className="text-gray-500 hover:text-[#6B1F2A] transition-colors"
+              className="text-gray-500 hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
             >
               <svg viewBox="0 0 24 24" className="h-8 w-8" aria-hidden="true" fill="currentColor">
                 <path d="M22 12a10 10 0 1 0-11.5 9.9v-7H8v-3h2.5V9.8C10.5 7.7 11.7 6.5 13.8 6.5c1 0 2 .2 2 .2v2.3h-1.1c-1.1 0-1.4.7-1.4 1.4V12H17l-.4 3h-2.3v7A10 10 0 0 0 22 12z" />
@@ -59,7 +59,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="text-gray-500 hover:text-[#6B1F2A] transition-colors"
+              className="text-gray-500 hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
             >
               <svg viewBox="0 0 24 24" className="h-8 w-8" aria-hidden="true" fill="currentColor">
                 <path d="M7 2C4.2 2 2 4.2 2 7v10c0 2.8 2.2 5 5 5h10c2.8 0 5-2.2 5-5V7c0-2.8-2.2-5-5-5H7zm10 2c1.7 0 3 1.3 3 3v10c0 1.7-1.3 3-3 3H7c-1.7 0-3-1.3-3-3V7c0-1.7 1.3-3 3-3h10zm-5 4.8A3.2 3.2 0 1 0 14.2 12 3.2 3.2 0 0 0 12 8.8zm0 5.2A2 2 0 1 1 14 12a2 2 0 0 1-2 2zm4.6-6.1a1 1 0 1 0-1-1 1 1 0 0 0 1 1z" />
@@ -71,7 +71,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="YouTube"
-              className="text-gray-500 hover:text-[#6B1F2A] transition-colors"
+              className="text-gray-500 hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
             >
               <svg viewBox="0 0 24 24" className="h-8 w-8" aria-hidden="true" fill="currentColor">
                 <path d="M23.5 6.2a3.1 3.1 0 0 0-2.2-2.2C19.4 3.5 12 3.5 12 3.5s-7.4 0-9.3.5A3.1 3.1 0 0 0 .5 6.2 32.6 32.6 0 0 0 0 12a32.6 32.6 0 0 0 .5 5.8 3.1 3.1 0 0 0 2.2 2.2c1.9.5 9.3.5 9.3.5s7.4 0 9.3-.5a3.1 3.1 0 0 0 2.2-2.2A32.6 32.6 0 0 0 24 12a32.6 32.6 0 0 0-.5-5.8ZM9.6 15.4V8.6L15.6 12l-6 3.4Z" />
@@ -91,12 +91,12 @@ export default function Footer() {
           </h4>
           <ul className="space-y-2 text-sm text-gray-600">
             <li>
-              <Link href="/events" className="hover:text-[#6B1F2A]">
+              <Link href="/events" className="hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
                 Upcoming Events
               </Link>
             </li>
             <li>
-              <Link href="/events" className="hover:text-[#6B1F2A]">
+              <Link href="/events" className="hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
                 Past Events
               </Link>
             </li>
@@ -134,16 +134,16 @@ export default function Footer() {
       <div className="border-t border-gray-200 px-8 py-6 flex flex-wrap justify-between gap-4 text-sm text-gray-500">
         <div className="flex items-center gap-6 flex-wrap">
           <div className="flex gap-6">
-            <Link href="/office-bearers" className="hover:text-[#6B1F2A]">
+            <Link href="/office-bearers" className="hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
               Office Bearers
             </Link>
-            <Link href="/mathetes" className="hover:text-[#6B1F2A]">
+            <Link href="/mathetes" className="hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
               Mathetes
             </Link>
-            <Link href="/gallery" className="hover:text-[#6B1F2A]">
+            <Link href="/gallery" className="hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
               Gallery
             </Link>
-            <Link href="/developers" className="hover:text-[#6B1F2A]">
+            <Link href="/developers" className="hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
               Developers
             </Link>
           </div>

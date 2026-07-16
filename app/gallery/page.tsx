@@ -110,9 +110,9 @@ export default async function GalleryPage() {
             {items.map((photo) => (
               <div
                 key={photo.id}
-                className="rounded-lg overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md"
+                className="group rounded-lg overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md"
               >
-                <div className="relative h-56">
+                <div className="relative h-56 overflow-hidden">
                   <Image
                     src={photo.photo_url}
                     alt={photo.caption || tag}
@@ -121,6 +121,8 @@ export default async function GalleryPage() {
                     style={{ objectFit: "cover" }}
                     quality={100}
                     unoptimized
+                    loading="lazy"
+                    className="transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
                 {photo.caption && (

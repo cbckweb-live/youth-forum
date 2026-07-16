@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import Link from "next/link";
 import SanitizedHtml from "@/components/SanitizedHtml";
 
 export default async function OfficeBearerDetailPage({
@@ -15,11 +16,19 @@ export default async function OfficeBearerDetailPage({
     .single();
 
   if (!person) {
-    return <main className="px-8 py-16 max-w-2xl mx-auto">Not found.</main>;
+    return <main className="px-8 py-16 max-w-2xl mx-auto text-center">
+      <Link href="/office-bearers" className="text-sm text-[#6B1F2A] hover:underline mb-6 inline-block">
+        ← Back to Office Bearers
+      </Link>
+      <p>Not found.</p>
+    </main>;
   }
 
   return (
     <main className="px-8 py-16 max-w-2xl mx-auto text-center">
+      <Link href="/office-bearers" className="text-sm text-[#6B1F2A] hover:underline mb-6 inline-block">
+        ← Back to Office Bearers
+      </Link>
       {person.photo_url && (
         <Image
           src={person.photo_url}

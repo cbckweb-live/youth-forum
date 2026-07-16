@@ -28,6 +28,7 @@ export default function MathetesCard({
           height={600}
           sizes="(max-width: 640px) 100vw, (max-width: 1080px) 100vw, 33vw"
           unoptimized
+          loading="lazy"
           className="block h-auto w-full"
           style={{ height: "auto" }}
         />

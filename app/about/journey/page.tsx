@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 
 /* ─── chapter data ───────────────────────────────────────────── */
@@ -70,6 +71,9 @@ export default function JourneyPage() {
           src="/background.jpg"
           alt=""
           aria-hidden="true"
+          width={1920}
+          height={1080}
+          fetchPriority="high"
           className="absolute inset-0 w-full h-full object-cover object-center z-0"
 
         />
@@ -135,7 +139,7 @@ export default function JourneyPage() {
 
       {/* ══ CHAPTER SECTIONS ════════════════════════════════════ */}
       {chapters.map((ch) => (
-        <section key={ch.id} id={ch.id} className="py-14 px-6">
+        <section key={ch.id} id={ch.id} className="py-14 px-6 scroll-mt-24">
           <div className="max-w-5xl mx-auto">
             <div
               className={`flex flex-col ${
@@ -154,6 +158,8 @@ export default function JourneyPage() {
                     <img
                       src={ch.image}
                       alt={ch.imageAlt}
+                      width={900}
+                      height={675}
                       className="img-zoom w-full h-full object-cover"
                       loading="lazy"
                     />
@@ -176,9 +182,9 @@ export default function JourneyPage() {
                     {ch.body}
                   </p>
                   {ch.cta && (
-                    <a href={ch.cta.href} className="btn-glass self-start">
+                    <Link href={ch.cta.href} className="btn-glass self-start">
                       {ch.cta.label} →
-                    </a>
+                    </Link>
                   )}
                 </div>
               </div>
@@ -232,9 +238,9 @@ export default function JourneyPage() {
             Whether you have been a part of the Youth Ministry for decades or are just discovering it —
             there is a place for you here.
           </p>
-          <a href="/events" className="btn-glass-cta">
+          <Link href="/events" className="btn-glass-cta">
             See Upcoming Events →
-          </a>
+          </Link>
         </div>
       </section>
     </main>

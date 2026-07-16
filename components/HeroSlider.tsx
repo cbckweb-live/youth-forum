@@ -16,6 +16,9 @@ export default function HeroSlider() {
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mediaQuery.matches) return;
+
     const id = window.setInterval(() => {
       setIndex((i) => (i + 1) % images.length);
     }, 5000);
@@ -45,6 +48,7 @@ export default function HeroSlider() {
     <div
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      aria-live="polite"
       className="relative w-full max-w-6xl mx-auto h-[220px] sm:h-[320px] md:h-[420px] rounded-xl border border-white/40 bg-white/30 backdrop-blur-sm shadow-lg overflow-hidden p-1 touch-pan-y"
     >
       <div className="absolute inset-0 w-full h-full">
@@ -55,6 +59,7 @@ export default function HeroSlider() {
           sizes="(max-width: 640px) 100vw, (max-width: 1080px) 100vw, 56vw"
           style={{ objectFit: "cover" }}
           quality={85}
+          priority
           unoptimized
         />
       </div>
@@ -62,23 +67,23 @@ export default function HeroSlider() {
       <button
         onClick={prev}
         aria-label="Previous image"
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
       >
-        <ChevronLeftIcon className="size-8" />
+        <ChevronLeftIcon aria-hidden="true" className="size-8" />
       </button>
       <button
         onClick={next}
         aria-label="Next image"
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
       >
-        <ChevronRightIcon className="size-8" />
+        <ChevronRightIcon aria-hidden="true" className="size-8" />
       </button>
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
         {images.map((_, i) => (
           <button
             key={i}
             onClick={() => setIndex(i)}
-            className={`w-2.5 h-2.5 rounded-full ${i === index ? "bg-white" : "bg-white/40"}`}
+            className={`w-2.5 h-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 ${i === index ? "bg-white" : "bg-white/40"}`}
             aria-label={`Go to slide ${i + 1}`}
           />
         ))}

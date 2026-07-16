@@ -20,7 +20,7 @@ export default function LeadershipCard({ id, name, role, photo_url, phone, email
       <p className="text-sm text-[#6B1F2A] uppercase tracking-wide mb-2">{role}</p>
       {phone && <p className="text-sm text-[#231F1E]/70">{phone}</p>}
       {email && <p className="text-sm text-[#231F1E]/70 mb-3">{email}</p>}
-      <Link href={`/office-bearers/${id}`} className="text-sm font-medium text-[#6B1F2A] hover:underline">
+      <Link href={`/office-bearers/${id}`} className="text-sm font-medium text-[#6B1F2A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
         Read More →
       </Link>
     </div>

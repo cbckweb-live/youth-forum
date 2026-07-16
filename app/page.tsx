@@ -186,16 +186,16 @@ export default async function HomePage() {
     <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-medium text-center mx-auto">
   Welcome
 </p>
-<h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black font-normal">
+<h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black font-normal text-balance">
   Chakhesang Baptist Church Kohima,
   <br /> Youth Ministry
 </h1>
-<h3 className="text-[#6B1F2A] text-xl sm:text-2xl leading-tight mb-2 text-center font-normal">
+<h2 className="text-[#6B1F2A] text-xl sm:text-2xl leading-tight mb-2 text-center font-normal">
   Theme: &quot;Renew Thy Church&quot;
-</h3>
-<h3 className="text-[#6B1F2A] text-xl sm:text-2xl leading-tight mb-4 text-center font-normal">
+</h2>
+<h2 className="text-[#6B1F2A] text-xl sm:text-2xl leading-tight mb-4 text-center font-normal">
   Book Focus: Revelations
-</h3>
+</h2>
     <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
       The official Youth Forum of Chakhesang Baptist Church Kohima &mdash;
       a community of young believers growing together in faith, fellowship,
@@ -228,7 +228,7 @@ export default async function HomePage() {
       {/* Upcoming Events */}
       <section className="px-4 sm:px-8 py-12 sm:py-16">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
-          <h2 className="font-display text-2xl text-center sm:text-left">
+          <h2 className="font-display text-2xl text-center sm:text-left text-balance">
             Upcoming Events
           </h2>
           <Link href="/events" className="text-sm text-[#6B1F2A] hover:underline">
@@ -244,7 +244,7 @@ export default async function HomePage() {
               <Link
                 key={event.id}
                 href="/events"
-                className="flex flex-col sm:flex-row sm:items-stretch gap-6 border border-[#231F1E]/10 rounded-2xl p-6 shadow-md bg-white hover:shadow-lg transition-shadow"
+                className="flex flex-col sm:flex-row sm:items-stretch gap-6 border border-[#231F1E]/10 rounded-2xl p-6 shadow-md bg-white hover:shadow-lg transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
               >
                 <CalendarDate startDate={event.event_date} endDate={event.event_end_date} />
 
@@ -285,7 +285,7 @@ export default async function HomePage() {
       {/* Blog & News */}
       <section className="px-4 sm:px-8 py-12 sm:py-16">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
-          <h2 className="font-display text-2xl text-center sm:text-left">
+          <h2 className="font-display text-2xl text-center sm:text-left text-balance">
             Recent Blog &amp; News
           </h2>
           <Link href="/about/blog-news" className="text-sm text-[#6B1F2A] hover:underline">
@@ -301,7 +301,7 @@ export default async function HomePage() {
               <Link
                 key={post.id}
                 href={`/about/blog-news/${post.slug}`}
-                className="group bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
+                className="group bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
               >
                 {post.photo_url && (
                   <div className="relative h-36">
@@ -338,7 +338,7 @@ export default async function HomePage() {
 
       {/* Leadership Section */}
       <section className="px-4 sm:px-8 py-12 sm:py-16">
-        <h2 className="font-display text-2xl mb-6 text-center">
+        <h2 className="font-display text-2xl mb-6 text-center text-balance">
           Our Leadership
         </h2>
         <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
@@ -375,13 +375,13 @@ export default async function HomePage() {
             className="text-center bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-xl p-6"
           >
             <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#6B1F2A] flex items-center justify-center">
-              <item.Icon className="size-6 text-white" />
+              <item.Icon aria-hidden="true" className="size-6 text-white" />
             </div>
             <h3 className="font-display text-lg mb-2">{item.title}</h3>
             <p className="text-sm text-[#231F1E]/70 mb-3">{item.text}</p>
             <Link
               href={item.href}
-              className="text-sm font-medium text-[#6B1F2A] hover:underline"
+              className="text-sm font-medium text-[#6B1F2A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
             >
               Read More →
             </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 interface EventCardProps {
@@ -19,6 +19,52 @@ export default function EventCard({
   image_url,
 }: EventCardProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lightboxRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  // Focus trap for lightbox
+  useEffect(() => {
+    if (!lightboxOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+
+    requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+
+      const container = lightboxRef.current;
+      if (!container) return;
+
+      const focusable = container.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [lightboxOpen]);
 
   return (
     <>
@@ -44,6 +90,7 @@ export default function EventCard({
           <button
             type="button"
             onClick={() => setLightboxOpen(true)}
+            ref={triggerRef}
             className="flex-shrink-0 w-36 h-36 rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] relative"
             aria-label="Enlarge image"
           >
@@ -54,6 +101,7 @@ export default function EventCard({
                 sizes="(max-width: 640px) 144px, (max-width: 1080px) 144px, 144px"
                 style={{ objectFit: "cover" }}
                 unoptimized
+                loading="lazy"
               />
           </button>
         )}
@@ -62,6 +110,7 @@ export default function EventCard({
       {/* Lightbox */}
       {lightboxOpen && image_url && (
         <div
+          ref={lightboxRef}
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
           onClick={() => setLightboxOpen(false)}
         >
@@ -71,7 +120,8 @@ export default function EventCard({
           >
             <button
               onClick={() => setLightboxOpen(false)}
-              className="absolute -top-10 right-0 text-white text-sm hover:underline z-10"
+              ref={closeButtonRef}
+              className="absolute -top-10 right-0 text-white text-sm hover:underline z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded"
             >
               Close ✕
             </button>
@@ -83,6 +133,7 @@ export default function EventCard({
                 sizes="(max-width: 640px) 100vw, (max-width: 1080px) 90vw, 75vw"
                 style={{ objectFit: "contain" }}
                 unoptimized
+                loading="lazy"
               />
             </div>
             <p className="text-white text-center mt-3 font-display text-lg">

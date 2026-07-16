@@ -6,9 +6,8 @@ type GalleryItemProps = {
 };
 
 export default function GalleryItem({ photo_url, caption, event_tag }: GalleryItemProps) {
-  return (
-    <div className="group relative rounded-lg overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md">
-      <div className="relative h-56">
+  return (      <div className="group relative rounded-lg overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md">
+      <div className="relative h-56 overflow-hidden">
           <Image
           src={photo_url}
           alt={caption || "Gallery photo"}
@@ -16,6 +15,8 @@ export default function GalleryItem({ photo_url, caption, event_tag }: GalleryIt
           sizes="(max-width: 640px) 100vw, (max-width: 1080px) 50vw, 33vw"
           style={{ objectFit: "cover" }}
           unoptimized
+          loading="lazy"
+          className="transition-transform duration-500 group-hover:scale-105"
         />
       </div>
       {(caption || event_tag) && (
