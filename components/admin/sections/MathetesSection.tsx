@@ -70,7 +70,6 @@ export default function MathetesSection() {
   const [form, setForm] = useState<MathetesForm>(emptyForm());
   const [originalPhotoUrl, setOriginalPhotoUrl] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
 
   async function assertValidSession() {
     const { data } = await supabase.auth.getSession();
@@ -114,35 +113,42 @@ export default function MathetesSection() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setUploadProgress(null);
-    let uploadedPhotoUrl: string | null = null;
     await executeSubmit(async () => {
       await assertValidSession();
-      let photo_url = form.photo_url;
-      if (photoFile) {
-        if (!photoFile.type.startsWith("image/")) {
-          throw new Error(`"${photoFile.name}" is not a valid image file.`);
+      let uploadedPhotoUrl: string | null = null;
+      try {
+        let photo_url = form.photo_url;
+        if (photoFile) {
+          if (!photoFile.type.startsWith("image/")) {
+            throw new Error(`"${photoFile.name}" is not a valid image file.`);
+          }
+          if (photoFile.size > 20 * 1024 * 1024) {
+            throw new Error(`"${photoFile.name}" exceeds 20MB limit. Please select a smaller image.`);
+          }
+          photo_url = await uploadPhoto(photoFile);
+          uploadedPhotoUrl = photo_url;
         }
-        if (photoFile.size > 20 * 1024 * 1024) {
-          throw new Error(`"${photoFile.name}" exceeds 20MB limit. Please select a smaller image.`);
+        const response = await fetch("/api/admin/mathetes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: editingId ? "update_mathetes" : "create_mathetes",
+            id: editingId,
+            previous_photo_url: editingId ? originalPhotoUrl : null,
+            title: form.title,
+            description: form.description.trim() === "" ? null : form.description,
+            photo_url,
+          }),
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || "Failed to save Mathetes entry.");
         }
-        photo_url = await uploadPhoto(photoFile);
-        uploadedPhotoUrl = photo_url;
-      }
-      const response = await fetch("/api/admin/mathetes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: editingId ? "update_mathetes" : "create_mathetes",
-          id: editingId,
-          previous_photo_url: editingId ? originalPhotoUrl : null,
-          title: form.title,
-          description: form.description.trim() === "" ? null : form.description,
-          photo_url,
-        }),
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || "Failed to save Mathetes entry.");
+      } catch (err) {
+        if (uploadedPhotoUrl) {
+          deleteUploadedPhoto(uploadedPhotoUrl);
+        }
+        throw err;
       }
     });
     setForm(emptyForm());
@@ -164,9 +170,7 @@ export default function MathetesSection() {
         </button>
       </div>
 
-      {loading ? (
-        <p className="text-sm text-[#231F1E]/50">Loading Mathetes entries...</p>
-      ) : entries.length > 0 ? (
+      {entries.length > 0 ? (
         <div className="space-y-3">
           {entries.map((entry) => (
             <div key={entry.id} className="bg-white shadow-sm rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

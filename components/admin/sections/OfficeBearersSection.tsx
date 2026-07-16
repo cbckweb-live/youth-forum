@@ -131,34 +131,41 @@ export default function OfficeBearersSection() {
     e.preventDefault();
     setUploadProgress(null);
     const previousPhotoUrl = originalPhotoUrl;
-    let uploadedPhotoUrl: string | null = null;
     await executeSubmit(async () => {
-      let photo_url = form.photo_url;
-      if (photoFile) {
-        if (!photoFile.type.startsWith("image/")) {
-          throw new Error(`"${photoFile.name}" is not a valid image file.`);
+      let uploadedPhotoUrl: string | null = null;
+      try {
+        let photo_url = form.photo_url;
+        if (photoFile) {
+          if (!photoFile.type.startsWith("image/")) {
+            throw new Error(`"${photoFile.name}" is not a valid image file.`);
+          }
+          if (photoFile.size > 20 * 1024 * 1024) {
+            throw new Error(`"${photoFile.name}" exceeds 20MB limit.`);
+          }
+          photo_url = await uploadPhoto(photoFile);
+          uploadedPhotoUrl = photo_url;
         }
-        if (photoFile.size > 20 * 1024 * 1024) {
-          throw new Error(`"${photoFile.name}" exceeds 20MB limit.`);
+        const payload = { ...form, photo_url };
+        const response = await fetch("/api/admin/office-bearers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: editingId ? "update_person" : "create_person",
+            id: editingId,
+            previous_photo_url: editingId ? previousPhotoUrl : null,
+            ...payload,
+            display_order: editingId ? undefined : people.length,
+          }),
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || "Failed to save person.");
         }
-        photo_url = await uploadPhoto(photoFile);
-        uploadedPhotoUrl = photo_url;
-      }
-      const payload = { ...form, photo_url };
-      const response = await fetch("/api/admin/office-bearers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: editingId ? "update_person" : "create_person",
-          id: editingId,
-          previous_photo_url: editingId ? previousPhotoUrl : null,
-          ...payload,
-          display_order: editingId ? undefined : people.length,
-        }),
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || "Failed to save person.");
+      } catch (err) {
+        if (uploadedPhotoUrl) {
+          deletePhotoByUrl(uploadedPhotoUrl).catch(console.error);
+        }
+        throw err;
       }
     });
     setForm(emptyPerson());
