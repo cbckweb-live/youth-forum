@@ -1,70 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/ssr";
-
-function getServerSupabase(request: NextRequest, response: NextResponse) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            if (options) {
-              response.cookies.set(name, value, options);
-            } else {
-              response.cookies.set(name, value);
-            }
-          });
-        },
-      },
-    },
-  );
-}
-
-function jsonResponse(body: unknown, init?: ResponseInit) {
-  return new NextResponse(JSON.stringify(body), {
-    headers: { "Content-Type": "application/json" },
-    ...init,
-  });
-}
-
-function errorResponse(message: string, status: number) {
-  return jsonResponse({ error: message }, { status });
-}
-
-async function requireAdmin(
-  request: NextRequest,
-  response: NextResponse,
-): Promise<{ error: NextResponse } | { ok: true }> {
-  const serverSupabase = getServerSupabase(request, response);
-  const {
-    data: { session },
-    error: sessionError,
-  } = await serverSupabase.auth.getSession();
-
-  if (sessionError || !session) {
-    return { error: errorResponse("Unauthorized", 401) };
-  }
-
-  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
-  if (role !== "admin") {
-    return { error: errorResponse("Forbidden", 403) };
-  }
-
-  return { ok: true };
-}
-
-function getServiceSupabase() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("Supabase service role key is not configured.");
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
+import {
+  jsonResponse,
+  errorResponse,
+  requireAdmin,
+  getServiceSupabase,
+  deleteStorageObject,
+} from "@/lib/admin-api-utils";
 
 export async function POST(request: NextRequest) {
   const response = NextResponse.next();
@@ -102,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "update_event") {
-    const { id, title, event_date, event_end_date, description, image_url } = payload;
+    const { id, title, event_date, event_end_date, description, image_url, previous_image_url } = payload;
     if (!id) return errorResponse("Event ID is required.", 400);
     if (!title) return errorResponse("Title is required.", 400);
     if (!event_date) return errorResponse("Event date is required.", 400);
@@ -119,6 +60,20 @@ export async function POST(request: NextRequest) {
       .eq("id", id);
 
     if (error) return errorResponse(error.message, 500);
+
+    // Clean up old image if it was replaced
+    if (
+      typeof previous_image_url === "string" &&
+      previous_image_url &&
+      previous_image_url !== image_url
+    ) {
+      try {
+        await deleteStorageObject(serviceSupabase, previous_image_url);
+      } catch (deleteError) {
+        console.error("Failed to delete previous event image:", deleteError);
+      }
+    }
+
     return new NextResponse(null, { status: 204 });
   }
 
@@ -126,12 +81,31 @@ export async function POST(request: NextRequest) {
     const { id } = payload;
     if (!id) return errorResponse("Event ID is required.", 400);
 
+    // Fetch the record first to get the image_url for storage cleanup
+    const { data: event, error: fetchError } = await serviceSupabase
+      .from("events")
+      .select("image_url")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (fetchError) return errorResponse(fetchError.message, 500);
+
     const { error } = await serviceSupabase
       .from("events")
       .delete()
       .eq("id", id);
 
     if (error) return errorResponse(error.message, 500);
+
+    // Clean up storage after successful deletion
+    if (event?.image_url) {
+      try {
+        await deleteStorageObject(serviceSupabase, event.image_url);
+      } catch (deleteError) {
+        console.error("Failed to delete event image from storage:", deleteError);
+      }
+    }
+
     return new NextResponse(null, { status: 204 });
   }
 

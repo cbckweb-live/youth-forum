@@ -62,6 +62,8 @@ export default function PostsSection() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previousPhotoUrl, setPreviousPhotoUrl] = useState<string | null>(null);
+  const [previousPdfUrl, setPreviousPdfUrl] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fetchPosts = useCallback(async () => {
@@ -139,6 +141,8 @@ export default function PostsSection() {
         body: JSON.stringify({
           action: editingId ? "update_post" : "create_post",
           id: editingId,
+          previous_photo_url: editingId ? previousPhotoUrl : null,
+          previous_pdf_url: editingId ? previousPdfUrl : null,
           ...payload,
         }),
       });
@@ -157,6 +161,8 @@ export default function PostsSection() {
 
   function handleEdit(post: Post) {
     setEditingId(post.id);
+    setPreviousPhotoUrl(post.photo_url);
+    setPreviousPdfUrl(post.pdf_url);
     setForm({
       title: post.title,
       slug: post.slug,
@@ -176,6 +182,8 @@ export default function PostsSection() {
   function closeModal() {
     setForm(emptyPost());
     setEditingId(null);
+    setPreviousPhotoUrl(null);
+    setPreviousPdfUrl(null);
     setMediaType("none");
     setMediaFile(null);
     setUploadProgress(null);

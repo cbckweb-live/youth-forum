@@ -1,117 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/ssr";
-
-function getServerSupabase(request: NextRequest, response: NextResponse) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            if (options) {
-              response.cookies.set(name, value, options);
-            } else {
-              response.cookies.set(name, value);
-            }
-          });
-        },
-      },
-    },
-  );
-}
-
-function jsonResponse(body: unknown, init?: ResponseInit) {
-  return new NextResponse(JSON.stringify(body), {
-    headers: { "Content-Type": "application/json" },
-    ...init,
-  });
-}
-
-function errorResponse(message: string, status: number) {
-  return jsonResponse({ error: message }, { status });
-}
-
-// FIX: Same admin guard as gallery route — checks app_metadata.role === "admin"
-// before allowing any service-role DB mutation.
-async function requireAdmin(
-  request: NextRequest,
-  response: NextResponse,
-): Promise<{ error: NextResponse } | { ok: true }> {
-  const serverSupabase = getServerSupabase(request, response);
-  const {
-    data: { session },
-    error: sessionError,
-  } = await serverSupabase.auth.getSession();
-
-  if (sessionError || !session) {
-    return { error: errorResponse("Unauthorized", 401) };
-  }
-
-  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
-  if (role !== "admin") {
-    return { error: errorResponse("Forbidden", 403) };
-  }
-
-  return { ok: true };
-}
-
-function getServiceSupabase() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("Supabase service role key is not configured.");
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
-
-function extractStorageLocationFromPublicUrl(publicUrl: string) {
-  const url = new URL(publicUrl);
-  const marker = "/object/public/";
-  const markerIndex = url.pathname.indexOf(marker);
-
-  if (markerIndex === -1) {
-    return null;
-  }
-
-  const storagePath = url.pathname.slice(markerIndex + marker.length);
-  const [bucket, ...pathParts] = storagePath.split("/").filter(Boolean);
-
-  if (!bucket || pathParts.length === 0) {
-    return null;
-  }
-
-  return {
-    bucket,
-    filePath: pathParts.join("/"),
-  };
-}
-
-type StorageDeleteClient = {
-  storage: {
-    from: (bucket: string) => {
-      remove: (paths: string[]) => Promise<{ error: unknown }>;
-    };
-  };
-};
-
-async function deleteStorageObject(serviceSupabase: StorageDeleteClient, publicUrl: string) {
-  const storageLocation = extractStorageLocationFromPublicUrl(publicUrl);
-  if (!storageLocation) {
-    return;
-  }
-
-  const { error } = await serviceSupabase.storage
-    .from(storageLocation.bucket)
-    .remove([storageLocation.filePath]);
-
-  if (error) {
-    console.error("Failed to delete file:", error);
-  }
-}
+import {
+  jsonResponse,
+  errorResponse,
+  requireAdmin,
+  getServiceSupabase,
+  deleteStorageObject,
+} from "@/lib/admin-api-utils";
 
 export async function POST(request: NextRequest) {
   const response = NextResponse.next();
@@ -177,7 +71,11 @@ export async function POST(request: NextRequest) {
       photo_url &&
       previous_photo_url !== photo_url
     ) {
-      await deleteStorageObject(serviceSupabase, previous_photo_url);
+      try {
+        await deleteStorageObject(serviceSupabase, previous_photo_url);
+      } catch (deleteError) {
+        console.error("Failed to delete previous photo:", deleteError);
+      }
     }
 
     return new NextResponse(null, { status: 204 });
@@ -203,7 +101,11 @@ export async function POST(request: NextRequest) {
     if (error) return errorResponse(error.message, 500);
 
     if (person?.photo_url) {
-      await deleteStorageObject(serviceSupabase, person.photo_url);
+      try {
+        await deleteStorageObject(serviceSupabase, person.photo_url);
+      } catch (deleteError) {
+        console.error("Failed to delete photo from storage:", deleteError);
+      }
     }
 
     return new NextResponse(null, { status: 204 });

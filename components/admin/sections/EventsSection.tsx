@@ -32,6 +32,7 @@ export default function EventsSection() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previousImageUrl, setPreviousImageUrl] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fetchEvents = useCallback(async () => {
@@ -119,6 +120,7 @@ export default function EventsSection() {
         body: JSON.stringify({
           action: editingId ? "update_event" : "create_event",
           id: editingId,
+          previous_image_url: editingId ? previousImageUrl : null,
           ...payload,
         }),
       });
@@ -137,6 +139,7 @@ export default function EventsSection() {
 
   function handleEdit(event: Event) {
     setEditingId(event.id);
+    setPreviousImageUrl(event.image_url);
     setForm({ title: event.title, event_date: event.event_date, event_end_date: event.event_end_date, description: event.description, image_url: event.image_url });
     setImageFile(null);
     setUploadProgress(null);
@@ -146,6 +149,7 @@ export default function EventsSection() {
   function closeModal() {
     setForm(emptyEvent());
     setEditingId(null);
+    setPreviousImageUrl(null);
     setImageFile(null);
     setUploadProgress(null);
     setError(null);

@@ -1,70 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/ssr";
-
-function getServerSupabase(request: NextRequest, response: NextResponse) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            if (options) {
-              response.cookies.set(name, value, options);
-            } else {
-              response.cookies.set(name, value);
-            }
-          });
-        },
-      },
-    },
-  );
-}
-
-function jsonResponse(body: unknown, init?: ResponseInit) {
-  return new NextResponse(JSON.stringify(body), {
-    headers: { "Content-Type": "application/json" },
-    ...init,
-  });
-}
-
-function errorResponse(message: string, status: number) {
-  return jsonResponse({ error: message }, { status });
-}
-
-async function requireAdmin(
-  request: NextRequest,
-  response: NextResponse,
-): Promise<{ error: NextResponse } | { ok: true }> {
-  const serverSupabase = getServerSupabase(request, response);
-  const {
-    data: { session },
-    error: sessionError,
-  } = await serverSupabase.auth.getSession();
-
-  if (sessionError || !session) {
-    return { error: errorResponse("Unauthorized", 401) };
-  }
-
-  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
-  if (role !== "admin") {
-    return { error: errorResponse("Forbidden", 403) };
-  }
-
-  return { ok: true };
-}
-
-function getServiceSupabase() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("Supabase service role key is not configured.");
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
+import {
+  jsonResponse,
+  errorResponse,
+  requireAdmin,
+  getServiceSupabase,
+} from "@/lib/admin-api-utils";
 
 export async function POST(request: NextRequest) {
   const response = NextResponse.next();

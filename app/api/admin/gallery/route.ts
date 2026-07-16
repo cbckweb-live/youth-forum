@@ -1,113 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/ssr";
+import {
+  jsonResponse,
+  errorResponse,
+  requireAdmin,
+  getServiceSupabase,
+  extractStorageLocationFromPublicUrl,
+} from "@/lib/admin-api-utils";
 
 type GalleryInsertRow = {
   photo_url: string;
   caption: string | null;
   event_tag: string | null;
 };
-
-function getServerSupabase(request: NextRequest, response: NextResponse) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            if (options) {
-              response.cookies.set(name, value, options);
-            } else {
-              response.cookies.set(name, value);
-            }
-          });
-        },
-      },
-    },
-  );
-}
-
-function jsonResponse(body: unknown, init?: ResponseInit) {
-  return new NextResponse(JSON.stringify(body), {
-    headers: { "Content-Type": "application/json" },
-    ...init,
-  });
-}
-
-function errorResponse(message: string, status: number) {
-  return jsonResponse({ error: message }, { status });
-}
-
-function extractStorageFilePathFromPublicUrl(publicUrl: string) {
-  try {
-    const url = new URL(publicUrl);
-    const marker = "/object/public/";
-    const markerIndex = url.pathname.indexOf(marker);
-
-    if (markerIndex === -1) {
-      return null;
-    }
-
-    const storagePath = url.pathname.slice(markerIndex + marker.length);
-    const pathParts = storagePath
-      .split("/")
-      .filter(Boolean)
-      .map((segment) => decodeURIComponent(segment));
-
-    if (pathParts.length < 2) {
-      return null;
-    }
-
-    return pathParts.slice(1).join("/");
-  } catch {
-    return null;
-  }
-}
-
-/**
- * FIX: Centralised auth + role guard used by every handler in this route.
- *
- * Previously the routes only checked that a session existed, meaning ANY
- * logged-in Supabase user could trigger service-role DB writes (privilege
- * escalation). Now we additionally verify app_metadata.role === "admin",
- * which is set server-side only and cannot be spoofed by the client.
- *
- * Returns the session on success, or a 401/403 NextResponse on failure.
- */
-async function requireAdmin(
-  request: NextRequest,
-  response: NextResponse,
-): Promise<{ error: NextResponse } | { session: NonNullable<Awaited<ReturnType<ReturnType<typeof getServerSupabase>["auth"]["getSession"]>>["data"]["session"]> }> {
-  const serverSupabase = getServerSupabase(request, response);
-  const {
-    data: { session },
-    error: sessionError,
-  } = await serverSupabase.auth.getSession();
-
-  if (sessionError || !session) {
-    return { error: errorResponse("Unauthorized", 401) };
-  }
-
-  // app_metadata is populated server-side only — safe to trust from the JWT.
-  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
-  if (role !== "admin") {
-    return { error: errorResponse("Forbidden", 403) };
-  }
-
-  return { session };
-}
-
-function getServiceSupabase() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("Supabase service role key is not configured.");
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
 
 export async function POST(request: NextRequest) {
   const response = NextResponse.next();
@@ -174,14 +78,14 @@ export async function DELETE(request: NextRequest) {
     return errorResponse("Gallery photo is missing a storage URL.", 500);
   }
 
-  const filePath = extractStorageFilePathFromPublicUrl(photo.photo_url);
+  const filePath = extractStorageLocationFromPublicUrl(photo.photo_url);
   if (!filePath) {
     return errorResponse("Unable to extract gallery storage path from photo_url.", 500);
   }
 
   const { error: deleteError } = await serviceSupabase.storage
-    .from("gallery-media")
-    .remove([filePath]);
+    .from(filePath.bucket)
+    .remove([filePath.filePath]);
 
   if (deleteError) {
     return errorResponse(`Failed to delete gallery file from storage: ${deleteError.message}`, 500);
@@ -213,6 +117,7 @@ export async function PUT(request: NextRequest) {
   const payload = (await request.json()) as {
     id?: string;
     photo_url?: string;
+    previous_photo_url?: string;
     caption?: string | null;
     event_tag?: string | null;
   };
@@ -225,7 +130,7 @@ export async function PUT(request: NextRequest) {
     caption: payload.caption ?? null,
     event_tag: payload.event_tag ?? null,
   };
-  
+
   if (payload.photo_url !== undefined) {
     updateData.photo_url = payload.photo_url;
   }
@@ -237,5 +142,23 @@ export async function PUT(request: NextRequest) {
     .select();
 
   if (error) return errorResponse(error.message, 500);
+
+  // Clean up old photo if it was replaced
+  if (
+    payload.previous_photo_url &&
+    payload.photo_url &&
+    payload.previous_photo_url !== payload.photo_url
+  ) {
+    const oldLocation = extractStorageLocationFromPublicUrl(payload.previous_photo_url);
+    if (oldLocation) {
+      const { error: storageError } = await serviceSupabase.storage
+        .from(oldLocation.bucket)
+        .remove([oldLocation.filePath]);
+      if (storageError) {
+        console.error("Failed to delete old gallery photo from storage:", storageError);
+      }
+    }
+  }
+
   return jsonResponse({ updatedRows: data });
 }

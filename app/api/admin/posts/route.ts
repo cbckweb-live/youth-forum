@@ -1,70 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/ssr";
-
-function getServerSupabase(request: NextRequest, response: NextResponse) {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            if (options) {
-              response.cookies.set(name, value, options);
-            } else {
-              response.cookies.set(name, value);
-            }
-          });
-        },
-      },
-    },
-  );
-}
-
-function jsonResponse(body: unknown, init?: ResponseInit) {
-  return new NextResponse(JSON.stringify(body), {
-    headers: { "Content-Type": "application/json" },
-    ...init,
-  });
-}
-
-function errorResponse(message: string, status: number) {
-  return jsonResponse({ error: message }, { status });
-}
-
-async function requireAdmin(
-  request: NextRequest,
-  response: NextResponse,
-): Promise<{ error: NextResponse } | { ok: true }> {
-  const serverSupabase = getServerSupabase(request, response);
-  const {
-    data: { session },
-    error: sessionError,
-  } = await serverSupabase.auth.getSession();
-
-  if (sessionError || !session) {
-    return { error: errorResponse("Unauthorized", 401) };
-  }
-
-  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
-  if (role !== "admin") {
-    return { error: errorResponse("Forbidden", 403) };
-  }
-
-  return { ok: true };
-}
-
-function getServiceSupabase() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("Supabase service role key is not configured.");
-  }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
+import {
+  jsonResponse,
+  errorResponse,
+  requireAdmin,
+  getServiceSupabase,
+  deleteStorageObject,
+} from "@/lib/admin-api-utils";
 
 export async function POST(request: NextRequest) {
   const response = NextResponse.next();
@@ -106,7 +47,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "update_post") {
-    const { id, title, slug, category, content, author_name, photo_url, pdf_url, published } = payload;
+    const { id, title, slug, category, content, author_name, photo_url, pdf_url, published, previous_photo_url, previous_pdf_url } = payload;
     if (!id) return errorResponse("Post ID is required.", 400);
     if (!title) return errorResponse("Title is required.", 400);
     if (!slug) return errorResponse("Slug is required.", 400);
@@ -127,6 +68,33 @@ export async function POST(request: NextRequest) {
       .eq("id", id);
 
     if (error) return errorResponse(error.message, 500);
+
+    // Clean up old photo if replaced
+    if (
+      typeof previous_photo_url === "string" &&
+      previous_photo_url &&
+      previous_photo_url !== photo_url
+    ) {
+      try {
+        await deleteStorageObject(serviceSupabase, previous_photo_url);
+      } catch (deleteError) {
+        console.error("Failed to delete previous post photo:", deleteError);
+      }
+    }
+
+    // Clean up old PDF if replaced
+    if (
+      typeof previous_pdf_url === "string" &&
+      previous_pdf_url &&
+      previous_pdf_url !== pdf_url
+    ) {
+      try {
+        await deleteStorageObject(serviceSupabase, previous_pdf_url);
+      } catch (deleteError) {
+        console.error("Failed to delete previous post PDF:", deleteError);
+      }
+    }
+
     return new NextResponse(null, { status: 204 });
   }
 
@@ -134,12 +102,38 @@ export async function POST(request: NextRequest) {
     const { id } = payload;
     if (!id) return errorResponse("Post ID is required.", 400);
 
+    // Fetch the record first to get storage URLs for cleanup
+    const { data: post, error: fetchError } = await serviceSupabase
+      .from("posts")
+      .select("photo_url, pdf_url")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (fetchError) return errorResponse(fetchError.message, 500);
+
     const { error } = await serviceSupabase
       .from("posts")
       .delete()
       .eq("id", id);
 
     if (error) return errorResponse(error.message, 500);
+
+    // Clean up storage after successful deletion
+    if (post?.photo_url) {
+      try {
+        await deleteStorageObject(serviceSupabase, post.photo_url);
+      } catch (deleteError) {
+        console.error("Failed to delete post photo from storage:", deleteError);
+      }
+    }
+    if (post?.pdf_url) {
+      try {
+        await deleteStorageObject(serviceSupabase, post.pdf_url);
+      } catch (deleteError) {
+        console.error("Failed to delete post PDF from storage:", deleteError);
+      }
+    }
+
     return new NextResponse(null, { status: 204 });
   }
 
