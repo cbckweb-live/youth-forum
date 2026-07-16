@@ -50,22 +50,7 @@ export default function AimsPage() {
 
         {/* ── Body paragraph ── */}
         <p className="text-sm sm:text-base leading-[1.7] max-w-[68ch] mb-14">
-          The CBCK Youth Ministry, as a sub-unit of the Church, is established
-          with the following aims and vision. Among its chief aims is to help
-          young people grow in their relationship with God through daily
-          Scripture reading and quiet time with Him. The Youth Ministry also
-          envisions itself as a platform where young people are given the
-          freedom to think, plan, create and express their opinions, while
-          encouraging them to respect and cooperate with the Church elders and
-          to take an active part in the services and programmes of the Youth
-          Ministry. In addition to regular fellowship among young people and
-          youth workers to strengthen discipleship, first as individuals and
-          then as a community, the youth are also encouraged to pray for one
-          another and build each other up through the guidance of the Holy Word.
-          The Youth Ministry further seeks to help young people keep God first
-          in their social and economic lives, while encouraging them to engage
-          in evangelistic work and use their gifts and abilities for the glory
-          of Almighty God.
+          The CBCK Youth Ministry, as a sub-unit of the Church, exists to help young people grow closer to God and to one another. It is a space where the youth are free to think, create, and express themselves, while remaining rooted in respect for the Church and active in its services and programmes. Through fellowship, prayer, and mutual encouragement, the ministry nurtures discipleship — first in the individual, then in community — helping young people keep God first in every area of life, and equipping them to serve and glorify Him through their gifts and witness.
         </p>
 
         {/* ── Thin gold divider ── */}
