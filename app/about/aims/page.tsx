@@ -183,7 +183,7 @@ export default function AimsPage() {
         {/* ══ Scripture pull-quote ══════════════════════════ */}
         <div className="mt-16 max-w-2xl">
           <p className="font-display italic leading-relaxed text-base sm:text-lg mb-4">
-            &ldquo;being confident of this, that he who began a good work in you will carry it on to completion until the day of Christ Jesus.&rdquo;
+            &quot;being confident of this, that he who began a good work in you will carry it on to completion until the day of Christ Jesus.&quot;
           </p>
           <p className="font-display text-sm text-[#6B1F2A]">
             &mdash; Philippians 1:6
