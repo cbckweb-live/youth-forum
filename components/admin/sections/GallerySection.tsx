@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { useAdminCrudSection } from "@/lib/hooks/useAdminCrudSection";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import ImageCropper from "@/components/admin/ImageCropper";
@@ -17,24 +18,49 @@ type Photo = {
 
 export default function GallerySection() {
   const supabase = createSupabaseBrowserClient();
-  const [photos, setPhotos] = useState<Photo[]>([]);
+
+  const {
+    records: photos,
+    editingId,
+    saving,
+    error,
+    confirmDeleteId,
+    openEdit,
+    closeModal: resetModal,
+    executeSubmit,
+    setConfirmDeleteId,
+    setError,
+    setSaving,
+    setEditingId,
+    fetchData,
+  } = useAdminCrudSection<Photo>({
+    apiPath: "/api/admin/gallery",
+    actionNames: { create: "create", update: "update", delete: "delete" },
+    fetchRecords: async () => {
+      const { data, error } = await supabase
+        .from("gallery")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data as Photo[]) || [];
+    },
+  });
+
   const [files, setFiles] = useState<FileList | null>(null);
   const [caption, setCaption] = useState("");
   const [eventTag, setEventTag] = useState("");
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [editCaption, setEditCaption] = useState("");
   const [editEventTag, setEditEventTag] = useState("");
   const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null);
   const [editCropFile, setEditCropFile] = useState<File | null>(null);
-  const editPhotoPreviewUrl = useMemo(() => 
-    editPhotoFile ? URL.createObjectURL(editPhotoFile) : null, 
-    [editPhotoFile]
+  const [previousPhotoUrl, setPreviousPhotoUrl] = useState<string | null>(null);
+
+  const editPhotoPreviewUrl = useMemo(() =>
+    editPhotoFile ? URL.createObjectURL(editPhotoFile) : null,
+    [editPhotoFile],
   );
 
   useEffect(() => {
@@ -42,27 +68,6 @@ export default function GallerySection() {
       if (editPhotoPreviewUrl) URL.revokeObjectURL(editPhotoPreviewUrl);
     };
   }, [editPhotoPreviewUrl]);
-
-  const fetchPhotos = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("gallery")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
-      setError(`Unable to load gallery: ${error.message}`);
-      setPhotos([]);
-      return;
-    }
-    setError(null);
-    setPhotos((data as Photo[]) || []);
-  }, [supabase]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void fetchPhotos();
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [fetchPhotos]);
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
@@ -77,16 +82,13 @@ export default function GallerySection() {
       const { compressImageFile } = await import("@/lib/compress");
 
       const uploads = Array.from(files).map(async (file) => {
-    // Validate MIME type before compression or upload
-    if (!file.type.startsWith("image/")) {
-      throw new Error(`"${file.name}" is not a valid image file.`);
-    }
+        if (!file.type.startsWith("image/")) {
+          throw new Error(`"${file.name}" is not a valid image file.`);
+        }
+        if (file.size > 20 * 1024 * 1024) {
+          throw new Error(`"${file.name}" exceeds 20MB limit. Please select a smaller image.`);
+        }
 
-    if (file.size > 20 * 1024 * 1024) {
-      throw new Error(`"${file.name}" exceeds 20MB limit. Please select a smaller image.`);
-    }
-
-    // Per-file compression with fallback to original if compression fails
         let toUpload: File = file;
         try {
           toUpload = await compressImageFile(file, {
@@ -192,7 +194,7 @@ export default function GallerySection() {
       setCaption("");
       setEventTag("");
       setUploadProgress(null);
-      fetchPhotos();
+      fetchData();
     } catch (err) {
       setError(`Upload failed: ${err instanceof Error ? err.message : "Please try again."}`);
       setDebugInfo(null);
@@ -201,13 +203,14 @@ export default function GallerySection() {
     }
   }
 
-  async function updatePhoto(id: string, photoUrl: string, nextCaption: string, nextEventTag: string) {
+  async function updatePhoto(id: string, photoUrl: string, nextCaption: string, nextEventTag: string, prevPhotoUrl?: string | null) {
     const response = await fetch("/api/admin/gallery", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         id,
         photo_url: photoUrl,
+        previous_photo_url: prevPhotoUrl || undefined,
         caption: nextCaption.trim() === "" ? null : nextCaption,
         event_tag: nextEventTag.trim() === "" ? null : nextEventTag,
       }),
@@ -228,25 +231,18 @@ export default function GallerySection() {
     if (!response.ok) {
       const responseText = await response.text();
       let result: unknown;
-      try {
-        result = responseText ? JSON.parse(responseText) : {};
-      } catch {
-        result = { error: responseText };
-      }
-
+      try { result = responseText ? JSON.parse(responseText) : {}; } catch { result = { error: responseText }; }
       const errorFromApi = (() => {
         if (typeof result !== "object" || result === null) return undefined;
         const maybe = result as Record<string, unknown>;
         const err = maybe["error"];
         return typeof err === "string" ? err : undefined;
       })();
-
       setError(`Delete failed: ${errorFromApi || responseText || "Please try again."}`);
       return;
     }
     setError(null);
     setConfirmDeleteId(null);
-    fetchPhotos();
   }
 
   const inputCls =
@@ -254,10 +250,7 @@ export default function GallerySection() {
 
   return (
     <div>
-      <form
-        onSubmit={handleUpload}
-        className="space-y-5 mb-10 bg-white shadow-md rounded-2xl p-6"
-      >
+      <form onSubmit={handleUpload} className="space-y-5 mb-10 bg-white shadow-md rounded-2xl p-6">
         <h2 className="font-display text-lg">Upload Photos</h2>
         <FileUploadInput
           accept="image/*"
@@ -268,9 +261,7 @@ export default function GallerySection() {
           multiple
           onChange={(f) => {
             if (!f) return setFiles(null);
-            const invalid = Array.from(f).find(
-              (file) => !file.type.startsWith("image/"),
-            );
+            const invalid = Array.from(f).find((file) => !file.type.startsWith("image/"));
             if (invalid) {
               alert(`"${invalid.name}" is not a valid image. Please select image files only.`);
               return;
@@ -278,26 +269,10 @@ export default function GallerySection() {
             setFiles(f);
           }}
         />
-        <input
-          type="text"
-          placeholder="Caption (optional — applies to all)"
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          className={inputCls}
-        />
-        <input
-          type="text"
-          placeholder="Event tag (e.g. Annual Camp 2024)"
-          value={eventTag}
-          onChange={(e) => setEventTag(e.target.value)}
-          className={inputCls}
-        />
+        <input type="text" placeholder="Caption (optional — applies to all)" value={caption} onChange={(e) => setCaption(e.target.value)} className={inputCls} />
+        <input type="text" placeholder="Event tag (e.g. Annual Camp 2024)" value={eventTag} onChange={(e) => setEventTag(e.target.value)} className={inputCls} />
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={saving}
-          className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60"
-        >
+        <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
           {saving ? "Uploading..." : "Upload"}
         </button>
       </form>
@@ -327,16 +302,10 @@ export default function GallerySection() {
                 style={{ objectFit: "cover" }}
                 quality={75}
                 unoptimized={!!editPhotoFile}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
-                }}
+                onError={(e) => { (e.target as HTMLImageElement).src = "/images/placeholder.jpg"; }}
               />
               {editPhotoFile && (
-                <button
-                  type="button"
-                  onClick={() => setEditCropFile(editPhotoFile)}
-                  className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white text-xs px-2 py-1 rounded-md transition-colors"
-                >
+                <button type="button" onClick={() => setEditCropFile(editPhotoFile)} className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white text-xs px-2 py-1 rounded-md transition-colors">
                   Crop
                 </button>
               )}
@@ -346,98 +315,53 @@ export default function GallerySection() {
               onSubmit={(e) => {
                 e.preventDefault();
                 void (async () => {
+                  setSaving(true);
+                  setError(null);
                   try {
-                    setSaving(true);
-                    setError(null);
-                    
                     let photoUrl = editingPhoto!.photo_url;
                     if (editPhotoFile) {
                       const formData = new FormData();
                       formData.append("file", editPhotoFile);
                       formData.append("type", "photo");
                       formData.append("bucket", "gallery-media");
-                      
                       const uploadResp = await fetch("/api/admin/media/upload", {
                         method: "POST",
                         body: formData,
                       });
-                      
                       if (!uploadResp.ok) {
                         const errorText = await uploadResp.text();
                         throw new Error(errorText || "Failed to upload photo.");
                       }
-                      
                       const uploadResult = await uploadResp.json();
                       photoUrl = (uploadResult as Record<string, unknown>).url as string;
                       if (!photoUrl) throw new Error("No URL returned from server.");
                     }
-                    
-                    await updatePhoto(editingId!, photoUrl, editCaption, editEventTag);
+                    await updatePhoto(editingId!, photoUrl, editCaption, editEventTag, previousPhotoUrl);
                     setEditingId(null);
+                    setPreviousPhotoUrl(null);
                     setEditCaption("");
                     setEditEventTag("");
                     setEditPhotoFile(null);
-                    await fetchPhotos();
                   } catch (err) {
-                    setError(
-                      `Update failed: ${err instanceof Error ? err.message : "Please try again."}`,
-                    );
+                    setError(`Update failed: ${err instanceof Error ? err.message : "Please try again."}`);
                   } finally {
                     setSaving(false);
                   }
                 })();
               }}
             >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setEditPhotoFile(file);
-                }}
-                className="hidden"
-                id="edit-photo-upload"
-              />
-              <label
-                htmlFor="edit-photo-upload"
-                className="flex items-center justify-center gap-2 w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-[#231F1E]/70 hover:bg-gray-50 cursor-pointer"
-              >
+              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setEditPhotoFile(file); }} className="hidden" id="edit-photo-upload" />
+              <label htmlFor="edit-photo-upload" className="flex items-center justify-center gap-2 w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-[#231F1E]/70 hover:bg-gray-50 cursor-pointer">
                 Change Photo
               </label>
-              <input
-                type="text"
-                placeholder="Caption"
-                value={editCaption}
-                onChange={(e) => setEditCaption(e.target.value)}
-                className={inputCls}
-              />
-              <input
-                type="text"
-                placeholder="Event tag (optional)"
-                value={editEventTag}
-                onChange={(e) => setEditEventTag(e.target.value)}
-                className={inputCls}
-              />
+              <input type="text" placeholder="Caption" value={editCaption} onChange={(e) => setEditCaption(e.target.value)} className={inputCls} />
+              <input type="text" placeholder="Event tag (optional)" value={editEventTag} onChange={(e) => setEditEventTag(e.target.value)} className={inputCls} />
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-3 pt-1">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60"
-                >
+                <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
                   {saving ? "Saving..." : "Save"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingId(null);
-                    setEditCaption("");
-                    setEditEventTag("");
-                    setEditPhotoFile(null);
-                    setError(null);
-                  }}
-                  className="text-sm text-[#231F1E]/50 hover:underline"
-                >
+                <button type="button" onClick={() => { setEditingId(null); setPreviousPhotoUrl(null); setEditCaption(""); setEditEventTag(""); setEditPhotoFile(null); setError(null); }} className="text-sm text-[#231F1E]/50 hover:underline">
                   Cancel
                 </button>
               </div>
@@ -449,20 +373,14 @@ export default function GallerySection() {
       {editCropFile && (
         <ImageCropper
           imageFile={editCropFile}
-          onCropped={(cropped) => {
-            setEditCropFile(null);
-            if (cropped) setEditPhotoFile(cropped);
-          }}
+          onCropped={(cropped) => { setEditCropFile(null); if (cropped) setEditPhotoFile(cropped); }}
           onCancel={() => setEditCropFile(null)}
         />
       )}
 
       <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-4">
         {photos.map((photo) => (
-          <div
-            key={photo.id}
-            className="relative group rounded-xl overflow-hidden bg-gray-100 h-32"
-          >
+          <div key={photo.id} className="relative group rounded-xl overflow-hidden bg-gray-100 h-32">
             <Image
               src={photo.photo_url}
               alt={String(photo.caption || "")}
@@ -471,23 +389,18 @@ export default function GallerySection() {
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               style={{ objectFit: "cover" }}
               quality={75}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/images/placeholder.jpg";
-              }}
+              onError={(e) => { (e.target as HTMLImageElement).src = "/images/placeholder.jpg"; }}
             />
             <div className="p-2">
-              {photo.event_tag && (
-                <p className="text-xs text-[#6B1F2A] truncate">{photo.event_tag}</p>
-              )}
-              {photo.caption && (
-                <p className="text-xs text-[#231F1E]/60 truncate">{photo.caption}</p>
-              )}
+              {photo.event_tag && <p className="text-xs text-[#6B1F2A] truncate">{photo.event_tag}</p>}
+              {photo.caption && <p className="text-xs text-[#231F1E]/60 truncate">{photo.caption}</p>}
             </div>
             <div className="absolute top-2 left-2 flex gap-2 opacity-100 transition-opacity">
               <button
                 onClick={() => {
-                  setEditingId(photo.id);
+                  openEdit(photo);
                   setEditingPhoto(photo);
+                  setPreviousPhotoUrl(photo.photo_url);
                   setEditCaption(photo.caption ?? "");
                   setEditEventTag(photo.event_tag ?? "");
                   setError(null);
@@ -505,9 +418,7 @@ export default function GallerySection() {
             </button>
           </div>
         ))}
-        {photos.length === 0 && (
-          <p className="text-sm text-[#231F1E]/50 col-span-full">No photos yet.</p>
-        )}
+        {photos.length === 0 && <p className="text-sm text-[#231F1E]/50 col-span-full">No photos yet.</p>}
       </div>
     </div>
   );

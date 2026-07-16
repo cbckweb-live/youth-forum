@@ -72,7 +72,7 @@ export default async function EventsPage() {
       )}
 
       {past.length > 0 && (
-        <div>
+        <div id="past-events">
           <p className="text-xs uppercase tracking-widest text-[#231F1E]/40 mb-4">Past Events</p>
           <div className="space-y-4">
             {past.map((event) => (

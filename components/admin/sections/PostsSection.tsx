@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { useAdminCrudSection } from "@/lib/hooks/useAdminCrudSection";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
@@ -31,7 +32,7 @@ const emptyPost = (): Omit<Post, "id" | "created_at"> => ({
   published: false,
 });
 
-const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10 MB — module scope, not re-created on render
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
 
 function slugify(text: string) {
   return text
@@ -40,46 +41,46 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-// Centralised PDF validation — used by both onChange and uploadMedia
 function validatePdf(file: File): string | null {
-  const isPdf =
-    file.type === "application/pdf" ||
-    file.name.toLowerCase().endsWith(".pdf");
+  const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
   if (!isPdf) return "Invalid file type. Please upload a PDF.";
-  if (file.size > MAX_PDF_BYTES)
-    return "File too large. Please upload a PDF smaller than 10 MB.";
+  if (file.size > MAX_PDF_BYTES) return "File too large. Please upload a PDF smaller than 10 MB.";
   return null;
 }
 
 export default function PostsSection() {
   const supabase = createSupabaseBrowserClient();
-  const [posts, setPosts] = useState<Post[]>([]);
+
+  const {
+    records: posts,
+    editingId,
+    showModal,
+    saving,
+    error,
+    confirmDeleteId,
+    openNew,
+    openEdit,
+    closeModal: resetModal,
+    executeSubmit,
+    handleDelete,
+    setConfirmDeleteId,
+    fetchData,
+    setError,
+  } = useAdminCrudSection<Post>({
+    apiPath: "/api/admin/posts",
+    actionNames: { create: "create_post", update: "update_post", delete: "delete_post" },
+    fetchRecords: async () => {
+      const { data } = await supabase.from("posts").select("*").order("created_at", { ascending: false });
+      return (data as Post[]) || [];
+    },
+  });
+
   const [form, setForm] = useState(emptyPost());
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
   const [mediaType, setMediaType] = useState<"none" | "photo" | "pdf">("none");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [previousPhotoUrl, setPreviousPhotoUrl] = useState<string | null>(null);
   const [previousPdfUrl, setPreviousPdfUrl] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-
-  const fetchPosts = useCallback(async () => {
-    const { data } = await supabase
-      .from("posts")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setPosts((data as Post[]) || []);
-  }, [supabase]);
-
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      void fetchPosts();
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, [fetchPosts]);
 
   async function uploadMedia(file: File, type: "photo" | "pdf"): Promise<string> {
     const formData = new FormData();
@@ -94,11 +95,7 @@ export default function PostsSection() {
 
     const responseText = await response.text();
     let result: unknown;
-    try {
-      result = responseText ? JSON.parse(responseText) : {};
-    } catch {
-      result = { error: responseText };
-    }
+    try { result = responseText ? JSON.parse(responseText) : {}; } catch { result = { error: responseText }; }
 
     const errorFromApi = (() => {
       if (typeof result !== "object" || result === null) return undefined;
@@ -122,18 +119,43 @@ export default function PostsSection() {
     return url;
   }
 
+  function handleEdit(post: Post) {
+    openEdit(post);
+    setPreviousPhotoUrl(post.photo_url);
+    setPreviousPdfUrl(post.pdf_url);
+    setForm({
+      title: post.title,
+      slug: post.slug,
+      category: post.category,
+      content: post.content,
+      author_name: post.author_name,
+      photo_url: post.photo_url,
+      pdf_url: post.pdf_url,
+      published: post.published,
+    });
+    setMediaType(post.photo_url ? "photo" : post.pdf_url ? "pdf" : "none");
+    setMediaFile(null);
+    setUploadProgress(null);
+  }
+
+  function handleCloseModal() {
+    resetModal();
+    setForm(emptyPost());
+    setPreviousPhotoUrl(null);
+    setPreviousPdfUrl(null);
+    setMediaType("none");
+    setMediaFile(null);
+    setUploadProgress(null);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
-    setError(null);
     setUploadProgress(null);
-    try {
+    await executeSubmit(async () => {
       let photo_url = mediaType === "photo" ? form.photo_url : null;
       let pdf_url = mediaType === "pdf" ? form.pdf_url : null;
-      if (mediaFile && mediaType === "photo")
-        photo_url = await uploadMedia(mediaFile, "photo");
-      if (mediaFile && mediaType === "pdf")
-        pdf_url = await uploadMedia(mediaFile, "pdf");
+      if (mediaFile && mediaType === "photo") photo_url = await uploadMedia(mediaFile, "photo");
+      if (mediaFile && mediaType === "pdf") pdf_url = await uploadMedia(mediaFile, "pdf");
       const payload = { ...form, photo_url, pdf_url };
       const response = await fetch("/api/admin/posts", {
         method: "POST",
@@ -150,64 +172,13 @@ export default function PostsSection() {
         const text = await response.text();
         throw new Error(text || "Failed to save post.");
       }
-      closeModal();
-      fetchPosts();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function handleEdit(post: Post) {
-    setEditingId(post.id);
-    setPreviousPhotoUrl(post.photo_url);
-    setPreviousPdfUrl(post.pdf_url);
-    setForm({
-      title: post.title,
-      slug: post.slug,
-      category: post.category,
-      content: post.content,
-      author_name: post.author_name,
-      photo_url: post.photo_url,
-      pdf_url: post.pdf_url,
-      published: post.published,
     });
-    setMediaType(post.photo_url ? "photo" : post.pdf_url ? "pdf" : "none");
-    setMediaFile(null);
-    setUploadProgress(null);
-    setShowModal(true);
-  }
-
-  function closeModal() {
     setForm(emptyPost());
-    setEditingId(null);
     setPreviousPhotoUrl(null);
     setPreviousPdfUrl(null);
     setMediaType("none");
     setMediaFile(null);
     setUploadProgress(null);
-    setError(null);
-    setShowModal(false);
-  }
-
-  async function handleDelete(id: string) {
-    try {
-      const response = await fetch("/api/admin/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete_post", id }),
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        setError(text || "Failed to delete post.");
-        return;
-      }
-      setConfirmDeleteId(null);
-      fetchPosts();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete post.");
-    }
   }
 
   async function togglePublish(post: Post) {
@@ -222,7 +193,7 @@ export default function PostsSection() {
         setError(text || "Failed to update publish status.");
         return;
       }
-      fetchPosts();
+      fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update publish status.");
     }
@@ -235,12 +206,7 @@ export default function PostsSection() {
     <div>
       <div className="flex justify-end mb-6">
         <button
-          onClick={() => {
-            setEditingId(null);
-            setForm(emptyPost());
-            setMediaType("none");
-            setShowModal(true);
-          }}
+          onClick={() => { openNew(); setForm(emptyPost()); setMediaType("none"); }}
           className="bg-[#6B1F2A] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#7d2432] transition-colors"
         >
           + New Post
@@ -249,10 +215,7 @@ export default function PostsSection() {
 
       <div className="space-y-3">
         {posts.map((post) => (
-          <div
-            key={post.id}
-            className="bg-white shadow-sm rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-          >
+          <div key={post.id} className="bg-white shadow-sm rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <p className="font-medium text-sm">{post.title}</p>
               <p className="text-xs text-[#231F1E]/50">
@@ -261,27 +224,15 @@ export default function PostsSection() {
               </p>
             </div>
             <div className="flex gap-3 text-sm">
-              <button
-                onClick={() => togglePublish(post)}
-                className={`${post.published ? "text-green-600" : "text-gray-400"} hover:underline`}
-              >
+              <button onClick={() => togglePublish(post)} className={`${post.published ? "text-green-600" : "text-gray-400"} hover:underline`}>
                 {post.published ? "Published" : "Draft"}
               </button>
-              <button onClick={() => handleEdit(post)} className="text-[#6B1F2A] hover:underline">
-                Edit
-              </button>
-              <button
-                onClick={() => setConfirmDeleteId(post.id)}
-                className="text-red-500 hover:underline"
-              >
-                Delete
-              </button>
+              <button onClick={() => handleEdit(post)} className="text-[#6B1F2A] hover:underline">Edit</button>
+              <button onClick={() => setConfirmDeleteId(post.id)} className="text-red-500 hover:underline">Delete</button>
             </div>
           </div>
         ))}
-        {posts.length === 0 && (
-          <p className="text-sm text-[#231F1E]/50">No posts yet.</p>
-        )}
+        {posts.length === 0 && <p className="text-sm text-[#231F1E]/50">No posts yet.</p>}
       </div>
 
       {confirmDeleteId && (
@@ -296,77 +247,29 @@ export default function PostsSection() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-4 mb-5">
-              <h2 className="font-display text-lg">
-                {editingId ? "Edit Post" : "New Post"}
-              </h2>
-              <button
-                type="button"
-                onClick={closeModal}
-                aria-label="Close"
-                className="text-[#231F1E]/50 hover:text-[#231F1E] transition-colors"
-              >
-                ✕
-              </button>
+              <h2 className="font-display text-lg">{editingId ? "Edit Post" : "New Post"}</h2>
+              <button type="button" onClick={handleCloseModal} aria-label="Close" className="text-[#231F1E]/50 hover:text-[#231F1E] transition-colors">✕</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Title"
-                value={form.title}
-                onChange={(e) =>
-                  setForm({ ...form, title: e.target.value, slug: slugify(e.target.value) })
-                }
-                required
-                className={inputCls}
-              />
-              <input
-                type="text"
-                placeholder="Slug (auto-generated)"
-                value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })}
-                required
-                className={inputCls}
-              />
+              <input type="text" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value, slug: slugify(e.target.value) })} required className={inputCls} />
+              <input type="text" placeholder="Slug (auto-generated)" value={form.slug} onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })} required className={inputCls} />
               <div className="flex gap-4">
                 {(["news", "blog-opinion"] as const).map((cat) => (
                   <label key={cat} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      checked={form.category === cat}
-                      onChange={() => setForm({ ...form, category: cat })}
-                    />
+                    <input type="radio" checked={form.category === cat} onChange={() => setForm({ ...form, category: cat })} />
                     {CATEGORY_LABELS[cat]}
                   </label>
                 ))}
               </div>
-              <input
-                type="text"
-                placeholder="Author name (optional)"
-                value={form.author_name || ""}
-                onChange={(e) => setForm({ ...form, author_name: e.target.value })}
-                className={inputCls}
-              />
-              <RichTextEditor
-                value={form.content}
-                onChange={(val) => setForm({ ...form, content: val })}
-              />
+              <input type="text" placeholder="Author name (optional)" value={form.author_name || ""} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className={inputCls} />
+              <RichTextEditor value={form.content} onChange={(val) => setForm({ ...form, content: val })} />
 
               <div>
-                <p className="text-sm text-[#231F1E]/60 mb-2">
-                  Attach media (optional — photo or PDF, not both)
-                </p>
+                <p className="text-sm text-[#231F1E]/60 mb-2">Attach media (optional — photo or PDF, not both)</p>
                 <div className="flex gap-4 mb-3">
                   {(["none", "photo", "pdf"] as const).map((type) => (
                     <label key={type} className="flex items-center gap-2 text-sm capitalize">
-                      <input
-                        type="radio"
-                        checked={mediaType === type}
-                        onChange={() => {
-                          setMediaType(type);
-                          setMediaFile(null);
-                          setUploadProgress(null);
-                        }}
-                      />
+                      <input type="radio" checked={mediaType === type} onChange={() => { setMediaType(type); setMediaFile(null); setUploadProgress(null); }} />
                       {type}
                     </label>
                   ))}
@@ -380,24 +283,14 @@ export default function PostsSection() {
                     progress={uploadProgress}
                     onChange={(files) => {
                       const f = files?.[0] || null;
-                      if (!f) {
-                        setMediaFile(null);
-                        return;
-                      }
+                      if (!f) { setMediaFile(null); return; }
                       if (mediaType === "pdf") {
                         const validationError = validatePdf(f);
-                        if (validationError) {
-                          alert(validationError);
-                          setMediaFile(null);
-                          setUploadProgress(null);
-                          return;
-                        }
+                        if (validationError) { alert(validationError); setMediaFile(null); setUploadProgress(null); return; }
                       }
                       if (mediaType === "photo" && !f.type.startsWith("image/")) {
                         alert("Invalid file type. Please upload an image.");
-                        setMediaFile(null);
-                        setUploadProgress(null);
-                        return;
+                        setMediaFile(null); setUploadProgress(null); return;
                       }
                       setMediaFile(f);
                     }}
@@ -406,30 +299,16 @@ export default function PostsSection() {
               </div>
 
               <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.published}
-                  onChange={(e) => setForm({ ...form, published: e.target.checked })}
-                />
+                <input type="checkbox" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} />
                 Publish immediately
               </label>
 
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-3 pt-1">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60"
-                >
+                <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
                   {saving ? "Saving..." : editingId ? "Update Post" : "Create Post"}
                 </button>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="text-sm text-[#231F1E]/50 hover:underline"
-                >
-                  Cancel
-                </button>
+                <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 hover:underline">Cancel</button>
               </div>
             </form>
           </div>

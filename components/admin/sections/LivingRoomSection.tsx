@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { useAdminCrudSection } from "@/lib/hooks/useAdminCrudSection";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 type Episode = {
@@ -21,43 +22,53 @@ const emptyEpisode = (): Omit<Episode, "id"> => ({
 
 export default function LivingRoomSection() {
   const supabase = createSupabaseBrowserClient();
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
+
+  const {
+    records: episodes,
+    editingId,
+    showModal,
+    saving,
+    error,
+    confirmDeleteId,
+    openNew,
+    openEdit,
+    closeModal: resetModal,
+    executeSubmit,
+    handleDelete,
+    setConfirmDeleteId,
+  } = useAdminCrudSection<Episode>({
+    apiPath: "/api/admin/living-room",
+    actionNames: { create: "create_episode", update: "update_episode", delete: "delete_episode" },
+    fetchRecords: async () => {
+      const { data, error } = await supabase
+        .from("living_room_seasons")
+        .select("*")
+        .order("display_order", { ascending: false });
+      if (error) throw error;
+      return (data as Episode[]) || [];
+    },
+  });
+
   const [form, setForm] = useState(emptyEpisode());
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const fetchEpisodes = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("living_room_seasons")
-      .select("*")
-      .order("display_order", { ascending: false });
+  function handleEdit(episode: Episode) {
+    openEdit(episode);
+    setForm({
+      title: episode.title,
+      description: episode.description,
+      youtube_url: episode.youtube_url,
+      display_order: episode.display_order,
+    });
+  }
 
-    if (error) {
-      setError(error.message);
-      setEpisodes([]);
-      return;
-    }
-
-    setError(null);
-    setEpisodes((data as Episode[]) || []);
-  }, [supabase]);
-
-
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      void fetchEpisodes();
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, [fetchEpisodes]);
+  function handleCloseModal() {
+    resetModal();
+    setForm(emptyEpisode());
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
-    setError(null);
-    try {
+    await executeSubmit(async () => {
       const response = await fetch("/api/admin/living-room", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -71,50 +82,8 @@ export default function LivingRoomSection() {
         const text = await response.text();
         throw new Error(text || "Failed to save episode.");
       }
-      closeModal();
-      await fetchEpisodes();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Please try again.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function handleEdit(episode: Episode) {
-    setEditingId(episode.id);
-    setForm({
-      title: episode.title,
-      description: episode.description,
-      youtube_url: episode.youtube_url,
-      display_order: episode.display_order,
     });
-    setShowModal(true);
-  }
-
-  function closeModal() {
     setForm(emptyEpisode());
-    setEditingId(null);
-    setError(null);
-    setShowModal(false);
-  }
-
-  async function handleDelete(id: string) {
-    try {
-      const response = await fetch("/api/admin/living-room", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete_episode", id }),
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        setError(text || "Failed to delete episode.");
-        return;
-      }
-      setConfirmDeleteId(null);
-      void fetchEpisodes();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete episode.");
-    }
   }
 
   const inputCls =
@@ -124,11 +93,7 @@ export default function LivingRoomSection() {
     <div className="space-y-6">
       <div className="flex justify-end">
         <button
-          onClick={() => {
-            setEditingId(null);
-            setForm(emptyEpisode());
-            setShowModal(true);
-          }}
+          onClick={() => { openNew(); setForm(emptyEpisode()); }}
           className="bg-[#6B1F2A] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#7d2432] transition-colors"
         >
           + New Episode
@@ -183,7 +148,7 @@ export default function LivingRoomSection() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto relative">
             <button
-              onClick={closeModal}
+              onClick={handleCloseModal}
               className="absolute top-4 right-4 text-[#231F1E]/40 hover:text-[#231F1E] text-xl leading-none"
               aria-label="Close"
             >
@@ -232,7 +197,7 @@ export default function LivingRoomSection() {
                   const value = parseInt(e.target.value) || 1;
                   setForm({
                     ...form,
-                    display_order: Math.max(1, value), // Clamp to minimum of 1
+                    display_order: Math.max(1, value),
                   });
                 }}
                 min="1"
@@ -253,7 +218,7 @@ export default function LivingRoomSection() {
                 </button>
                 <button
                   type="button"
-                  onClick={closeModal}
+                  onClick={handleCloseModal}
                   className="text-sm text-[#231F1E]/50 hover:underline"
                 >
                   Cancel

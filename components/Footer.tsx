@@ -96,7 +96,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/events" className="hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
+              <Link href="/events#past-events" className="hover:text-[#6B1F2A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
                 Past Events
               </Link>
             </li>
