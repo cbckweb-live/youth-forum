@@ -183,10 +183,10 @@ export default function AimsPage() {
         {/* ══ Scripture pull-quote ══════════════════════════ */}
         <div className="mt-16 max-w-2xl">
           <p className="font-display italic leading-relaxed text-base sm:text-lg mb-4">
-            &ldquo;[PLACEHOLDER — insert scripture text here]&rdquo;
+            &ldquo;being confident of this, that he who began a good work in you will carry it on to completion until the day of Christ Jesus.&rdquo;
           </p>
           <p className="font-display text-sm text-[#6B1F2A]">
-            &mdash; [PLACEHOLDER — insert reference, e.g. Book Chapter:Verse]
+            &mdash; Philippians 1:6
           </p>
         </div>
       </section>
