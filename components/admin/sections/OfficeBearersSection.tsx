@@ -246,7 +246,7 @@ export default function OfficeBearersSection() {
       </select>
       <div>
         <label className="block text-sm font-medium text-[#231F1E] mb-2">Bio (optional)</label>
-        <RichTextEditor value={form.bio || ""} onChange={(val) => setForm({ ...form, bio: val })} />
+        <RichTextEditor key={editingId || 'new'} value={form.bio || ""} onChange={(val) => setForm({ ...form, bio: val })} />
       </div>
       <FileUploadInput
         accept="image/*"

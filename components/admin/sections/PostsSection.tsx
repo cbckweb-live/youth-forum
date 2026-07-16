@@ -262,7 +262,7 @@ export default function PostsSection() {
                 ))}
               </div>
               <input type="text" placeholder="Author name (optional)" value={form.author_name || ""} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className={inputCls} />
-              <RichTextEditor value={form.content} onChange={(val) => setForm({ ...form, content: val })} />
+              <RichTextEditor key={editingId || 'new'} value={form.content} onChange={(val) => setForm({ ...form, content: val })} />
 
               <div>
                 <p className="text-sm text-[#231F1E]/60 mb-2">Attach media (optional — photo or PDF, not both)</p>
