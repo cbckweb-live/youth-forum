@@ -48,6 +48,16 @@
   box-shadow: 0 0 10px #6B1F2A, 0 0 5px #6B1F2A !important; /* Subtle glowing edge */
 }
 
+/* Simple fade-in on page load — used by aims page */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 250ms ease-out forwards;
+}
+
 /* ─────────────────────────────────────────────────────────────
    Journey page shared styles
    (moved from app/about/journey/page.tsx <style> tag)
