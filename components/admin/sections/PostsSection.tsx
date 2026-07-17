@@ -32,9 +32,16 @@ function PublishToggleButton({ record, refresh }: { record: Post; refresh: () =>
               published: !record.published,
             }),
           });
-          if (response.ok) refresh();
-        } catch {
-          // silent
+
+          if (response.ok) {
+            refresh();
+          } else {
+            const text = await response.text().catch(() => "");
+            alert(`Publish failed: ${text || response.status}`);
+          }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "Publish failed.";
+          alert(msg);
         } finally {
           setLoading(false);
         }

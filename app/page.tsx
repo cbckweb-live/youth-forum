@@ -240,6 +240,7 @@ export default async function HomePage() {
       </Link>
     </div>
     <p className="font-display italic text-black dark:text-[#e5e5e5] leading-relaxed max-w-3xl mx-auto mb-6">
+      </br>
       &quot;Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.&quot;
     </p>
     <p className="font-display mt-3 text-sm text-[#6B1F2A] dark:text-[#B84C5C]">
