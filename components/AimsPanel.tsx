@@ -95,11 +95,22 @@ export default function AimsPanel() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
   const [isHoverDevice, setIsHoverDevice] = useState(true);
-  /* Staggered entry animation on mount */
+  /* Detect reduced motion during first render (before paint), so no flash */
+  const [reducedMotion] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false,
+  );
+  /* Staggered entry animation on mount (respects prefers-reduced-motion) */
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(raf);
-  }, []);
+    if (reducedMotion) {
+      // Skip animation entirely — show immediately at final state
+      setMounted(true);
+    } else {
+      const raf = requestAnimationFrame(() => setMounted(true));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [reducedMotion]);
 
   /* Detect hover capability */
   useEffect(() => {
@@ -182,12 +193,16 @@ export default function AimsPanel() {
               return (
                 <div
                   key={aim.numeral}
-                  className={`
-                    transition-all duration-[700ms]
-                    ease-[cubic-bezier(0.32,0.72,0,1)]
-                    ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
-                  `}
-                  style={{ transitionDelay: `${i * 120}ms` }}
+                  style={{
+                    transition: reducedMotion
+                      ? 'none'
+                      : `all 700ms cubic-bezier(0.32,0.72,0,1) ${i * 120}ms`,
+                    opacity: reducedMotion || mounted ? 1 : 0,
+                    transform:
+                      reducedMotion || mounted
+                        ? 'translateY(0)'
+                        : 'translateY(1rem)',
+                  }}
                 >
                   {/* ── Row (clickable trigger) ── */}
                   <div
