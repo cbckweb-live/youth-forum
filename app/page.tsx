@@ -218,14 +218,8 @@ export default async function HomePage() {
       Whether you are visiting for the first time, seeking a place to belong,
       or looking to deepen your walk with God, we warmly welcome you to be part of this growing family.
     </p>
-    <p className="font-display italic text-black dark:text-[#e5e5e5] leading-relaxed max-w-3xl mx-auto mb-6">
-      &quot;Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.&quot;
-    </p>
-    <p className="font-display mt-3 text-sm text-[#6B1F2A] dark:text-[#B84C5C]">
-      — 1 Timothy 4:12
-    </p>
 
-    {/* Our Story — Frosted glass button */}
+     {/* Our Story — Frosted glass button */}
     <div className="mt-8">
       <Link
         href="/about/journey"
@@ -244,6 +238,14 @@ export default async function HomePage() {
         </svg>
       </Link>
     </div>
+    <p className="font-display italic text-black dark:text-[#e5e5e5] leading-relaxed max-w-3xl mx-auto mb-6">
+      &quot;Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.&quot;
+    </p>
+    <p className="font-display mt-3 text-sm text-[#6B1F2A] dark:text-[#B84C5C]">
+      — 1 Timothy 4:12
+    </p>
+
+   
   </div>
 </section>
 

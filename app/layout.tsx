@@ -46,13 +46,18 @@ export default function RootLayout({
         <meta name="theme-color" content="#151515" media="(prefers-color-scheme: dark)" />
       </head>
       <body className="min-h-full flex flex-col bg-white dark:bg-[#151515] text-[#231F1E] dark:text-[#e5e5e5] font-body transition-colors duration-300">
-        {/* Inline script to set dark class based on system preference (prevents flash) */}
+        {/* Inline script to restore saved theme before React hydrates (prevents flash) */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                  var saved = localStorage.getItem('theme');
+                  if (saved === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else if (saved === 'light') {
+                    document.documentElement.classList.remove('dark');
+                  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                     document.documentElement.classList.add('dark');
                   }
                 } catch(e) {}

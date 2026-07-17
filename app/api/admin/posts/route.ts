@@ -1,155 +1,92 @@
-import { NextRequest, NextResponse } from "next/server";
-import {
-  jsonResponse,
-  errorResponse,
-  requireAdmin,
-  getServiceSupabase,
-  deleteStorageObject,
-} from "@/lib/admin-api-utils";
+import { NextResponse } from "next/server";
+import { createGenericRoute } from "@/lib/crud/generic-api-handler";
+import { deleteStorageObject } from "@/lib/admin-api-utils";
 
-export async function POST(request: NextRequest) {
-  const response = NextResponse.next();
-  const auth = await requireAdmin(request, response);
-  if ("error" in auth) return auth.error;
+export const POST = createGenericRoute({
+  table: "posts",
+  actionCreate: "create_post",
+  actionUpdate: "update_post",
+  actionDelete: "delete_post",
+  sanitizePayload: (payload) => ({
+    title: payload.title,
+    slug: payload.slug,
+    category: payload.category,
+    content: payload.content || "",
+    author_name: payload.author_name || null,
+    photo_url: payload.photo_url || null,
+    pdf_url: payload.pdf_url || null,
+    published: payload.published ?? false,
+  }),
+  validate: (payload, action) => {
+    if (action === "create_post" || action === "update_post") {
+      if (!payload.title) return "Title is required.";
+      if (!payload.slug) return "Slug is required.";
+      if (!payload.category) return "Category is required.";
+    }
+    return null;
+  },
+  customActions: {
+    toggle_publish: async (payload, serviceSupabase) => {
+      const { id, published } = payload;
+      if (!id) {
+        return NextResponse.json({ error: "Post ID is required." }, { status: 400 });
+      }
+      if (typeof published !== "boolean") {
+        return NextResponse.json({ error: "Published status is required." }, { status: 400 });
+      }
 
-  let serviceSupabase;
-  try {
-    serviceSupabase = getServiceSupabase();
-  } catch {
-    return errorResponse("Supabase service role key is not configured.", 500);
-  }
+      const { error } = await serviceSupabase
+        .from("posts")
+        .update({ published })
+        .eq("id", id);
 
-  const payload = await request.json();
-  const { action } = payload as { action?: string };
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      return new NextResponse(null, { status: 204 });
+    },
+  },
+  afterUpdate: async (serviceSupabase, payload) => {
+    const { previous_photo_url, photo_url, previous_pdf_url, pdf_url } = payload;
 
-  if (action === "create_post") {
-    const { title, slug, category, content, author_name, photo_url, pdf_url, published } = payload;
-    if (!title) return errorResponse("Title is required.", 400);
-    if (!slug) return errorResponse("Slug is required.", 400);
-    if (!category) return errorResponse("Category is required.", 400);
-
-    const { data, error } = await serviceSupabase
-      .from("posts")
-      .insert({
-        title,
-        slug,
-        category,
-        content: content || "",
-        author_name: author_name || null,
-        photo_url: photo_url || null,
-        pdf_url: pdf_url || null,
-        published: published ?? false,
-      })
-      .select();
-
-    if (error) return errorResponse(error.message, 500);
-    return jsonResponse({ data });
-  }
-
-  if (action === "update_post") {
-    const { id, title, slug, category, content, author_name, photo_url, pdf_url, published, previous_photo_url, previous_pdf_url } = payload;
-    if (!id) return errorResponse("Post ID is required.", 400);
-    if (!title) return errorResponse("Title is required.", 400);
-    if (!slug) return errorResponse("Slug is required.", 400);
-    if (!category) return errorResponse("Category is required.", 400);
-
-    const { error } = await serviceSupabase
-      .from("posts")
-      .update({
-        title,
-        slug,
-        category,
-        content: content || "",
-        author_name: author_name || null,
-        photo_url: photo_url || null,
-        pdf_url: pdf_url || null,
-        published: published ?? false,
-      })
-      .eq("id", id);
-
-    if (error) return errorResponse(error.message, 500);
-
-    // Clean up old photo if replaced
-    if (
-      typeof previous_photo_url === "string" &&
-      previous_photo_url &&
-      previous_photo_url !== photo_url
-    ) {
+    if (typeof previous_photo_url === "string" && previous_photo_url && previous_photo_url !== photo_url) {
       try {
         await deleteStorageObject(serviceSupabase, previous_photo_url);
-      } catch (deleteError) {
-        console.error("Failed to delete previous post photo:", deleteError);
+      } catch (err) {
+        console.error("Failed to delete previous post photo:", err);
       }
     }
 
-    // Clean up old PDF if replaced
-    if (
-      typeof previous_pdf_url === "string" &&
-      previous_pdf_url &&
-      previous_pdf_url !== pdf_url
-    ) {
+    if (typeof previous_pdf_url === "string" && previous_pdf_url && previous_pdf_url !== pdf_url) {
       try {
         await deleteStorageObject(serviceSupabase, previous_pdf_url);
-      } catch (deleteError) {
-        console.error("Failed to delete previous post PDF:", deleteError);
+      } catch (err) {
+        console.error("Failed to delete previous post PDF:", err);
       }
     }
-
-    return new NextResponse(null, { status: 204 });
-  }
-
-  if (action === "delete_post") {
+  },
+  afterDelete: async (serviceSupabase, payload) => {
+    // Fetch the record to get storage URLs for cleanup
     const { id } = payload;
-    if (!id) return errorResponse("Post ID is required.", 400);
-
-    // Fetch the record first to get storage URLs for cleanup
-    const { data: post, error: fetchError } = await serviceSupabase
+    const { data: post } = await serviceSupabase
       .from("posts")
       .select("photo_url, pdf_url")
       .eq("id", id)
       .maybeSingle();
 
-    if (fetchError) return errorResponse(fetchError.message, 500);
-
-    const { error } = await serviceSupabase
-      .from("posts")
-      .delete()
-      .eq("id", id);
-
-    if (error) return errorResponse(error.message, 500);
-
-    // Clean up storage after successful deletion
     if (post?.photo_url) {
       try {
         await deleteStorageObject(serviceSupabase, post.photo_url);
-      } catch (deleteError) {
-        console.error("Failed to delete post photo from storage:", deleteError);
+      } catch (err) {
+        console.error("Failed to delete post photo after deletion:", err);
       }
     }
     if (post?.pdf_url) {
       try {
         await deleteStorageObject(serviceSupabase, post.pdf_url);
-      } catch (deleteError) {
-        console.error("Failed to delete post PDF from storage:", deleteError);
+      } catch (err) {
+        console.error("Failed to delete post PDF after deletion:", err);
       }
     }
-
-    return new NextResponse(null, { status: 204 });
-  }
-
-  if (action === "toggle_publish") {
-    const { id, published } = payload;
-    if (!id) return errorResponse("Post ID is required.", 400);
-    if (typeof published !== "boolean") return errorResponse("Published status is required.", 400);
-
-    const { error } = await serviceSupabase
-      .from("posts")
-      .update({ published })
-      .eq("id", id);
-
-    if (error) return errorResponse(error.message, 500);
-    return new NextResponse(null, { status: 204 });
-  }
-
-  return errorResponse("Invalid action.", 400);
-}
+  },
+});

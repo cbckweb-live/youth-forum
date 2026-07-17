@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/cbck.youthforum",
@@ -148,6 +149,7 @@ export default function Footer() {
             </Link>
           </div>
         </div>
+        <ThemeToggle />
       </div>
     </footer>
   );
