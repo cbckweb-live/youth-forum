@@ -83,7 +83,7 @@ export default async function GalleryPage() {
     ) ?? {};
 
   return (
-    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-6xl mx-auto">
+    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-6xl mx-auto dark:text-[#e5e5e5]">
       <h1 className="font-display text-2xl sm:text-3xl mb-8 sm:mb-10">
         Gallery
       </h1>
@@ -93,14 +93,14 @@ export default async function GalleryPage() {
           <p className="text-red-600">
             Something went wrong loading the gallery.
           </p>
-          <pre className="text-xs text-[#231F1E]/70 bg-gray-100 rounded-lg p-3 overflow-x-auto">
+          <pre className="text-xs text-[#231F1E]/70 dark:text-gray-400 bg-gray-100 dark:bg-[#2a2a2a] rounded-lg p-3 overflow-x-auto">
             {errorMessage}
           </pre>
         </div>
       )}
 
       {photos && photos.length === 0 && (
-        <p className="text-[#231F1E]/60">No photos have been added yet.</p>
+        <p className="text-[#231F1E]/60 dark:text-gray-400">No photos have been added yet.</p>
       )}
 
       {Object.entries(grouped).map(([tag, items]) => (
@@ -110,7 +110,7 @@ export default async function GalleryPage() {
             {items.map((photo) => (
               <div
                 key={photo.id}
-                className="group rounded-lg overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md"
+                className="group rounded-lg overflow-hidden bg-white/40 dark:bg-[#1e1e1e]/40 backdrop-blur-sm border border-white/50 dark:border-white/10 shadow-md"
               >
                 <div className="relative h-56 overflow-hidden">
                   <Image
@@ -126,7 +126,7 @@ export default async function GalleryPage() {
                   />
                 </div>
                 {photo.caption && (
-                  <p className="text-sm text-[#231F1E]/80 p-3">
+                  <p className="text-sm text-[#231F1E]/80 dark:text-gray-300 p-3">
                     {photo.caption}
                   </p>
                 )}

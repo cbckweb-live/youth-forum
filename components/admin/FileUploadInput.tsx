@@ -69,7 +69,7 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
 
   return (
     <div
-      className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-[#6B1F2A] transition-colors cursor-pointer"
+      className="border-2 border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-xl p-4 hover:border-[#6B1F2A] dark:hover:border-[#B84C5C] transition-colors cursor-pointer"
       onClick={(e) => {
         const target = e.target as HTMLElement | null;
         if (target?.closest?.("[data-cropper-root='true']")) return;
@@ -133,34 +133,34 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
       )}
 
       {!isImage && fileCount !== null && files && files[0] && (
-        <p className="text-xs text-[#231F1E]/70 mb-2">{files[0].name}</p>
+        <p className="text-xs text-[#231F1E]/70 dark:text-gray-400 mb-2">{files[0].name}</p>
       )}
 
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-lg bg-[#6B1F2A]/10 flex items-center justify-center shrink-0">
-          <span className="text-[#6B1F2A] text-lg">{isImage ? "🖼" : "📄"}</span>
+          <span className="text-[#6B1F2A] dark:text-[#B84C5C] text-lg">{isImage ? "🖼" : "📄"}</span>
         </div>
         <div>
-          <p className="text-sm font-medium text-[#231F1E]">
+          <p className="text-sm font-medium text-[#231F1E] dark:text-[#e5e5e5]">
             {fileCount !== null
               ? `${fileCount} photo${fileCount !== 1 ? "s" : ""} selected`
               : file
                 ? file.name
                 : label}
           </p>
-          <p className="text-xs text-[#231F1E]/50">Click to {file || fileCount ? "change" : "browse"}</p>
+          <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">Click to {file || fileCount ? "change" : "browse"}</p>
         </div>
       </div>
 
       {progress !== null && progress !== undefined && progress > 0 && progress < 100 && (
         <div className="mt-3">
-          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-gray-100 dark:bg-[#2a2a2a] rounded-full overflow-hidden">
             <div
               className="h-full bg-[#6B1F2A] rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-xs text-[#231F1E]/50 mt-1">{progress}% uploaded</p>
+          <p className="text-xs text-[#231F1E]/50 dark:text-gray-400 mt-1">{progress}% uploaded</p>
         </div>
       )}
       {progress === 100 && (

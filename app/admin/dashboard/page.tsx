@@ -30,16 +30,16 @@ export default function AdminDashboard() {
   }
 
   return (
-    <main className="px-4 sm:px-8 py-12 max-w-5xl mx-auto">
+    <main className="px-4 sm:px-8 py-12 max-w-5xl mx-auto dark:text-[#e5e5e5]">
       <div className="flex items-center justify-between mb-8">
         <h1 className="font-display text-2xl">Admin Dashboard</h1>
-        <button onClick={handleSignOut} className="text-sm text-[#6B1F2A] hover:underline">
+        <button onClick={handleSignOut} className="text-sm text-[#6B1F2A] dark:text-[#B84C5C] hover:underline">
           Sign Out
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-200 pb-3">
+      <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-200 dark:border-[#2a2a2a] pb-3">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -47,7 +47,7 @@ export default function AdminDashboard() {
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               activeTab === tab
                 ? "bg-[#6B1F2A] text-white"
-                : "bg-gray-100 text-[#231F1E]/60 hover:bg-gray-200"
+                : "bg-gray-100 dark:bg-[#2a2a2a] text-[#231F1E]/60 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#3a3a3a]"
             }`}
           >
             {tab}

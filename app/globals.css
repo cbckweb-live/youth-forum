@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ── Dark mode variant (class-based) ── */
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
   .prose blockquote {
     border-left: 0 !important;
@@ -13,11 +16,19 @@
 }
 
 :root {
+  color-scheme: light dark;
   --color-ink: #1c1b1a;
   --color-ivory: #f7f3ea;
   --color-terracotta: #a13d2b;
   --color-ochre: #c99a3c;
   --color-forest: #3c4a3d;
+}
+
+/* ── Dark mode custom properties ── */
+.dark {
+  --color-ink: #e5e5e5;
+  --color-ivory: #1e1e1e;
+  --color-forest: #6a9a6b;
 }
 
 .font-display {
@@ -69,6 +80,11 @@
   border: 1px solid rgba(255,255,255,0.75);
 }
 
+.dark .glass-light {
+  background: rgba(30,30,30,0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
 .glass-dark {
   background: rgba(20,18,15,0.82);
   backdrop-filter: blur(16px);
@@ -77,11 +93,21 @@
   box-shadow: 0 8px 40px rgba(0,0,0,0.18);
 }
 
+.dark .glass-dark {
+  background: rgba(30,30,30,0.90);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
 .glass-mid {
   background: rgba(255,255,255,0.30);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.50);
+}
+
+.dark .glass-mid {
+  background: rgba(30,30,30,0.40);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .btn-glass {
@@ -106,6 +132,17 @@
   border-color: rgba(255,255,255,0.90);
 }
 
+.dark .btn-glass {
+  color: rgba(229,229,229,0.85);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.dark .btn-glass:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.30);
+}
+
 .btn-glass-cta {
   display: inline-block;
   padding: 0.7rem 2.2rem;
@@ -124,6 +161,16 @@
 
 .btn-glass-cta:hover {
   background: rgba(247,243,234,0.80);
+}
+
+.dark .btn-glass-cta {
+  color: rgba(229,229,229,0.9);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.dark .btn-glass-cta:hover {
+  background: rgba(255,255,255,0.18);
 }
 
 .img-zoom {

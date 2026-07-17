@@ -59,9 +59,9 @@ export default async function BlogNewsPage({
   const baseUrl = await getBaseUrl();
 
   return (
-    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-5xl mx-auto">
+    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-5xl mx-auto dark:text-[#e5e5e5]">
       <h1 className="font-display text-2xl sm:text-3xl mb-4">Blog & News</h1>
-      <p className="text-[#231F1E]/70 leading-relaxed max-w-2xl mb-8">
+      <p className="text-[#231F1E]/70 dark:text-gray-300 leading-relaxed max-w-2xl mb-8">
         Updates, stories, and opinions from our community.
       </p>
 
@@ -78,7 +78,7 @@ export default async function BlogNewsPage({
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               (category ?? "") === tab.value
                 ? "bg-[#6B1F2A] text-white"
-                : "bg-gray-100 text-[#231F1E]/60 hover:bg-gray-200"
+                : "bg-gray-100 dark:bg-[#2a2a2a] text-[#231F1E]/60 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#3a3a3a]"
             }`}
           >
             {tab.label}
@@ -88,14 +88,14 @@ export default async function BlogNewsPage({
 
       {error && <p className="text-red-600">Something went wrong loading posts.</p>}
       {postList.length === 0 && !error && (
-        <p className="text-[#231F1E]/60">No posts yet.</p>
+        <p className="text-[#231F1E]/60 dark:text-gray-400">No posts yet.</p>
       )}
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
         {postList.map((post) => (
           <div
             key={post.id}
-            className="group bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
+            className="group bg-white dark:bg-[#1e1e1e] shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] rounded-2xl overflow-hidden hover:shadow-lg dark:hover:shadow-[0_6px_30px_rgba(0,0,0,0.4)] transition-shadow"
           >
             <Link href={`/about/blog-news/${post.slug}`} className="block">
               {post.photo_url && (
@@ -111,24 +111,24 @@ export default async function BlogNewsPage({
                 </div>
               )}
               <div className="p-5">
-                <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">
+                <p className="text-xs uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-2">
                   {post.category === "news" ? "News" : "Blog & Opinion"}
                 </p>
-                <h2 className="font-display text-lg leading-snug mb-2 group-hover:text-[#6B1F2A] transition-colors">
+                <h2 className="font-display text-lg leading-snug mb-2 group-hover:text-[#6B1F2A] dark:group-hover:text-[#B84C5C] transition-colors">
                   {post.title}
                 </h2>
                 <div
-                  className="text-sm text-[#231F1E]/60 line-clamp-3"
+                  className="text-sm text-[#231F1E]/60 dark:text-gray-400 line-clamp-3"
                   dangerouslySetInnerHTML={{
 __html: sanitizeHtml(post.content.replace(/<[^>]+>/g, " ").slice(0, 120) + "..."),
                   }}
                 />
-                <div className="mt-4 flex items-center justify-between text-xs text-[#231F1E]/40">
+                <div className="mt-4 flex items-center justify-between text-xs text-[#231F1E]/40 dark:text-gray-500">
                   {post.author_name && <span>{post.author_name}</span>}
                   <span>{new Date(post.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
                 </div>
                 {post.pdf_url && (
-                  <p className="mt-3 text-xs text-[#6B1F2A]">📄 PDF attached</p>
+                  <p className="mt-3 text-xs text-[#6B1F2A] dark:text-[#B84C5C]">📄 PDF attached</p>
                 )}
               </div>
             </Link>

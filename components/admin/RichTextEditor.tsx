@@ -22,7 +22,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: "min-h-[240px] px-4 py-3 focus:outline-none prose prose-sm max-w-none [&_blockquote]:border-l-0 [&_blockquote]:pl-0 [&_blockquote]:before:content-none [&_blockquote]:after:content-none",
+        class: "min-h-[240px] px-4 py-3 focus:outline-none prose prose-sm max-w-none [&_blockquote]:border-l-0 [&_blockquote]:pl-0 [&_blockquote]:before:content-none [&_blockquote]:after:content-none dark:prose-invert",
       },
     },
   });
@@ -36,7 +36,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
         e.preventDefault();
         action();
       }}
-      className={`px-2 py-1 text-sm rounded hover:bg-gray-200 ${active ? "bg-gray-200 font-semibold" : ""}`}
+      className={`px-2 py-1 text-sm rounded hover:bg-gray-200 dark:hover:bg-[#2a2a2a] ${active ? "bg-gray-200 dark:bg-[#3a3a3a] font-semibold" : ""}`}
     >
       {label}
     </button>
@@ -57,8 +57,8 @@ export default function RichTextEditor({ value, onChange }: Props) {
   };
 
   return (
-    <div className="border border-gray-300 rounded-lg overflow-hidden">
-      <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-gray-200 bg-gray-50">
+    <div className="border border-gray-300 dark:border-[#2a2a2a] rounded-lg overflow-hidden">
+      <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#1e1e1e]">
         {btn(() => editor.chain().focus().toggleBold().run(), "B", editor.isActive("bold"))}
         {btn(() => editor.chain().focus().toggleItalic().run(), "I", editor.isActive("italic"))}
         {btn(() => editor.chain().focus().toggleUnderline().run(), "U", editor.isActive("underline"))}

@@ -16,10 +16,10 @@ export const metadata: Metadata = {
 
 export default function AimsPage() {
   return (
-    <main className="bg-[#F5F0E6] text-[#231F1E] font-body min-h-screen">
+    <main className="bg-[#F5F0E6] dark:bg-[#151515] text-[#231F1E] dark:text-[#e5e5e5] font-body min-h-screen">
       <section className="animate-fadeIn px-4 sm:px-8 py-16 sm:py-20 max-w-4xl mx-auto">
         {/* ── Page heading ── */}
-        <h1 className="font-display text-3xl sm:text-4xl text-[#6B1F2A] mb-8">
+        <h1 className="font-display text-3xl sm:text-4xl text-[#6B1F2A] dark:text-[#B84C5C] mb-8">
           Aim and Vision
         </h1>
 
@@ -44,7 +44,7 @@ export default function AimsPage() {
           <p className="font-display italic leading-relaxed text-base sm:text-lg mb-4">
             &quot;being confident of this, that he who began a good work in you will carry it on to completion until the day of Christ Jesus.&quot;
           </p>
-          <p className="font-display text-sm text-[#6B1F2A]">
+          <p className="font-display text-sm text-[#6B1F2A] dark:text-[#B84C5C]">
             &mdash; Philippians 1:6
           </p>
         </div>

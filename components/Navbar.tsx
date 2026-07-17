@@ -40,14 +40,14 @@ export default function Navbar() {
   }, [open]);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100">
+    <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#151515]/90 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-[#2a2a2a]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative flex h-20 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
       <button
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 focus:outline-2 focus:-outline-offset-1 focus:outline-[#6B1F2A]"
+        className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] focus:outline-2 focus:-outline-offset-1 focus:outline-[#6B1F2A]"
       >
         <span className="sr-only">{open ? "Close main menu" : "Open main menu"}</span>
               {open ? (
@@ -76,7 +76,7 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-sm font-medium uppercase tracking-wide text-gray-700 hover:text-[#6B1F2A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
+                  className="text-sm font-medium uppercase tracking-wide text-gray-700 dark:text-gray-300 hover:text-[#6B1F2A] dark:hover:text-[#B84C5C] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
                 >
                   {item.name}
                 </Link>
@@ -94,7 +94,7 @@ export default function Navbar() {
                 key={item.name}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="block rounded-md px-3 py-2 text-base font-medium uppercase tracking-wide text-gray-700 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
+                className="block rounded-md px-3 py-2 text-base font-medium uppercase tracking-wide text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
               >
                 {item.name}
               </Link>

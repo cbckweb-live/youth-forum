@@ -64,7 +64,7 @@ export default async function LivingRoomPage() {
   if (error) {
     console.error("Failed to fetch episodes:", error);
     return (
-      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto">
+      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
         <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Image
             src="/livingroom.png"
@@ -74,18 +74,18 @@ export default async function LivingRoomPage() {
             unoptimized
             className="h-17 w-auto"
           />
-          <h1 className="font-display text-[2rem] text-[#6B1F2A]">
+          <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
             The Living Room
           </h1>
         </div>
-        <p className="text-[#231F1E]">Unable to load episodes at this time.</p>
+        <p className="text-[#231F1E] dark:text-gray-300">Unable to load episodes at this time.</p>
       </main>
     );
   }
 
   if (!episodes || episodes.length === 0) {
     return (
-      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto">
+      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
         <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <Image
             src="/livingroom.png"
@@ -95,17 +95,17 @@ export default async function LivingRoomPage() {
             unoptimized
             className="h-17 w-auto"
           />
-          <h1 className="font-display text-[2rem] text-[#6B1F2A]">
+          <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
             The Living Room
           </h1>
         </div>
-        <p className="text-[#231F1E]">No episodes available yet.</p>
+        <p className="text-[#231F1E] dark:text-gray-300">No episodes available yet.</p>
       </main>
     );
   }
 
-  return (
-    <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto">
+  return (      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
+
       <div className="mb-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
         <Image
           src="/livingroom.png"
@@ -115,7 +115,7 @@ export default async function LivingRoomPage() {
           unoptimized
           className="h-17 w-auto"
         />
-        <h1 className="font-display text-[2rem] text-[#6B1F2A]">
+        <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
           The Living Room
         </h1>
       </div>
@@ -127,13 +127,13 @@ export default async function LivingRoomPage() {
           return (
             <div
               key={episode.id}
-              className="bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-2xl p-6 sm:p-8"
+              className="bg-white/40 dark:bg-[#1e1e1e]/40 backdrop-blur-sm border border-white/50 dark:border-white/10 shadow-md rounded-2xl p-6 sm:p-8"
             >
               <div className="mb-6 flex flex-col gap-2">
-                <p className="text-xs text-[#231F1E]/50">
+                <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">
                   Episode {toRomanNumeral(episode.display_order)}
                 </p>
-                <h2 className="font-display text-2xl text-[#6B1F2A]">
+                <h2 className="font-display text-2xl text-[#6B1F2A] dark:text-[#B84C5C]">
                   {episode.title}
                 </h2>
               </div>
@@ -141,7 +141,7 @@ export default async function LivingRoomPage() {
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,480px)] lg:items-start">
                 <div className="space-y-4">
                   {episode.description && (
-                    <p className="text-[#231F1E] font-body leading-relaxed">
+                    <p className="text-[#231F1E] dark:text-gray-300 font-body leading-relaxed">
                       {episode.description}
                     </p>
                   )}
@@ -159,7 +159,7 @@ export default async function LivingRoomPage() {
                       />
                     </div>
                   ) : (
-                    <div className="aspect-video bg-gray-300 rounded-xl flex items-center justify-center text-[#231F1E] text-sm">
+                    <div className="aspect-video bg-gray-300 dark:bg-[#2a2a2a] rounded-xl flex items-center justify-center text-[#231F1E] dark:text-gray-300 text-sm">
                       No video available
                     </div>
                   )}

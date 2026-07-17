@@ -115,9 +115,9 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
 
   if (status === "checking-auth") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#151515] px-4">
         <div className="w-full max-w-sm text-center">
-          <p className="text-sm text-gray-600">Verifying your session...</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Verifying your session...</p>
         </div>
       </div>
     );
@@ -125,9 +125,9 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
 
   if (status === "error") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#151515] px-4">
         <div className="w-full max-w-sm">
-          <div className="bg-rose-50 text-rose-600 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-rose-50 dark:bg-[#2a1a1a] text-rose-600 px-4 py-3 rounded-lg text-sm">
             Invalid or Expired Link
           </div>
         </div>
@@ -137,9 +137,9 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
 
   if (status === "success") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#151515] px-4">
         <div className="w-full max-w-sm">
-          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center animate-pulse">
+          <div className="bg-emerald-50 dark:bg-[#0a2e1a] border border-emerald-200 dark:border-emerald-700 rounded-lg p-6 text-center animate-pulse">
             <svg
               className="w-12 h-12 mx-auto mb-3 text-emerald-600"
               fill="none"
@@ -148,8 +148,8 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            <h2 className="font-display text-lg text-emerald-800 mb-1">Success!</h2>
-            <p className="text-sm text-emerald-700">{successMessage}</p>
+            <h2 className="font-display text-lg text-emerald-800 dark:text-emerald-300 mb-1">Success!</h2>
+            <p className="text-sm text-emerald-700 dark:text-emerald-300">{successMessage}</p>
           </div>
         </div>
       </div>
@@ -157,10 +157,10 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#151515] px-4">
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-2xl mb-2 text-center">{headerText}</h1>
-        <p className="text-sm text-gray-600 text-center mb-8">{bodyText}</p>
+        <h1 className="font-display text-2xl mb-2 text-center dark:text-[#e5e5e5]">{headerText}</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-8">{bodyText}</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="password"

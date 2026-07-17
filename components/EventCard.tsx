@@ -68,10 +68,10 @@ export default function EventCard({
 
   return (
     <>
-      <div className="flex items-stretch gap-6 border border-[#231F1E]/10 rounded-2xl p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+      <div className="flex items-stretch gap-6 border border-[#231F1E]/10 dark:border-white/10 rounded-2xl p-6 shadow-md bg-white dark:bg-[#1e1e1e] hover:shadow-lg dark:hover:shadow-[0_6px_30px_rgba(0,0,0,0.4)] transition-shadow">
         {/* Text content */}
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">
+          <p className="text-xs uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-2">
             {new Date(event_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
             {event_end_date && event_end_date !== event_date && (
               <> — {new Date(event_end_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</>
@@ -79,7 +79,7 @@ export default function EventCard({
           </p>
           <h3 className="font-display text-2xl leading-snug mb-3">{title}</h3>
           {description && (
-            <p className="text-base text-[#231F1E]/70 line-clamp-3 leading-relaxed">
+            <p className="text-base text-[#231F1E]/70 dark:text-gray-400 line-clamp-3 leading-relaxed">
               {description}
             </p>
           )}

@@ -26,10 +26,10 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
+    <main className="min-h-screen flex items-center justify-center px-4 dark:bg-[#151515] dark:text-[#e5e5e5]">
       <div className="w-full max-w-sm">
         <h1 className="font-display text-2xl mb-2 text-center">Admin Login</h1>
-        <p className="text-sm text-[#231F1E]/50 text-center mb-8">CBCK Content Management</p>
+        <p className="text-sm text-[#231F1E]/50 dark:text-gray-400 text-center mb-8">CBCK Content Management</p>
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"

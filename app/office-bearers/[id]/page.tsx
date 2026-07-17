@@ -16,7 +16,7 @@ export default async function OfficeBearerDetailPage({
     .single();
 
   if (!person) {
-    return <main className="px-8 py-16 max-w-2xl mx-auto text-center">
+    return    <main className="px-8 py-16 max-w-2xl mx-auto text-center dark:text-[#e5e5e5]">
       <Link href="/office-bearers" className="text-sm text-[#6B1F2A] hover:underline mb-6 inline-block">
         ← Back to Office Bearers
       </Link>
@@ -25,7 +25,7 @@ export default async function OfficeBearerDetailPage({
   }
 
   return (
-    <main className="px-8 py-16 max-w-2xl mx-auto text-center">
+    <main className="px-8 py-16 max-w-2xl mx-auto text-center dark:text-[#e5e5e5]">
       <Link href="/office-bearers" className="text-sm text-[#6B1F2A] hover:underline mb-6 inline-block">
         ← Back to Office Bearers
       </Link>
@@ -41,16 +41,16 @@ export default async function OfficeBearerDetailPage({
         />
       )}
       <h1 className="font-display text-3xl mb-2">{person.name}</h1>
-      <p className="text-[#6B1F2A] uppercase tracking-wide mb-6">
+      <p className="text-[#6B1F2A] dark:text-[#B84C5C] uppercase tracking-wide mb-6">
         {person.role}
       </p>
       {person.bio ? (
         <SanitizedHtml
           html={person.bio}
-          className="prose prose-sm max-w-none text-[#231F1E]/80 prose-headings:font-display prose-a:text-[#6B1F2A] text-left"
+          className="prose prose-sm max-w-none text-[#231F1E]/80 dark:text-[#e5e5e5] prose-headings:font-display prose-a:text-[#6B1F2A] dark:prose-a:text-[#B84C5C] text-left"
         />
       ) : (
-        <p className="text-[#231F1E]/80 leading-relaxed text-justify">
+        <p className="text-[#231F1E]/80 dark:text-gray-300 leading-relaxed text-justify">
           Their story will be added here soon.
         </p>
       )}

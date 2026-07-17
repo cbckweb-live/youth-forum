@@ -64,9 +64,9 @@ export default async function CezoMepuPage() {
   const supervisorList = (supervisors as Supervisor[]) || [];
 
   return (
-    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-5xl mx-auto">
+    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-5xl mx-auto dark:text-[#e5e5e5]">
       <h1 className="font-display text-2xl sm:text-3xl mb-4">Cezo Mepu</h1>
-      <p className="text-[#231F1E]/70 leading-relaxed max-w-2xl mb-12">
+      <p className="text-[#231F1E]/70 dark:text-gray-300 leading-relaxed max-w-2xl mb-12">
         Cezo Mepu represents the nine regional local Colony Churches under the Chakhesang
         Baptist Church, Kohima. Each Cezo Mepu has their own youth community and is guided by
         dedicated Youth Supervisors who shepherds and serve their local
@@ -78,7 +78,7 @@ export default async function CezoMepuPage() {
       )}
 
       {locationList.length === 0 && !error && (
-        <p className="text-[#231F1E]/60">No locations have been added yet.</p>
+        <p className="text-[#231F1E]/60 dark:text-gray-400">No locations have been added yet.</p>
       )}
 
       <div className="space-y-4">
@@ -90,7 +90,7 @@ export default async function CezoMepuPage() {
           return (
             <section
               key={location.id}
-              className="rounded-2xl p-5 sm:p-6 bg-white shadow-md"
+              className="rounded-2xl p-5 sm:p-6 bg-white dark:bg-[#1e1e1e] shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
             >
               <div className="flex flex-col sm:flex-row gap-5">
                 {/* Photo */}
@@ -105,7 +105,7 @@ export default async function CezoMepuPage() {
                       unoptimized
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#231F1E]/05 flex flex-col items-center justify-center gap-2 text-[#231F1E]/30">
+                    <div className="w-full h-full bg-[#231F1E]/05 dark:bg-white/5 flex flex-col items-center justify-center gap-2 text-[#231F1E]/30 dark:text-gray-500">
                       <MapPinIcon className="size-8" />
                       <span className="text-xs">No photo yet</span>
                     </div>
@@ -131,15 +131,14 @@ export default async function CezoMepuPage() {
                   </div>
 
                   {location.address && (
-                    <p className="text-sm text-[#231F1E]/60 mb-2">{location.address}</p>
+                    <p className="text-sm text-[#231F1E]/60 dark:text-gray-400 mb-2">{location.address}</p>
                   )}
                   {location.description && (
-                    <p className="text-sm text-[#231F1E]/70 leading-relaxed mb-3">{location.description}</p>
+                    <p className="text-sm text-[#231F1E]/70 dark:text-gray-300 leading-relaxed mb-3">{location.description}</p>
                   )}
 
-                  {/* Supervisors */}
-                  <div className="mt-auto pt-3 border-t border-[#231F1E]/10">
-                    <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">
+                  {/* Supervisors */}                    <div className="mt-auto pt-3 border-t border-[#231F1E]/10 dark:border-white/10">
+                    <p className="text-xs uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-2">
                       Youth Supervisors
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -165,7 +164,7 @@ export default async function CezoMepuPage() {
                           </Link>
                         ))
                       ) : (
-                        <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-[#231F1E]/20 text-[#231F1E]/40 text-sm">
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-[#231F1E]/20 dark:border-white/10 text-[#231F1E]/40 dark:text-gray-500 text-sm">
                           Not yet assigned
                         </span>
                       )}

@@ -49,7 +49,7 @@ export default function OfficeBearersClient({ featured, standalone, rest, teams 
           placeholder="Search by name or role..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full border border-gray-200 rounded-full px-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white shadow-sm"
+          className="w-full border border-gray-200 dark:border-[#2a2a2a] rounded-full px-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] shadow-sm"
         />
       </div>
 
@@ -106,7 +106,7 @@ export default function OfficeBearersClient({ featured, standalone, rest, teams 
       )}
 
       {isSearching && filteredFeatured.length === 0 && filteredStandalone.length === 0 && filteredRest.length === 0 && (
-        <p className="text-center text-[#231F1E]/50 text-sm">No results for &quot;{query}&quot;</p>
+        <p className="text-center text-[#231F1E]/50 dark:text-gray-400 text-sm">No results for &quot;{query}&quot;</p>
       )}
     </>
   );

@@ -121,11 +121,10 @@ export default function EventsSection() {
 
   const inputCls = "w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]";
 
-  const EventRow = ({ event }: { event: Event }) => (
-    <div className="bg-white shadow-sm rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+  const EventRow = ({ event }: { event: Event }) => (      <div className="bg-white dark:bg-[#1e1e1e] shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <p className="font-medium text-sm">{event.title}</p>
-        <p className="text-xs text-[#231F1E]/50">
+        <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">
           {new Date(event.event_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           {event.event_end_date && event.event_end_date !== event.event_date && (
             <> — {new Date(event.event_end_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</>
@@ -133,7 +132,7 @@ export default function EventsSection() {
         </p>
       </div>
       <div className="flex gap-3 text-sm">
-        <button onClick={() => handleEdit(event)} className="text-[#6B1F2A] hover:underline">Edit</button>
+        <button onClick={() => handleEdit(event)} className="text-[#6B1F2A] dark:text-[#B84C5C] hover:underline">Edit</button>
         <button onClick={() => setConfirmDeleteId(event.id)} className="text-red-500 hover:underline">Delete</button>
       </div>
     </div>
@@ -151,24 +150,24 @@ export default function EventsSection() {
       </div>
 
       <div>
-        <h3 className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-3">Upcoming</h3>
+        <h3 className="text-xs uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-3">Upcoming</h3>
         <div className="space-y-3">
           {upcoming.length > 0 ? upcoming.map((e) => <EventRow key={e.id} event={e} />) : (
-            <p className="text-sm text-[#231F1E]/50">No upcoming events.</p>
+            <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">No upcoming events.</p>
           )}
         </div>
       </div>
 
       {past.length > 0 && (
         <div>
-          <h3 className="text-xs uppercase tracking-widest text-[#231F1E]/40 mb-3">Past Events</h3>
+          <h3 className="text-xs uppercase tracking-widest text-[#231F1E]/40 dark:text-gray-500 mb-3">Past Events</h3>
           <div className="space-y-3">
             {past.slice().reverse().map((e) => <EventRow key={e.id} event={e} />)}
           </div>
         </div>
       )}
 
-      {events.length === 0 && <p className="text-sm text-[#231F1E]/50">No events yet.</p>}
+      {events.length === 0 && <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">No events yet.</p>}
 
       {confirmDeleteId && (
         <ConfirmDialog
@@ -180,14 +179,14 @@ export default function EventsSection() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto relative">
-            <button onClick={handleCloseModal} className="absolute top-4 right-4 text-[#231F1E]/40 hover:text-[#231F1E] text-xl leading-none" aria-label="Close">✕</button>
-            <h2 className="font-display text-lg mb-5">{editingId ? "Edit Event" : "New Event"}</h2>
+          <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-md p-6 max-h-[90vh] overflow-y-auto relative">
+            <button onClick={handleCloseModal} className="absolute top-4 right-4 text-[#231F1E]/40 dark:text-gray-400 hover:text-[#231F1E] dark:hover:text-[#e5e5e5] text-xl leading-none" aria-label="Close">✕</button>
+            <h2 className="font-display text-lg mb-5 dark:text-[#e5e5e5]">{editingId ? "Edit Event" : "New Event"}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input type="text" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className={inputCls} />
               <input type="date" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} required className={inputCls} />
               <div>
-                <p className="text-xs text-[#231F1E]/50 mb-1">End date (optional — for multi-day events)</p>
+                <p className="text-xs text-[#231F1E]/50 dark:text-gray-400 mb-1">End date (optional — for multi-day events)</p>
                 <input type="date" value={form.event_end_date || ""} min={form.event_date} onChange={(e) => setForm({ ...form, event_end_date: e.target.value || null })} className={inputCls} />
               </div>
               <textarea placeholder="Description (optional)" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} className={inputCls} />
@@ -208,7 +207,7 @@ export default function EventsSection() {
                 <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
                   {saving ? "Saving..." : editingId ? "Update Event" : "Create Event"}
                 </button>
-                <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 hover:underline">Cancel</button>
+                <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 dark:text-gray-400 hover:underline">Cancel</button>
               </div>
             </form>
           </div>

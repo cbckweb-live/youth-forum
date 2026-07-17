@@ -99,26 +99,26 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 px-4">
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-5 max-h-[95vh] overflow-y-auto flex flex-col"
+        className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-3xl p-5 max-h-[95vh] overflow-y-auto flex flex-col"
         data-cropper-root="true"
       >
 
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-display text-lg">Crop Image</h3>
+          <h3 className="font-display text-lg dark:text-[#e5e5e5]">Crop Image</h3>
           <button
             type="button"
             onClick={onCancel}
             aria-label="Close"
-            className="w-9 h-9 rounded-full grid place-items-center text-[#231F1E]/60 hover:text-[#231F1E] hover:bg-black/5 transition-colors"
+            className="w-9 h-9 rounded-full grid place-items-center text-[#231F1E]/60 dark:text-gray-400 hover:text-[#231F1E] dark:hover:text-[#e5e5e5] hover:bg-black/5 transition-colors"
           >
             ✕
           </button>
         </div>
 
-        <p className="text-xs text-[#231F1E]/60 mb-3">Drag to adjust the crop area.</p>
+        <p className="text-xs text-[#231F1E]/60 dark:text-gray-400 mb-3">Drag to adjust the crop area.</p>
 
         <div
-  className="relative select-none bg-gray-100 rounded-lg overflow-auto"
+  className="relative select-none bg-gray-100 dark:bg-[#2a2a2a] rounded-lg overflow-auto"
   style={{ maxHeight: "60vh" }}
 >
   <ReactCrop
@@ -138,7 +138,7 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
     />
   </ReactCrop>
   {!imageLoaded && (
-    <div className="absolute inset-0 flex items-center justify-center text-sm text-[#231F1E]/50">
+    <div className="absolute inset-0 flex items-center justify-center text-sm text-[#231F1E]/50 dark:text-gray-400">
       Loading...
     </div>
   )}
@@ -150,7 +150,7 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
           <button
             type="button"
             onClick={() => setCrop({ unit: "%", x: 25, y: 25, width: 50, height: 50 })}
-            className="text-sm text-[#231F1E]/60 hover:underline"
+            className="text-sm text-[#231F1E]/60 dark:text-gray-400 hover:underline"
           >
             Reset
           </button>
@@ -159,7 +159,7 @@ export default function ImageCropper({ imageFile, onCropped, onCancel }: Props) 
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
             >
               Cancel
             </button>

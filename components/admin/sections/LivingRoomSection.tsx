@@ -105,18 +105,18 @@ export default function LivingRoomSection() {
           episodes.map((episode) => (
             <div
               key={episode.id}
-              className="bg-white shadow-sm rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="bg-white dark:bg-[#1e1e1e] shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div>
                 <p className="font-medium text-sm">{episode.title}</p>
-                <p className="text-xs text-[#231F1E]/50">
+                <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">
                   Episode #{episode.display_order}
                 </p>
               </div>
               <div className="flex gap-3 text-sm">
                 <button
                   onClick={() => handleEdit(episode)}
-                  className="text-[#6B1F2A] hover:underline"
+                  className="text-[#6B1F2A] dark:text-[#B84C5C] hover:underline"
                 >
                   Edit
                 </button>
@@ -130,7 +130,7 @@ export default function LivingRoomSection() {
             </div>
           ))
         ) : (
-          <p className="text-sm text-[#231F1E]/50">No episodes yet.</p>
+          <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">No episodes yet.</p>
         )}
       </div>
 
@@ -146,15 +146,15 @@ export default function LivingRoomSection() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto relative">
+          <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-md p-6 max-h-[90vh] overflow-y-auto relative">
             <button
               onClick={handleCloseModal}
-              className="absolute top-4 right-4 text-[#231F1E]/40 hover:text-[#231F1E] text-xl leading-none"
+              className="absolute top-4 right-4 text-[#231F1E]/40 dark:text-gray-400 hover:text-[#231F1E] dark:hover:text-[#e5e5e5] text-xl leading-none"
               aria-label="Close"
             >
               ✕
             </button>
-            <h2 className="font-display text-lg mb-5">
+            <h2 className="font-display text-lg mb-5 dark:text-[#e5e5e5]">
               {editingId ? "Edit Episode" : "New Episode"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -185,7 +185,7 @@ export default function LivingRoomSection() {
                   }
                   className={inputCls}
                 />
-                <p className="text-xs text-[#231F1E]/50 mt-1">
+                <p className="text-xs text-[#231F1E]/50 dark:text-gray-400 mt-1">
                   Paste any YouTube link — it will embed automatically
                 </p>
               </div>
@@ -219,7 +219,7 @@ export default function LivingRoomSection() {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="text-sm text-[#231F1E]/50 hover:underline"
+                  className="text-sm text-[#231F1E]/50 dark:text-gray-400 hover:underline"
                 >
                   Cancel
                 </button>

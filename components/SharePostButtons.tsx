@@ -44,7 +44,7 @@ export default function SharePostButtons({ title, url }: SharePostButtonsProps) 
     <button
       type="button"
       onClick={handleShare}
-      className="inline-flex items-center justify-center rounded-full bg-[#6B1F2A] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#571824]"
+      className="inline-flex items-center justify-center rounded-full bg-[#6B1F2A] dark:bg-[#8a2836] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#571824] dark:hover:bg-[#7d2432]"
     >
       {copied ? "Link copied" : "Share"}
     </button>

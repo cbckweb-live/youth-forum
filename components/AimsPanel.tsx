@@ -177,7 +177,7 @@ export default function AimsPanel() {
         }}
       >
         {/* ── Inner panel ── */}
-        <div className="bg-[#FAF6EE]">
+        <div className="bg-[#FAF6EE] dark:bg-[#1e1e1e]">
           {/* Gold dowel bar across the top */}
           <div
             className="h-1.5 w-full bg-gradient-to-r from-[#C99A3C]/40 via-[#C99A3C] to-[#C99A3C]/40"
@@ -229,11 +229,11 @@ export default function AimsPanel() {
 
                     {/* Title + summary + full text */}
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-sm sm:text-base md:text-lg font-bold text-[#6B1F2A] mb-1">
+                      <h3 className="font-display text-sm sm:text-base md:text-lg font-bold text-[#6B1F2A] dark:text-[#B84C5C] mb-1">
                         {aim.title}
                       </h3>
                       {/* Summary line (always visible) */}
-                      <p className="text-xs sm:text-sm md:text-base text-[#231F1E]/80 leading-relaxed">
+                      <p className="text-xs sm:text-sm md:text-base text-[#231F1E]/80 dark:text-gray-300 leading-relaxed">
                         {aim.summary}
                       </p>
 
@@ -246,8 +246,7 @@ export default function AimsPanel() {
                           maxHeight: expanded ? '240px' : '0',
                           opacity: expanded ? 1 : 0,
                         }}
-                      >
-                        <p className="text-xs sm:text-sm md:text-base text-[#231F1E]/90 leading-relaxed pt-2 border-t border-[#C99A3C]/20 mt-2">
+                      >                          <p className="text-xs sm:text-sm md:text-base text-[#231F1E]/90 dark:text-gray-200 leading-relaxed pt-2 border-t border-[#C99A3C]/20 mt-2">
                           {aim.fullText}
                         </p>
                       </div>

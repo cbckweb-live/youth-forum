@@ -112,7 +112,7 @@ export default function HeroSlider() {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       aria-live="polite"
-      className="relative w-full max-w-6xl mx-auto h-[220px] sm:h-[320px] md:h-[420px] rounded-xl border border-white/40 bg-white/30 backdrop-blur-sm shadow-lg overflow-hidden p-1 touch-pan-y"
+      className="relative w-full max-w-6xl mx-auto h-[220px] sm:h-[320px] md:h-[420px] rounded-xl border border-white/40 dark:border-white/10 bg-white/30 dark:bg-black/40 backdrop-blur-sm shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] overflow-hidden p-1 touch-pan-y"
     >
       {/* ── Stacked images with true crossfade ── */}
       {images.map((src, i) => {

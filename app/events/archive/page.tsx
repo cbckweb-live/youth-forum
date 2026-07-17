@@ -23,16 +23,16 @@ export default async function EventsArchivePage() {
     .order("event_date", { ascending: false });
 
   return (
-    <main className="px-8 py-16 max-w-3xl mx-auto">
+    <main className="px-8 py-16 max-w-3xl mx-auto dark:text-[#e5e5e5]">
       <div className="flex items-center justify-between mb-8">
         <h1 className="font-display text-3xl">Past Years</h1>
-        <Link href="/events" className="text-sm text-[#6B1F2A] hover:underline">
+        <Link href="/events" className="text-sm text-[#6B1F2A] dark:text-[#B84C5C] hover:underline">
           ← Back to This Year
         </Link>
       </div>
 
       {events && events.length === 0 && (
-        <p className="text-[#231F1E]/60">No past events on record yet.</p>
+        <p className="text-[#231F1E]/60 dark:text-gray-400">No past events on record yet.</p>
       )}
 
       <div className="space-y-4">

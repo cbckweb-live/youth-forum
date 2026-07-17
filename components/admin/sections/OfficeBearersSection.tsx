@@ -244,8 +244,7 @@ export default function OfficeBearersSection() {
         <option value="">No team</option>
         {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
       </select>
-      <div>
-        <label className="block text-sm font-medium text-[#231F1E] mb-2">Bio (optional)</label>
+      <div>              <label className="block text-sm font-medium text-[#231F1E] dark:text-[#e5e5e5] mb-2">Bio (optional)</label>
         <RichTextEditor key={editingId || 'new'} value={form.bio || ""} onChange={(val) => setForm({ ...form, bio: val })} />
       </div>
       <FileUploadInput
@@ -262,7 +261,7 @@ export default function OfficeBearersSection() {
         <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
           {saving ? "Saving..." : editingId ? "Update" : "Add Person"}
         </button>
-        <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 hover:underline">Cancel</button>
+        <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 dark:text-gray-400 hover:underline">Cancel</button>
       </div>
     </form>
   );
@@ -271,14 +270,14 @@ export default function OfficeBearersSection() {
     <div className="space-y-6">
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <input type="text" placeholder="Search by name or role..." value={search} onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-full px-5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] flex-1 min-w-50" />
+          className="border border-gray-300 dark:border-[#2a2a2a] rounded-full px-5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] flex-1 min-w-50" />
         <div className="flex gap-2">
           <button onClick={() => { setEditingId(null); setForm(emptyPerson()); setShowEditModal(true); }}
             className="bg-[#6B1F2A] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#7d2432] transition-colors">
             + Add Person
           </button>
           <button onClick={() => setShowTeamsModal(true)}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors">
+            className="border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors dark:text-[#e5e5e5]">
             Manage Teams
           </button>
         </div>
@@ -286,27 +285,27 @@ export default function OfficeBearersSection() {
 
       <div className="space-y-3">
         {filtered.map((person) => (
-          <div key={person.id} className="bg-white shadow-sm rounded-xl px-5 py-4 flex items-center justify-between gap-3">
+          <div key={person.id} className="bg-white dark:bg-[#1e1e1e] shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] rounded-xl px-5 py-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               {person.photo_url ? (
                 <Image src={person.photo_url} alt={person.name} width={36} height={36} unoptimized
                   onError={(e) => { (e.target as HTMLImageElement).src = "/images/placeholder.jpg"; }}
                   className="w-9 h-9 rounded-full object-cover shrink-0" />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-[#2a2a2a] shrink-0" />
               )}
               <div>
                 <p className="font-medium text-sm">{person.name}</p>
-                <p className="text-xs text-[#231F1E]/50">{person.role || "—"}{person.team_id && ` · ${teams.find((t) => t.id === person.team_id)?.name}`}</p>
+                <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">{person.role || "—"}{person.team_id && ` · ${teams.find((t) => t.id === person.team_id)?.name}`}</p>
               </div>
             </div>
             <div className="flex gap-3 text-sm">
-              <button onClick={() => handleEdit(person)} className="text-[#6B1F2A] hover:underline">Edit</button>
+              <button onClick={() => handleEdit(person)} className="text-[#6B1F2A] dark:text-[#B84C5C] hover:underline">Edit</button>
               <button onClick={() => setConfirmDeleteId(person.id)} className="text-red-500 hover:underline">Delete</button>
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <p className="text-sm text-[#231F1E]/50">No results.</p>}
+        {filtered.length === 0 && <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">No results.</p>}
       </div>
 
       {confirmDeleteId && (
@@ -318,11 +317,11 @@ export default function OfficeBearersSection() {
 
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-3 mb-5">
-              <h2 className="font-display text-lg">{editingId ? "Edit Person" : "Add Person"}</h2>
+              <h2 className="font-display text-lg dark:text-[#e5e5e5]">{editingId ? "Edit Person" : "Add Person"}</h2>
               <button type="button" onClick={handleCloseModal} aria-label="Close"
-                className="w-9 h-9 rounded-full grid place-items-center text-[#231F1E]/60 hover:text-[#231F1E] hover:bg-black/5 transition-colors shrink-0">✕</button>
+                className="w-9 h-9 rounded-full grid place-items-center text-[#231F1E]/60 dark:text-gray-400 hover:text-[#231F1E] dark:hover:text-[#e5e5e5] hover:bg-black/5 transition-colors shrink-0">✕</button>
             </div>
             {PersonForm}
           </div>
@@ -331,10 +330,10 @@ export default function OfficeBearersSection() {
 
       {showTeamsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-display text-lg">Manage Teams</h2>
-              <button onClick={() => setShowTeamsModal(false)} className="text-sm text-[#231F1E]/50 hover:underline">Close</button>
+              <h2 className="font-display text-lg dark:text-[#e5e5e5]">Manage Teams</h2>
+              <button onClick={() => setShowTeamsModal(false)} className="text-sm text-[#231F1E]/50 dark:text-gray-400 hover:underline">Close</button>
             </div>
             <form onSubmit={handleAddTeam} className="flex gap-2 mb-4">
               <input type="text" placeholder="New team name" value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} className={`${inputCls} flex-1`} />
@@ -342,12 +341,12 @@ export default function OfficeBearersSection() {
             </form>
             <div className="space-y-2">
               {teams.map((team) => (
-                <div key={team.id} className="flex items-center justify-between px-4 py-2 rounded-lg bg-gray-50">
+                <div key={team.id} className="flex items-center justify-between px-4 py-2 rounded-lg bg-gray-50 dark:bg-[#2a2a2a]">
                   <p className="text-sm">{team.name}</p>
                   <button onClick={() => setConfirmDeleteTeamId(team.id)} className="text-red-500 text-sm hover:underline">Delete</button>
                 </div>
               ))}
-              {teams.length === 0 && <p className="text-sm text-[#231F1E]/50">No teams yet.</p>}
+              {teams.length === 0 && <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">No teams yet.</p>}
             </div>
           </div>
         </div>

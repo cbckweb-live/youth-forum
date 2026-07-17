@@ -81,11 +81,11 @@ function CalendarDate({ startDate, endDate }: { startDate: string; endDate?: str
   const endDay = isMultiday ? new Date(endDate).getDate() : null;
 
   return (
-    <div className="flex flex-col items-center justify-center border border-[#231F1E]/10 rounded-xl shadow-sm bg-white w-16 h-16 shrink-0">
-      <span className="text-[10px] uppercase tracking-wider text-[#6B1F2A] font-medium leading-none mb-0.5">
+    <div className="flex flex-col items-center justify-center border border-[#231F1E]/10 dark:border-white/10 rounded-xl shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] bg-white dark:bg-[#2a2a2a] w-16 h-16 shrink-0">
+      <span className="text-[10px] uppercase tracking-wider text-[#6B1F2A] dark:text-[#B84C5C] font-medium leading-none mb-0.5">
         {startMonth}
       </span>
-      <span className="text-xl font-bold leading-none">
+      <span className="text-xl font-bold leading-none dark:text-[#f0f0f0]">
         {startDay}
         {isMultiday && <>-{endDay}</>}
       </span>
@@ -159,11 +159,11 @@ export default async function HomePage() {
   const posts = (recentPosts as Post[] | null) ?? [];
 
   return (
-    <main className="bg-white text-[#231F1E]">
+    <main className="bg-white dark:bg-[#151515] text-[#231F1E] dark:text-[#e5e5e5]">
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
 
 <section
-  className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16 max-w-[92vw] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
+  className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16  w-full max-w-[calc(100vw-2rem)] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
   style={{
     backgroundImage: "url('/background.jpg')",
     backgroundSize: "cover",
@@ -173,90 +173,118 @@ export default async function HomePage() {
 >
   {/* Radial gradient: clear/light center, darker white toward the edges */}
   <div
-    className="absolute inset-0"
+    className="absolute inset-0 dark:hidden"
     style={{
       background:
         "radial-gradient(ellipse at center, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.45) 35%, rgba(255,255,255,0.75) 65%, rgba(255,255,255,0.95) 100%)",
     }}
   ></div>
 
+  {/* Dark mode radial overlay */}
+  <div
+    className="hidden dark:block absolute inset-0"
+    style={{
+      background:
+        "radial-gradient(ellipse at center, rgba(10,10,10,0.35) 0%, rgba(15,15,15,0.60) 35%, rgba(20,20,20,0.80) 65%, rgba(21,21,21,0.95) 100%)",
+    }}
+  ></div>
 
   {/* Frosted card sitting over the text, on top of the radial gradient */}
-  <div className="relative text-center bg-white/75 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10">
-    <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] mb-4 font-medium text-center mx-auto">
+  <div className="relative text-center bg-white/75 dark:bg-[#1e1e1e]/85 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+    <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-4 font-medium text-center mx-auto">
   Welcome
 </p>
-<h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black font-normal text-balance">
+<h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black dark:text-[#f0f0f0] font-normal text-balance">
   Chakhesang Baptist Church Kohima,
   <br /> Youth Ministry
 </h1>
-<h2 className="text-[#6B1F2A] text-xl sm:text-2xl leading-tight mb-2 text-center font-normal">
+<h2 className="text-[#6B1F2A] dark:text-[#B84C5C] text-xl sm:text-2xl leading-tight mb-2 text-center font-normal">
   Theme: &quot;Renew Thy Church&quot;
 </h2>
-<h2 className="text-[#6B1F2A] text-xl sm:text-2xl leading-tight mb-4 text-center font-normal">
+<h2 className="text-[#6B1F2A] dark:text-[#B84C5C] text-xl sm:text-2xl leading-tight mb-4 text-center font-normal">
   Book Focus: Revelations
 </h2>
-    <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
+    <p className="font-display text-black dark:text-[#e5e5e5] leading-relaxed max-w-3xl mx-auto mb-6">
       The official Youth Forum of Chakhesang Baptist Church Kohima &mdash;
       a community of young believers growing together in faith, fellowship,
       and service.
     </p>
-    <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
+    <p className="font-display text-black dark:text-[#e5e5e5] leading-relaxed max-w-3xl mx-auto mb-6">
       Established in 1968, with a growing family of over 1,000 members,
       we continue to cultivate a Christ&ndash;centred community where worship, discipleship, fellowship,
       leadership, creativity, service, and spiritual care to shape every aspect of our journey together.
     </p>
-    <p className="font-display text-black leading-relaxed max-w-3xl mx-auto mb-6">
+    <p className="font-display text-black dark:text-[#e5e5e5] leading-relaxed max-w-3xl mx-auto mb-6">
       Whether you are visiting for the first time, seeking a place to belong,
       or looking to deepen your walk with God, we warmly welcome you to be part of this growing family.
     </p>
-    <p className="font-display italic text-black leading-relaxed max-w-3xl mx-auto mb-6">
+    <p className="font-display italic text-black dark:text-[#e5e5e5] leading-relaxed max-w-3xl mx-auto mb-6">
       &quot;Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.&quot;
     </p>
-    <p className="font-display mt-3 text-sm text-[#27060b]">
+    <p className="font-display mt-3 text-sm text-[#6B1F2A] dark:text-[#B84C5C]">
       — 1 Timothy 4:12
     </p>
+
+    {/* Our Story — Frosted glass button */}
+    <div className="mt-8">
+      <Link
+        href="/about/journey"
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium tracking-wide text-[#6B1F2A]/90 dark:text-[#B84C5C] bg-white/40 dark:bg-[#2a2a2a]/60 backdrop-blur-sm border border-white/60 dark:border-white/20 shadow-sm hover:bg-white/60 dark:hover:bg-[#3a3a3a]/60 hover:shadow-md dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:text-[#6B1F2A] dark:hover:text-[#D46A7A] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]/40 group"
+      >
+        <span>Our Story</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </Link>
+    </div>
   </div>
 </section>
 
-<section className="px-4 sm:px-8 py-8 sm:py-10">
+<section className="px-4 sm:px-8 py-12 sm:py-16">
   <div className="relative z-10 flex justify-center">
     <HeroSlider />
   </div>
 </section>
 
       {/* Upcoming Events */}
-      <section className="px-4 sm:px-8 py-12 sm:py-16">
+      <section className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <h2 className="font-display text-2xl text-center sm:text-left text-balance">
             Upcoming Events
           </h2>
-          <Link href="/events" className="text-sm text-[#6B1F2A] hover:underline">
+          <Link href="/events" className="text-sm text-[#6B1F2A] dark:text-[#B84C5C] hover:underline">
             View all →
           </Link>
         </div>
 
         {upcoming.length === 0 ? (
-          <p className="text-[#231F1E]/60 text-center">No upcoming events.</p>
+          <p className="text-[#231F1E]/60 dark:text-gray-400 text-center">No upcoming events.</p>
         ) : (
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {upcoming.map((event) => (
               <Link
                 key={event.id}
                 href="/events"
-                className="flex flex-col sm:flex-row sm:items-stretch gap-6 border border-[#231F1E]/10 rounded-2xl p-6 shadow-md bg-white hover:shadow-lg transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
+                className="flex flex-col sm:flex-row sm:items-stretch gap-6 border border-[#231F1E]/10 dark:border-white/10 rounded-2xl p-6 shadow-md bg-white dark:bg-[#1e1e1e] hover:shadow-lg dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
               >
                 <CalendarDate startDate={event.event_date} endDate={event.event_end_date} />
 
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <p className="text-xs text-[#6B1F2A] mb-2">
+                  <p className="text-xs text-[#6B1F2A] dark:text-[#B84C5C] mb-2">
                     {formatRange(event.event_date, event.event_end_date ?? event.event_date)}
                   </p>
                   <h3 className="font-display text-2xl leading-snug mb-2">
                     {event.title}
                   </h3>
                   {event.description && (
-                    <p className="text-base text-[#231F1E]/70 line-clamp-3 leading-relaxed">
+                    <p className="text-base text-[#231F1E]/70 dark:text-gray-400 line-clamp-3 leading-relaxed">
                       {truncate(event.description, 140)}
                     </p>
                   )}
@@ -283,25 +311,25 @@ export default async function HomePage() {
       </section>
 
       {/* Blog & News */}
-      <section className="px-4 sm:px-8 py-12 sm:py-16">
+      <section className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <h2 className="font-display text-2xl text-center sm:text-left text-balance">
             Recent Blog &amp; News
           </h2>
-          <Link href="/about/blog-news" className="text-sm text-[#6B1F2A] hover:underline">
+          <Link href="/about/blog-news" className="text-sm text-[#6B1F2A] dark:text-[#B84C5C] hover:underline">
             Read more →
           </Link>
         </div>
 
         {posts.length === 0 ? (
-          <p className="text-[#231F1E]/60 text-center">No posts yet.</p>
+          <p className="text-[#231F1E]/60 dark:text-gray-400 text-center">No posts yet.</p>
         ) : (
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {posts.map((post) => (
               <Link
                 key={post.id}
                 href={`/about/blog-news/${post.slug}`}
-                className="group bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-lg transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
+                className="group bg-white dark:bg-[#1e1e1e] shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] rounded-2xl overflow-hidden hover:shadow-lg dark:hover:shadow-[0_6px_30px_rgba(0,0,0,0.6)] transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
               >
                 {post.photo_url && (
                   <div className="relative h-36">
@@ -317,16 +345,16 @@ export default async function HomePage() {
                   </div>
                 )}
                 <div className="p-5">
-                  <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">
+                  <p className="text-xs uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-2">
                     {CATEGORY_LABELS[post.category] ?? "Uncategorised"}
                   </p>
-                  <h3 className="font-display text-lg leading-snug mb-2 group-hover:text-[#6B1F2A] transition-colors">
+                  <h3 className="font-display text-lg leading-snug mb-2 group-hover:text-[#6B1F2A] dark:group-hover:text-[#B84C5C] transition-colors">
                     {post.title}
                   </h3>
-                  <div className="text-sm text-[#231F1E]/70 line-clamp-4">
+                  <div className="text-sm text-[#231F1E]/70 dark:text-gray-400 line-clamp-4">
                     {truncate(post.content, 160)}
                   </div>
-                  <div className="mt-4 text-sm font-medium text-[#6B1F2A] group-hover:underline">
+                  <div className="mt-4 text-sm font-medium text-[#6B1F2A] dark:text-[#B84C5C] group-hover:underline">
                     Read more →
                   </div>
                 </div>
@@ -337,7 +365,7 @@ export default async function HomePage() {
       </section>
 
       {/* Leadership Section */}
-      <section className="px-4 sm:px-8 py-12 sm:py-16">
+      <section className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20">
         <h2 className="font-display text-2xl mb-6 text-center text-balance">
           Our Leadership
         </h2>
@@ -349,7 +377,7 @@ export default async function HomePage() {
       </section>
 
       {/* Navigation Cards */}
-      <section className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4 sm:px-8 py-12 sm:py-16">
+      <section className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20">
         {[
           {
             title: "Journey",
@@ -365,23 +393,23 @@ export default async function HomePage() {
           },
           {
             title: "Blog/News",
-            text: "How our community is organized and led.",
+            text: "Stories, updates, and reflections from our community.",
             href: "/about/blog-news",
             Icon: PencilSquareIcon,
           },
         ].map((item) => (
           <div
             key={item.title}
-            className="text-center bg-white/40 backdrop-blur-sm border border-white/50 shadow-md rounded-xl p-6"
+            className="text-center bg-white/40 dark:bg-[#1e1e1e]/40 backdrop-blur-sm border border-white/50 dark:border-white/10 shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] rounded-xl p-6"
           >
             <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#6B1F2A] flex items-center justify-center">
               <item.Icon aria-hidden="true" className="size-6 text-white" />
             </div>
             <h3 className="font-display text-lg mb-2">{item.title}</h3>
-            <p className="text-sm text-[#231F1E]/70 mb-3">{item.text}</p>
+            <p className="text-sm text-[#231F1E]/70 dark:text-gray-400 mb-3">{item.text}</p>
             <Link
               href={item.href}
-              className="text-sm font-medium text-[#6B1F2A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
+              className="text-sm font-medium text-[#6B1F2A] dark:text-[#B84C5C] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
             >
               Read More →
             </Link>

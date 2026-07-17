@@ -61,7 +61,7 @@ export const metadata: Metadata = {
 
 export default function JourneyPage() {
   return (
-    <main className="overflow-x-hidden bg-white text-[#1c1b1a] font-body min-h-screen">
+    <main className="overflow-x-hidden bg-white dark:bg-[#151515] text-[#1c1b1a] dark:text-[#e5e5e5] font-body min-h-screen">
       {/* ══ HERO ════════════════════════════════════════════════ */}
       <section className="relative text-center overflow-hidden min-h-[420px]">
 
@@ -83,10 +83,10 @@ export default function JourneyPage() {
 
         {/* text written directly over the image */}
         <div className="relative z-10 py-32 px-6 flex flex-col items-center text-[#f7f3ea]">
-          <p className="uppercase font-semibold mb-3 text-[#f8f8ff] tracking-[0.35em] text-[0.78rem]">
+          <p                className="uppercase font-semibold mb-3 text-[#f8f8ff] tracking-[0.35em] text-[0.78rem]">
             Our Story
           </p>
-          <h1 className="font-display text-4xl md:text-6xl font-bold leading-tight mb-5 text-[#c9a84c]">
+          <h1 className="font-display text-4xl md:text-6xl font-bold leading-tight mb-5 text-[#c9a84c] dark:text-[#d4b04a]">
             Our Journey
           </h1>
           <p className="mx-auto text-base leading-relaxed mb-10 max-w-2xl">
@@ -118,11 +118,11 @@ export default function JourneyPage() {
                   <div className="flex items-center justify-center">
                     <div className="w-7 h-7 rounded-full bg-[#7b1f1f] shadow-[0_0_0_5px_rgba(123,31,31,0.15),0_0_0_9px_rgba(123,31,31,0.06),0_4px_10px_rgba(0,0,0,0.20)]" />
                   </div>
-                  <span className="font-bold text-center text-[#1c1b1a] text-base">
+                  <span className="font-bold text-center text-[#1c1b1a] dark:text-[#e5e5e5] text-base">
                     {m.year}
                   </span>
                   <span
-                    className={`text-center leading-snug text-[rgba(28,27,26,0.55)] text-xs sm:block transform transition-transform duration-200 ${
+                    className={`text-center leading-snug text-[rgba(28,27,26,0.55)] dark:text-[rgba(229,229,229,0.55)] text-xs sm:block transform transition-transform duration-200 ${
                     idx % 2 === 0 ? "-translate-y-2" : "translate-y-2"
 
                     } sm:translate-y-0`}
@@ -151,7 +151,7 @@ export default function JourneyPage() {
                 <div className="glass-light rounded-2xl overflow-hidden h-full min-h-[280px]">
                   <div className="relative overflow-hidden h-full aspect-[4/3]">
                     {/* year badge — glass */}
-                    <div className="glass-light absolute top-3 left-3 z-10 px-2.5 py-1 rounded-md text-[0.62rem] font-bold tracking-[0.1em] text-[#1c1b1a]">
+                    <div className="glass-light absolute top-3 left-3 z-10 px-2.5 py-1 rounded-md text-[0.62rem] font-bold tracking-[0.1em] text-[#1c1b1a] dark:text-[#e5e5e5]">
                       {ch.year.toUpperCase()}
                     </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -170,15 +170,15 @@ export default function JourneyPage() {
               {/* ── Text card ── */}
               <div className="w-full md:w-7/12">
                 <div className="glass-light rounded-2xl px-8 py-8 h-full flex flex-col justify-center">
-                  <p className="uppercase font-semibold mb-2 text-[rgba(28,27,26,0.45)] tracking-[0.2em] text-[0.65rem]">
+                  <p className="uppercase font-semibold mb-2 text-[rgba(28,27,26,0.45)] dark:text-[rgba(229,229,229,0.45)] tracking-[0.2em] text-[0.65rem]">
                     {ch.tag}
                   </p>
-                  <h2 className="font-display text-2xl md:text-3xl font-bold leading-snug mb-4 text-[#1c1b1a]">
+                  <h2 className="font-display text-2xl md:text-3xl font-bold leading-snug mb-4 text-[#1c1b1a] dark:text-[#e5e5e5]">
                     {ch.heading}
                   </h2>
                   {/* subtle divider */}
-                  <div className="w-10 h-px mb-5 bg-[rgba(28,27,26,0.2)]" aria-hidden="true" />
-                  <p className="text-sm md:text-base text-[rgba(28,27,26,0.72)] leading-[1.85]">
+                  <div className="w-10 h-px mb-5 bg-[rgba(28,27,26,0.2)] dark:bg-[rgba(229,229,229,0.15)]" aria-hidden="true" />
+                  <p className="text-sm md:text-base text-[rgba(28,27,26,0.72)] dark:text-[rgba(229,229,229,0.72)] leading-[1.85]">
                     {ch.body}
                   </p>
                   {ch.cta && (
@@ -213,14 +213,14 @@ export default function JourneyPage() {
                 &ldquo;
               </p>
 
-              <blockquote className="font-display text-xl md:text-2xl font-semibold leading-relaxed -mt-4 mb-6 text-[rgba(28,27,26,0.82)]">
+              <blockquote className="font-display text-xl md:text-2xl font-semibold leading-relaxed -mt-4 mb-6 text-[rgba(28,27,26,0.82)] dark:text-[rgba(229,229,229,0.82)]">
                 {pullQuote}
               </blockquote>
 
               {/* thin separator */}
               <div className="w-12 h-px mx-auto mb-4 bg-[rgba(123,31,31,0.30)]" aria-hidden="true" />
 
-              <p className="text-xs tracking-widest uppercase text-[#c9a84c]">
+              <p          className="text-xs tracking-widest uppercase text-[#c9a84c] dark:text-[#d4b04a]">
                 CBCK Youth Ministry &mdash; Golden Jubilee 2018
               </p>
             </div>
@@ -231,10 +231,10 @@ export default function JourneyPage() {
       {/* ══ CLOSING CTA ═════════════════════════════════════════ */}
       <section className="py-16 px-6 text-center">
         <div className="glass-mid rounded-2xl max-w-xl mx-auto px-8 py-10">
-          <h2 className="font-display text-2xl md:text-3xl font-bold mb-3 text-[#1c1b1a]">
+          <h2 className="font-display text-2xl md:text-3xl font-bold mb-3 text-[#1c1b1a] dark:text-[#e5e5e5]">
             The Next Chapter Is Being Written
           </h2>
-          <p className="mx-auto text-sm leading-relaxed mb-7 text-[rgba(28,27,26,0.60)] max-w-[28rem]">
+          <p className="mx-auto text-sm leading-relaxed mb-7 text-[rgba(28,27,26,0.60)] dark:text-[rgba(229,229,229,0.60)] max-w-[28rem]">
             Whether you have been a part of the Youth Ministry for decades or are just discovering it —
             there is a place for you here.
           </p>

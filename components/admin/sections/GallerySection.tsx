@@ -250,8 +250,8 @@ export default function GallerySection() {
 
   return (
     <div>
-      <form onSubmit={handleUpload} className="space-y-5 mb-10 bg-white shadow-md rounded-2xl p-6">
-        <h2 className="font-display text-lg">Upload Photos</h2>
+      <form onSubmit={handleUpload} className="space-y-5 mb-10 bg-white dark:bg-[#1e1e1e] shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] rounded-2xl p-6">
+        <h2 className="font-display text-lg dark:text-[#e5e5e5]">Upload Photos</h2>
         <FileUploadInput
           accept="image/*"
           label="Select one or more photos"
@@ -278,7 +278,7 @@ export default function GallerySection() {
       </form>
 
       {process.env.NODE_ENV !== "production" && debugInfo && (
-        <p className="text-sm text-[#231F1E]/60">{debugInfo}</p>
+        <p className="text-sm text-[#231F1E]/60 dark:text-gray-400">{debugInfo}</p>
       )}
 
       {confirmDeleteId && (
@@ -291,9 +291,9 @@ export default function GallerySection() {
 
       {editingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-display text-lg mb-5">Edit Gallery Photo</h2>
-            <div className="relative rounded-xl overflow-hidden border bg-gray-50 mb-4 h-40">
+          <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="font-display text-lg mb-5 dark:text-[#e5e5e5]">Edit Gallery Photo</h2>
+            <div className="relative rounded-xl overflow-hidden border bg-gray-50 dark:bg-[#2a2a2a] mb-4 h-40">
               <Image
                 src={editPhotoPreviewUrl || editingPhoto!.photo_url}
                 alt={String(editingPhoto?.caption || "")}
@@ -351,7 +351,7 @@ export default function GallerySection() {
               }}
             >
               <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setEditPhotoFile(file); }} className="hidden" id="edit-photo-upload" />
-              <label htmlFor="edit-photo-upload" className="flex items-center justify-center gap-2 w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-[#231F1E]/70 hover:bg-gray-50 cursor-pointer">
+              <label htmlFor="edit-photo-upload" className="flex items-center justify-center gap-2 w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm text-[#231F1E]/70 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] cursor-pointer">
                 Change Photo
               </label>
               <input type="text" placeholder="Caption" value={editCaption} onChange={(e) => setEditCaption(e.target.value)} className={inputCls} />
@@ -361,7 +361,7 @@ export default function GallerySection() {
                 <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
                   {saving ? "Saving..." : "Save"}
                 </button>
-                <button type="button" onClick={() => { setEditingId(null); setPreviousPhotoUrl(null); setEditCaption(""); setEditEventTag(""); setEditPhotoFile(null); setError(null); }} className="text-sm text-[#231F1E]/50 hover:underline">
+                <button type="button" onClick={() => { setEditingId(null); setPreviousPhotoUrl(null); setEditCaption(""); setEditEventTag(""); setEditPhotoFile(null); setError(null); }} className="text-sm text-[#231F1E]/50 dark:text-gray-400 hover:underline">
                   Cancel
                 </button>
               </div>
@@ -380,7 +380,7 @@ export default function GallerySection() {
 
       <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-4">
         {photos.map((photo) => (
-          <div key={photo.id} className="relative group rounded-xl overflow-hidden bg-gray-100 h-32">
+          <div key={photo.id} className="relative group rounded-xl overflow-hidden bg-gray-100 dark:bg-[#2a2a2a] h-32">
             <Image
               src={photo.photo_url}
               alt={String(photo.caption || "")}
@@ -392,8 +392,8 @@ export default function GallerySection() {
               onError={(e) => { (e.target as HTMLImageElement).src = "/images/placeholder.jpg"; }}
             />
             <div className="p-2">
-              {photo.event_tag && <p className="text-xs text-[#6B1F2A] truncate">{photo.event_tag}</p>}
-              {photo.caption && <p className="text-xs text-[#231F1E]/60 truncate">{photo.caption}</p>}
+              {photo.event_tag && <p className="text-xs text-[#6B1F2A] dark:text-[#B84C5C] truncate">{photo.event_tag}</p>}
+              {photo.caption && <p className="text-xs text-[#231F1E]/60 dark:text-gray-400 truncate">{photo.caption}</p>}
             </div>
             <div className="absolute top-2 left-2 flex gap-2 opacity-100 transition-opacity">
               <button
@@ -405,7 +405,7 @@ export default function GallerySection() {
                   setEditEventTag(photo.event_tag ?? "");
                   setError(null);
                 }}
-                className="bg-white/90 text-[#6B1F2A] text-xs rounded-full px-3 py-1 border border-white/50"
+                className="bg-white/90 dark:bg-[#2a2a2a]/90 text-[#6B1F2A] dark:text-[#B84C5C] text-xs rounded-full px-3 py-1 border border-white/50 dark:border-white/10"
               >
                 Edit
               </button>
@@ -418,7 +418,7 @@ export default function GallerySection() {
             </button>
           </div>
         ))}
-        {photos.length === 0 && <p className="text-sm text-[#231F1E]/50 col-span-full">No photos yet.</p>}
+        {photos.length === 0 && <p className="text-sm text-[#231F1E]/50 dark:text-gray-400 col-span-full">No photos yet.</p>}
       </div>
     </div>
   );

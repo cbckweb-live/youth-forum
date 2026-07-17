@@ -19,7 +19,7 @@ export default function MathetesCard({
   const excerpt = description ? truncateText(description, 180) : null;
 
   return (
-    <div className="rounded-xl overflow-hidden bg-white/40 backdrop-blur-sm border border-white/50 shadow-md">
+    <div className="rounded-xl overflow-hidden bg-white/40 dark:bg-[#1e1e1e]/40 backdrop-blur-sm border border-white/50 dark:border-white/10 shadow-md">
       {photo_url ? (
         <Image
           src={photo_url}
@@ -33,9 +33,9 @@ export default function MathetesCard({
           style={{ height: "auto" }}
         />
       ) : (
-        <div className="flex h-56 items-center justify-center bg-gradient-to-br from-[#6B1F2A]/15 via-white to-[#C8A46A]/20 px-6 text-center">
+        <div className="flex h-56 items-center justify-center bg-gradient-to-br from-[#6B1F2A]/15 via-white dark:via-[#1e1e1e] to-[#C8A46A]/20 px-6 text-center">
           <div>
-            <p className="font-display text-2xl text-[#6B1F2A]">Mathetes</p>
+            <p className="font-display text-2xl text-[#6B1F2A] dark:text-[#B84C5C]">Mathetes</p>
             <p className="mt-2 text-xs uppercase tracking-[0.25em] text-[#231F1E]/50">
               Fellowship update
             </p>
@@ -44,7 +44,7 @@ export default function MathetesCard({
       )}
       <div className="p-5">
         <h3 className="font-display text-lg mb-2">{title}</h3>
-        {excerpt && <p className="text-sm text-[#231F1E]/70 leading-relaxed">{excerpt}</p>}
+        {excerpt && <p className="text-sm text-[#231F1E]/70 dark:text-gray-400 leading-relaxed">{excerpt}</p>}
       </div>
     </div>
   );

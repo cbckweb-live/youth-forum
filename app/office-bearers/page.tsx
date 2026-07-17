@@ -54,7 +54,7 @@ export default async function OfficeBearersPage() {
   const standalone = rest.filter((p) => !p.team_id);
 
   return (
-    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-5xl mx-auto">
+    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-5xl mx-auto dark:text-[#e5e5e5]">
       <OfficeBearersClient
         featured={featured}
         standalone={standalone}

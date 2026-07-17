@@ -60,15 +60,15 @@ export default async function PostDetailPage({
   if (!post) notFound();
 
   return (
-    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-3xl mx-auto">
+    <main className="px-4 sm:px-8 py-12 sm:py-16 max-w-3xl mx-auto dark:text-[#e5e5e5]">
       <Link
         href="/about/blog-news"
-        className="text-sm text-[#6B1F2A] hover:underline mb-8 inline-block"
+        className="text-sm text-[#6B1F2A] dark:text-[#B84C5C] hover:underline mb-8 inline-block"
       >
         ← Back to Blog & News
       </Link>
 
-      <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-3">
+      <p className="text-xs uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-3">
         {post.category === "news" ? "News" : "Blog & Opinion"}
       </p>
 
@@ -76,7 +76,7 @@ export default async function PostDetailPage({
         {post.title}
       </h1>
 
-      <div className="flex items-center gap-3 text-sm text-[#231F1E]/50 mb-8">
+      <div className="flex items-center gap-3 text-sm text-[#231F1E]/50 dark:text-gray-400 mb-8">
         {post.author_name && <span>By {post.author_name}</span>}
         {post.author_name && <span>·</span>}
         <span>
@@ -103,19 +103,19 @@ export default async function PostDetailPage({
 
       <SanitizedHtml
         html={post.content}
-        className="prose prose-sm sm:prose max-w-none text-[#231F1E] prose-headings:font-display prose-a:text-[#6B1F2A]"
+        className="prose prose-sm sm:prose max-w-none text-[#231F1E] dark:text-[#e5e5e5] prose-headings:font-display prose-a:text-[#6B1F2A] dark:prose-a:text-[#B84C5C]"
       />
       <div>
       <SharePostButtons title={post.title} url={`${baseUrl}/about/blog-news/${post.slug}`} />
       </div>
       {post.pdf_url && (
-        <div className="mt-10 p-4 border border-[#231F1E]/10 rounded-xl flex items-center justify-between">
+        <div className="mt-10 p-4 border border-[#231F1E]/10 dark:border-white/10 rounded-xl flex items-center justify-between">
           <p className="text-sm font-medium">📄 Attached Document</p>
           <a
             href={post.pdf_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[#6B1F2A] font-medium hover:underline"
+            className="text-sm text-[#6B1F2A] dark:text-[#B84C5C] font-medium hover:underline"
           >
             Download PDF
           </a>

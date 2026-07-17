@@ -215,10 +215,10 @@ export default function PostsSection() {
 
       <div className="space-y-3">
         {posts.map((post) => (
-          <div key={post.id} className="bg-white shadow-sm rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div key={post.id} className="bg-white dark:bg-[#1e1e1e] shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <p className="font-medium text-sm">{post.title}</p>
-              <p className="text-xs text-[#231F1E]/50">
+              <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">
                 {post.category === "news" ? CATEGORY_LABELS.news : CATEGORY_LABELS["blog-opinion"]} ·{" "}
                 {new Date(post.created_at).toLocaleDateString()}
               </p>
@@ -227,12 +227,12 @@ export default function PostsSection() {
               <button onClick={() => togglePublish(post)} className={`${post.published ? "text-green-600" : "text-gray-400"} hover:underline`}>
                 {post.published ? "Published" : "Draft"}
               </button>
-              <button onClick={() => handleEdit(post)} className="text-[#6B1F2A] hover:underline">Edit</button>
+              <button onClick={() => handleEdit(post)} className="text-[#6B1F2A] dark:text-[#B84C5C] hover:underline">Edit</button>
               <button onClick={() => setConfirmDeleteId(post.id)} className="text-red-500 hover:underline">Delete</button>
             </div>
           </div>
         ))}
-        {posts.length === 0 && <p className="text-sm text-[#231F1E]/50">No posts yet.</p>}
+        {posts.length === 0 && <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">No posts yet.</p>}
       </div>
 
       {confirmDeleteId && (
@@ -245,17 +245,17 @@ export default function PostsSection() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-4 mb-5">
-              <h2 className="font-display text-lg">{editingId ? "Edit Post" : "New Post"}</h2>
-              <button type="button" onClick={handleCloseModal} aria-label="Close" className="text-[#231F1E]/50 hover:text-[#231F1E] transition-colors">✕</button>
+              <h2 className="font-display text-lg dark:text-[#e5e5e5]">{editingId ? "Edit Post" : "New Post"}</h2>
+              <button type="button" onClick={handleCloseModal} aria-label="Close" className="text-[#231F1E]/50 dark:text-gray-400 hover:text-[#231F1E] dark:hover:text-[#e5e5e5] transition-colors">✕</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input type="text" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value, slug: slugify(e.target.value) })} required className={inputCls} />
               <input type="text" placeholder="Slug (auto-generated)" value={form.slug} onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })} required className={inputCls} />
               <div className="flex gap-4">
                 {(["news", "blog-opinion"] as const).map((cat) => (
-                  <label key={cat} className="flex items-center gap-2 text-sm">
+                  <label key={cat} className="flex items-center gap-2 text-sm dark:text-[#e5e5e5]">
                     <input type="radio" checked={form.category === cat} onChange={() => setForm({ ...form, category: cat })} />
                     {CATEGORY_LABELS[cat]}
                   </label>
@@ -265,7 +265,7 @@ export default function PostsSection() {
               <RichTextEditor key={editingId || 'new'} value={form.content} onChange={(val) => setForm({ ...form, content: val })} />
 
               <div>
-                <p className="text-sm text-[#231F1E]/60 mb-2">Attach media (optional — photo or PDF, not both)</p>
+                <p className="text-sm text-[#231F1E]/60 dark:text-gray-400 mb-2">Attach media (optional — photo or PDF, not both)</p>
                 <div className="flex gap-4 mb-3">
                   {(["none", "photo", "pdf"] as const).map((type) => (
                     <label key={type} className="flex items-center gap-2 text-sm capitalize">
@@ -298,7 +298,7 @@ export default function PostsSection() {
                 )}
               </div>
 
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-sm dark:text-[#e5e5e5]">
                 <input type="checkbox" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} />
                 Publish immediately
               </label>
@@ -308,7 +308,7 @@ export default function PostsSection() {
                 <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
                   {saving ? "Saving..." : editingId ? "Update Post" : "Create Post"}
                 </button>
-                <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 hover:underline">Cancel</button>
+                <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 dark:text-gray-400 hover:underline">Cancel</button>
               </div>
             </form>
           </div>

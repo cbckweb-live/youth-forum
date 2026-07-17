@@ -173,34 +173,34 @@ export default function MathetesSection() {
       {entries.length > 0 ? (
         <div className="space-y-3">
           {entries.map((entry) => (
-            <div key={entry.id} className="bg-white shadow-sm rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div key={entry.id} className="bg-white dark:bg-[#1e1e1e] shadow-sm dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)] rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start gap-4 min-w-0">
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-[#6B1F2A]/10 border border-gray-100">
                   {entry.photo_url ? (
                     <Image src={entry.photo_url} alt={entry.title} fill sizes="64px" className="object-cover" unoptimized />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.2em] text-[#6B1F2A]">M</div>
+                    <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.2em] text-[#6B1F2A] dark:text-[#B84C5C]">M</div>
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium text-sm text-[#231F1E] truncate">{entry.title}</p>
-                  <p className="text-xs text-[#231F1E]/50 mt-1">
+                  <p className="font-medium text-sm text-[#231F1E] dark:text-[#e5e5e5] truncate">{entry.title}</p>
+                  <p className="text-xs text-[#231F1E]/50 dark:text-gray-400 mt-1">
                     {new Date(entry.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
-                  <p className="text-sm text-[#231F1E]/70 mt-2 max-w-2xl">
+                  <p className="text-sm text-[#231F1E]/70 dark:text-gray-300 mt-2 max-w-2xl">
                     {entry.description ? truncateText(entry.description, 140) : "No description provided."}
                   </p>
                 </div>
               </div>
               <div className="flex gap-3 text-sm shrink-0">
-                <button onClick={() => handleEdit(entry)} className="text-[#6B1F2A] hover:underline">Edit</button>
+                <button onClick={() => handleEdit(entry)} className="text-[#6B1F2A] dark:text-[#B84C5C] hover:underline">Edit</button>
                 <button onClick={() => setConfirmDeleteId(entry.id)} className="text-red-500 hover:underline">Delete</button>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#231F1E]/50">No Mathetes entries yet.</p>
+        <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">No Mathetes entries yet.</p>
       )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -215,9 +215,9 @@ export default function MathetesSection() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto relative">
-            <button onClick={handleCloseModal} className="absolute top-4 right-4 text-[#231F1E]/40 hover:text-[#231F1E] text-xl leading-none" aria-label="Close">✕</button>
-            <h2 className="font-display text-lg mb-5">{editingId ? "Edit Mathetes Entry" : "New Mathetes Entry"}</h2>
+          <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto relative">
+            <button onClick={handleCloseModal} className="absolute top-4 right-4 text-[#231F1E]/40 dark:text-gray-400 hover:text-[#231F1E] dark:hover:text-[#e5e5e5] text-xl leading-none" aria-label="Close">✕</button>
+            <h2 className="font-display text-lg mb-5 dark:text-[#e5e5e5]">{editingId ? "Edit Mathetes Entry" : "New Mathetes Entry"}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input type="text" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className={inputCls} />
               <textarea placeholder="Description (optional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={5} className={inputCls} />
@@ -235,7 +235,7 @@ export default function MathetesSection() {
                 <button type="submit" disabled={saving} className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
                   {saving ? "Saving..." : editingId ? "Update Entry" : "Create Entry"}
                 </button>
-                <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 hover:underline">Cancel</button>
+                <button type="button" onClick={handleCloseModal} className="text-sm text-[#231F1E]/50 dark:text-gray-400 hover:underline">Cancel</button>
               </div>
             </form>
           </div>

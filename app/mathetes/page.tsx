@@ -45,7 +45,7 @@ export default async function MathetesPage() {
     : { data: [] };
 
   return (
-    <main className="px-8 py-16 max-w-5xl mx-auto">
+    <main className="px-8 py-16 max-w-5xl mx-auto dark:text-[#e5e5e5]">
       <img
         src="/mathetes logo.png"
         alt="Mathetes Fellowship"
@@ -55,7 +55,7 @@ export default async function MathetesPage() {
       <h1 className="font-['Copperplate',serif] font-bold text-3xl mb-4 text-center">Mathetes</h1>
       <h3 className="font-['Copperplate',serif] font-bold text-xl mb-4 text-center">&quot; The way to Jesus &quot;</h3>
 
-      <div className="mx-auto text-[#231F1E]/80 leading-relaxed mb-10 max-w-2xl space-y-4 text-justify">
+      <div className="mx-auto text-[#231F1E]/80 dark:text-gray-300 leading-relaxed mb-10 max-w-2xl space-y-4 text-justify">
         <p>
           The Mathetes Fellowship is a Youth Ministry initiative that bridges
           the gap between Sunday School and Youth Ministry, nurturing spiritual
@@ -80,13 +80,13 @@ export default async function MathetesPage() {
       <section className="mb-20">
         <div className="flex items-end justify-between gap-4 mb-6">
           <div>
-            <p className="text-xs uppercase tracking-widest text-[#6B1F2A] mb-2">Updates</p>
+            <p className="text-xs uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-2">Updates</p>
             <h2 className="font-display text-2xl">Mathetes Diaries</h2>
           </div>
         </div>
 
         {entries && entries.length === 0 ? (
-          <p className="text-[#231F1E]/60">No Mathetes entries yet.</p>
+          <p className="text-[#231F1E]/60 dark:text-gray-400">No Mathetes entries yet.</p>
         ) : (
           <div
             className="[column-count:1] [column-gap:1.5rem] sm:[column-count:2] lg:[column-count:3]"
@@ -106,7 +106,7 @@ export default async function MathetesPage() {
 
       {/* Mathetes In-Charges — at the bottom */}
       {incharges && incharges.length > 0 && (
-        <section className="mt-20 pt-12 border-t border-[#231F1E]/10">
+        <section className="mt-20 pt-12 border-t border-[#231F1E]/10 dark:border-white/10">
           <h2 className="font-display text-2xl mb-6">Mathetes In-Charge&apos;s</h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
             {incharges.map((person) => (
