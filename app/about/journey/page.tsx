@@ -21,7 +21,7 @@ const chapters = [
     tag: "Decades of Growth",
     heading: "The Year of God's Faithfulness",
     body: "Through the decades, the ministry has grown alongside the church, and has impacted many lives. From a handful of a hundred members, today, the ministry has grown into one of the largest departments within the church, with more than 1,000 members. In 2018, the ministry joyfully celebrated its Golden Jubilee, marking fifty years of God's faithfulness, spiritual growth, and dedicated service. The celebration not only reflected on the rich legacy of the past but also reaffirmed the ministry's commitment to raising Christ-centred leaders for the future.",
-    image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=900&q=80",
+    image: "/jubilee.JPG",
     imageAlt: "Large community gathering celebrating the Golden Jubilee",
     imageLeft: false,
     cta: null,
