@@ -10,7 +10,7 @@ const chapters = [
     tag: "The Beginning",
     heading: "Established in Faith",
     body: "The Youth Ministry of Chakhesang Baptist Church, Kohima was established in 1968, eight years after the establishment of the church. Since its inception, the ministry has served as a platform for nurturing young believers in their spiritual journey, equipping them for Christian leadership, and encouraging active participation in the life and mission of the church.",
-    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&q=80",
+    image: "/journey.JPG",
     imageAlt: "Young believers gathered in worship and fellowship",
     imageLeft: true,
     cta: null,
