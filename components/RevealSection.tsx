@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+
 type Props = {
   children: React.ReactNode;
   className?: string;
@@ -27,32 +28,48 @@ export default function RevealSection({
     const el = ref.current;
     if (!el) return;
 
-    // If the user prefers reduced motion, just show immediately
+    // If already revealed (possible with fast remounts), don't schedule anything.
+    if (revealed) return;
+
+    // If the user prefers reduced motion, just show immediately.
+    // (Avoid calling setState synchronously inside the effect body.)
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) {
-      setRevealed(true);
+      queueMicrotask(() => setRevealed(true));
       return;
     }
 
-    let timerId: ReturnType<typeof setTimeout> | undefined;
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let didReveal = false;
+
+    // Use rootMargin to avoid “stuck just below threshold” on some browsers.
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          // Small delay for staggering
-          timerId = setTimeout(() => setRevealed(true), delay);
-          observer.unobserve(el);
-        }
+        if (!entry.isIntersecting) return;
+        if (didReveal) return;
+
+        didReveal = true;
+        observer.unobserve(el);
+
+        // Small delay for staggering (timer race protection)
+        timeoutId = setTimeout(() => {
+          setRevealed((prev) => (prev ? prev : true));
+        }, delay);
       },
-      { threshold: 0.08 },
+      {
+        threshold: 0.08,
+        rootMargin: "0px 0px -10% 0px",
+      },
     );
 
     observer.observe(el);
     return () => {
       observer.disconnect();
-      if (timerId !== undefined) clearTimeout(timerId);
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
     };
-  }, [delay]);
+  }, [delay, revealed]);
+
 
   return (
     <Tag
