@@ -156,16 +156,16 @@ export default function HeroSlider() {
       <button
         onClick={prev}
         aria-label="Previous image"
-        className="absolute left-3 top-1/2 -translate-y-1/2 z-10 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+        className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-10 p-3 sm:p-2 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
       >
-        <ChevronLeftIcon aria-hidden="true" className="size-8" />
+        <ChevronLeftIcon aria-hidden="true" className="size-6 sm:size-8" />
       </button>
       <button
         onClick={next}
         aria-label="Next image"
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+        className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-10 p-3 sm:p-2 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
       >
-        <ChevronRightIcon aria-hidden="true" className="size-8" />
+        <ChevronRightIcon aria-hidden="true" className="size-6 sm:size-8" />
       </button>
 
       {/* ── Dot indicators ── */}

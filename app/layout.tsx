@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import ProgressBar from "@/components/ProgressBar";
 import { Analytics } from "@vercel/analytics/react";
 import SentryProvider from "@/components/SentryProvider";
+import ScrollToTop from "@/components/ScrollToTop";
 import { Suspense } from "react";
 
 // 1. Configure Fonts
@@ -81,6 +82,7 @@ export default function RootLayout({
           <Navbar />
           <main id="main-content" className="flex-1">{children}</main>
           <Footer />
+          <ScrollToTop />
           <Analytics />
         </SentryProvider>
       </body>

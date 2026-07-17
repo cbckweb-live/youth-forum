@@ -10,6 +10,7 @@ import LeadershipCard from "@/components/LeadershipCard";
 import Image from "next/image";
 import { truncate } from "@/lib/truncate";
 import { CATEGORY_LABELS } from "@/lib/categories";
+import RevealSection from "@/components/RevealSection";
 
 function ensureAbsoluteImageUrl(url: string) {
   // Supabase public URLs should already be absolute.
@@ -163,7 +164,7 @@ export default async function HomePage() {
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
 
 <section
-  className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16  w-full max-w-[calc(100vw-2rem)] sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto text-center relative overflow-hidden"
+  className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16  w-full max-w-6xl mx-auto text-center relative overflow-hidden"
   style={{
     backgroundImage: "url('/background.jpg')",
     backgroundSize: "cover",
@@ -219,7 +220,7 @@ export default async function HomePage() {
       or looking to deepen your walk with God, we warmly welcome you to be part of this growing family.
     </p>
 
-     {/* Our Story — Frosted glass button */}
+    {/* Our Story — Frosted glass button */}
     <div className="mt-8">
       <Link
         href="/about/journey"
@@ -249,14 +250,14 @@ export default async function HomePage() {
   </div>
 </section>
 
-<section className="px-4 sm:px-8 py-12 sm:py-16">
+<RevealSection className="px-4 sm:px-8 py-12 sm:py-16">
   <div className="relative z-10 flex justify-center">
     <HeroSlider />
   </div>
-</section>
+</RevealSection>
 
       {/* Upcoming Events */}
-      <section className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20">
+      <RevealSection delay={100} className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20" as="section">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <h2 className="font-display text-2xl text-center sm:text-left text-balance">
             Upcoming Events
@@ -310,10 +311,10 @@ export default async function HomePage() {
             ))}
           </div>
         )}
-      </section>
+      </RevealSection>
 
       {/* Blog & News */}
-      <section className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20">
+      <RevealSection delay={200} className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20" as="section">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <h2 className="font-display text-2xl text-center sm:text-left text-balance">
             Recent Blog &amp; News
@@ -364,22 +365,23 @@ export default async function HomePage() {
             ))}
           </div>
         )}
-      </section>
+      </RevealSection>
 
       {/* Leadership Section */}
-      <section className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20">
+      <RevealSection delay={300} className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20" as="section">
         <h2 className="font-display text-2xl mb-6 text-center text-balance">
           Our Leadership
         </h2>
-        <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {sortedLeadership?.map((person) => (
             <LeadershipCard key={person.id} {...person} />
           ))}
         </div>
-      </section>
+      </RevealSection>
 
       {/* Navigation Cards */}
-      <section className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20">
+      <RevealSection delay={400} className="px-4 sm:px-8 py-12 sm:py-16 scroll-mt-20" as="section">
+      <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4">
         {[
           {
             title: "Journey",
@@ -400,24 +402,28 @@ export default async function HomePage() {
             Icon: PencilSquareIcon,
           },
         ].map((item) => (
-          <div
+          <Link
             key={item.title}
-            className="text-center bg-white/40 dark:bg-[#1e1e1e]/40 backdrop-blur-sm border border-white/50 dark:border-white/10 shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] rounded-xl p-6"
+            href={item.href}
+            className="group block text-center bg-white/40 dark:bg-[#1e1e1e]/40 backdrop-blur-sm border border-white/50 dark:border-white/10 shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] rounded-xl p-6 hover:shadow-lg dark:hover:shadow-[0_8px_40px_rgba(0,0,0,0.6)] hover:border-[#6B1F2A]/20 dark:hover:border-[#B84C5C]/30 hover:-translate-y-1 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
           >
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#6B1F2A] flex items-center justify-center">
-              <item.Icon aria-hidden="true" className="size-6 text-white" />
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#6B1F2A] dark:group-hover:bg-[#B84C5C] flex items-center justify-center group-hover:scale-110 group-hover:-translate-y-0.5 transition-[transform,colors] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+              <item.Icon aria-hidden="true" className="size-6 text-white group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <h3 className="font-display text-lg mb-2">{item.title}</h3>
-            <p className="text-sm text-[#231F1E]/70 dark:text-gray-400 mb-3">{item.text}</p>
-            <Link
-              href={item.href}
-              className="text-sm font-medium text-[#6B1F2A] dark:text-[#B84C5C] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]"
-            >
-              Read More →
-            </Link>
-          </div>
+            <h3 className="font-display text-lg mb-2 group-hover:text-[#6B1F2A] dark:group-hover:text-[#B84C5C] transition-colors duration-300">
+              {item.title}
+            </h3>
+            <p className="text-sm text-[#231F1E]/70 dark:text-gray-400 mb-3 group-hover:text-[#231F1E]/90 dark:group-hover:text-gray-300 transition-colors duration-300">
+              {item.text}
+            </p>
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#6B1F2A] dark:text-[#B84C5C] group-hover:gap-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+              Read More
+              <span className="inline-block group-hover:translate-x-1 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">→</span>
+            </span>
+          </Link>
         ))}
-      </section>
+      </div>
+      </RevealSection>
     </main>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import MathetesCard from "@/components/MathetesCard";
 import LeadershipCard from "@/components/LeadershipCard";
+import RevealSection from "@/components/RevealSection";
 
 export const metadata: Metadata = {
   title: "Mathetes Fellowship | CBCK Youth Forum",
@@ -77,7 +78,7 @@ export default async function MathetesPage() {
         <p className="text-red-600">Something went wrong loading this page.</p>
       )}
 
-      <section className="mb-20">
+      <RevealSection delay={100} as="section" className="mb-20">
         <div className="flex items-end justify-between gap-4 mb-6">
           <div>
             <p className="text-xs uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-2">Updates</p>
@@ -102,18 +103,18 @@ export default async function MathetesPage() {
             ))}
           </div>
         )}
-      </section>
+      </RevealSection>
 
       {/* Mathetes In-Charges — at the bottom */}
       {incharges && incharges.length > 0 && (
-        <section className="mt-20 pt-12 border-t border-[#231F1E]/10 dark:border-white/10">
+        <RevealSection delay={250} as="section" className="mt-20 pt-12 border-t border-[#231F1E]/10 dark:border-white/10">
           <h2 className="font-display text-2xl mb-6">Mathetes In-Charge&apos;s</h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
             {incharges.map((person) => (
               <LeadershipCard key={person.id} {...person} />
             ))}
           </div>
-        </section>
+        </RevealSection>
       )}
     </main>
   );

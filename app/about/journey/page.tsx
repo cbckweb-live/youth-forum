@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import RevealSection from "@/components/RevealSection";
 
 /* ─── chapter data ───────────────────────────────────────────── */
 const chapters = [
@@ -102,7 +103,7 @@ export default function JourneyPage() {
       </div>
 
       {/* ══ TIMELINE STRIP ════════════════════════════════════ */}
-      <section className="py-14 px-6">
+      <RevealSection delay={100} className="py-14 px-6" as="section">
         <div className="max-w-4xl mx-auto">
           <div className="glass-light rounded-3xl px-12 py-10">
             <div className="relative flex items-start justify-between">
@@ -135,11 +136,11 @@ export default function JourneyPage() {
             </div>
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* ══ CHAPTER SECTIONS ════════════════════════════════════ */}
-      {chapters.map((ch) => (
-        <section key={ch.id} id={ch.id} className="py-14 px-6 scroll-mt-24">
+      {chapters.map((ch, idx) => (
+        <RevealSection key={ch.id} id={ch.id} delay={200 + idx * 150} as="section" className="py-14 px-6 scroll-mt-24">
           <div className="max-w-5xl mx-auto">
             <div
               className={`flex flex-col ${
@@ -190,11 +191,11 @@ export default function JourneyPage() {
               </div>
             </div>
           </div>
-        </section>
+        </RevealSection>
       ))}
 
       {/* -- PULL QUOTE (Golden Jubilee) -- */}
-      <section className="py-16 px-6">
+      <RevealSection delay={100} className="py-16 px-6" as="section">
         <div className="max-w-2xl mx-auto">
           {/* outer glow ring */}
           <div className="rounded-3xl p-px bg-[linear-gradient(135deg,rgba(255,255,255,0.6)_0%,rgba(255,255,255,0.1)_100%)]">
@@ -226,10 +227,10 @@ export default function JourneyPage() {
             </div>
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* ══ CLOSING CTA ═════════════════════════════════════════ */}
-      <section className="py-16 px-6 text-center">
+      <RevealSection delay={100} className="py-16 px-6 text-center" as="section">
         <div className="glass-mid rounded-2xl max-w-xl mx-auto px-8 py-10">
           <h2 className="font-display text-2xl md:text-3xl font-bold mb-3 text-[#1c1b1a] dark:text-[#e5e5e5]">
             The Next Chapter Is Being Written
@@ -242,7 +243,7 @@ export default function JourneyPage() {
             See Upcoming Events →
           </Link>
         </div>
-      </section>
+      </RevealSection>
     </main>
   );
 }

@@ -51,6 +51,8 @@ export default function PostsSection() {
   const [mediaType, setMediaType] = useState<"none" | "photo" | "pdf">("none");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [pdfUploadProgress, setPdfUploadProgress] = useState<number | null>(null);
+  const [localMediaType, setLocalMediaType] = useState<"none" | "photo" | "pdf">("none");
+  const [localFile, setLocalFile] = useState<File | null>(null);
 
   async function uploadMedia(file: File, type: "photo" | "pdf"): Promise<string> {
     const formData = new FormData();
@@ -98,11 +100,10 @@ export default function PostsSection() {
       const currentPhotoUrl = form.photo_url as string | null;
       const currentPdfUrl = form.pdf_url as string | null;
 
-      // Initialize mediaType from existing data when editing
-      const [localMediaType, setLocalMediaType] = useState<"none" | "photo" | "pdf">(
-        editingId ? (currentPhotoUrl ? "photo" : currentPdfUrl ? "pdf" : "none") : mediaType,
-      );
-      const [localFile, setLocalFile] = useState<File | null>(null);
+      // Sync local media type when editing modal opens
+      const effectiveMediaType = editingId
+        ? (currentPhotoUrl ? "photo" : currentPdfUrl ? "pdf" : "none")
+        : localMediaType;
 
       function handleTypeChange(type: "none" | "photo" | "pdf") {
         setLocalMediaType(type);
@@ -119,11 +120,11 @@ export default function PostsSection() {
         const f = files?.[0] || null;
         if (!f) { setLocalFile(null); return; }
 
-        if (localMediaType === "pdf") {
+        if (effectiveMediaType === "pdf") {
           const validationError = validatePdf(f);
           if (validationError) { alert(validationError); return; }
         }
-        if (localMediaType === "photo" && !f.type.startsWith("image/")) {
+        if (effectiveMediaType === "photo" && !f.type.startsWith("image/")) {
           alert("Invalid file type. Please upload an image.");
           return;
         }
@@ -131,8 +132,8 @@ export default function PostsSection() {
         setLocalFile(f);
 
         try {
-          const url = await uploadMedia(f, localMediaType === "photo" ? "photo" : "pdf");
-          if (localMediaType === "photo") {
+          const url = await uploadMedia(f, effectiveMediaType === "photo" ? "photo" : "pdf");
+          if (effectiveMediaType === "photo") {
             setForm({ ...form, photo_url: url });
           } else {
             setForm({ ...form, pdf_url: url });
@@ -154,24 +155,24 @@ export default function PostsSection() {
               <label key={type} className="flex items-center gap-2 text-sm capitalize cursor-pointer dark:text-[#e5e5e5]">
                 <input
                   type="radio"
-                  checked={localMediaType === type}
+                  checked={effectiveMediaType === type}
                   onChange={() => handleTypeChange(type)}
                 />
                 {type}
               </label>
             ))}
           </div>
-          {localMediaType !== "none" && (
+          {effectiveMediaType !== "none" && (
             <FileUploadInput
-              accept={localMediaType === "photo" ? "image/*" : "application/pdf"}
-              label={`Upload ${localMediaType}`}
+              accept={effectiveMediaType === "photo" ? "image/*" : "application/pdf"}
+              label={`Upload ${effectiveMediaType}`}
               file={localFile}
-              currentUrl={localMediaType === "photo" ? currentPhotoUrl : currentPdfUrl}
+              currentUrl={effectiveMediaType === "photo" ? currentPhotoUrl : currentPdfUrl}
               progress={pdfUploadProgress}
               onChange={handleFileChange}
               onRemove={() => {
                 setLocalFile(null);
-                if (localMediaType === "photo") setForm({ ...form, photo_url: null });
+                if (effectiveMediaType === "photo") setForm({ ...form, photo_url: null });
                 else setForm({ ...form, pdf_url: null });
               }}
             />
