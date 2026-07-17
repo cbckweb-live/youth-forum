@@ -358,7 +358,7 @@ export default async function HomePage() {
             Icon: MapIcon,
           },
           {
-            title: "Aims and Goals",
+            title: "Aims and Vision",
             text: "What we strive toward, together, as one community.",
             href: "/about/aims",
             Icon: PlusIcon,
