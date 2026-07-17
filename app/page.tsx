@@ -193,9 +193,9 @@ export default async function HomePage() {
   {/* Frosted card sitting over the text, on top of the radial gradient */}
   <div className="relative text-center bg-white/75 dark:bg-[#1e1e1e]/85 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
     <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-4 font-medium text-center mx-auto">
-  Welcome
-</p>
-<h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black dark:text-[#f0f0f0] font-normal text-balance">
+      Welcome
+    </p>
+    <h1 className="text-2xl sm:text-4xl leading-tight mb-4 text-center text-black dark:text-[#f0f0f0] font-normal text-balance">
   Chakhesang Baptist Church Kohima,
   <br /> Youth Ministry
 </h1>
@@ -240,7 +240,7 @@ export default async function HomePage() {
       </Link>
     </div>
     <p className="font-display italic text-black dark:text-[#e5e5e5] leading-relaxed max-w-3xl mx-auto mb-6">
-      </br>
+      <br />
       &quot;Don&rsquo;t let anyone look down on you because you are young, but set an example for the believers in speech, in life, in love, in faith, and in purity.&quot;
     </p>
     <p className="font-display mt-3 text-sm text-[#6B1F2A] dark:text-[#B84C5C]">
