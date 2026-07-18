@@ -1,41 +1,33 @@
 import type { NextConfig } from "next";
 import "./lib/env";
 
+/**
+ * Static security headers — set via next.config.ts because they never
+ * change between requests.
+ *
+ * CSP is deliberately NOT here; it is set dynamically in middleware.ts
+ * so that each request gets a unique nonce.
+ */
 const securityHeaders = [
-  { key: 'X-DNS-Prefetch-Control', value: 'on' },
-  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-  { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "worker-src blob:",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
-      "script-src-elem 'self' 'unsafe-inline' https://vercel.live",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https:",
-      // Sentry + Supabase + Vercel
-      "connect-src 'self' https://*.sentry.io https://emsfthlfptmysgzpectv.supabase.co https://*.supabase.co https://vercel.live wss://ws-us3.pusher.com",
-      "frame-src https://www.google.com https://google.com https://www.youtube.com",
-    ].join('; '),
-  }
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "origin-when-cross-origin" },
 ];
 
 const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         has: [
           {
-            type: 'host',
-            value: 'www.cbckyouthforum.live',
+            type: "host",
+            value: "www.cbckyouthforum.live",
           },
         ],
-        destination: 'https://cbckyouthforum.live/:path*',
+        destination: "https://cbckyouthforum.live/:path*",
         permanent: true,
       },
     ];
@@ -43,7 +35,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: securityHeaders,
       },
     ];

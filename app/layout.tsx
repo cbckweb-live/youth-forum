@@ -10,6 +10,7 @@ import { Analytics } from "@vercel/analytics/react";
 import SentryProvider from "@/components/SentryProvider";
 import ScrollToTop from "@/components/ScrollToTop";
 import { Suspense } from "react";
+import { headers } from "next/headers";
 
 // 1. Configure Fonts
 const sora = Sora({
@@ -36,9 +37,12 @@ export const metadata: Metadata = {
 };
 
 // 3. Unified Root Layout
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Read the nonce set by middleware.ts
+  const nonce = (await headers()).get("x-nonce") ?? "";
+
   return (
     <html lang="en" className={`${sora.variable} ${inter.variable} h-full`} suppressHydrationWarning>
       <head>
@@ -57,6 +61,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-white dark:bg-[#151515] text-[#231F1E] dark:text-[#e5e5e5] font-body transition-colors duration-300">
         {/* Inline script to restore saved theme before React hydrates (prevents flash) */}
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
