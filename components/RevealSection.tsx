@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-
 type Props = {
   children: React.ReactNode;
   className?: string;
@@ -14,6 +13,16 @@ type Props = {
   id?: string;
 };
 
+const prefersReducedMotion =
+  typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
+
+/**
+ * A scroll-reveal wrapper that animates only compositor-friendly
+ * properties (opacity + translateY) and avoids expensive CSS filters
+ * for smooth 60fps scrolling even with many instances on a page.
+ */
 export default function RevealSection({
   children,
   className = "",
@@ -22,39 +31,29 @@ export default function RevealSection({
   id,
 }: Props) {
   const ref = useRef<HTMLElement>(null);
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(prefersReducedMotion);
+  const observedRef = useRef(false);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    // If already revealed (possible with fast remounts), don't schedule anything.
+    // Already revealed (initial render for reduced motion, or unmount/remount).
     if (revealed) return;
 
-    // If the user prefers reduced motion, just show immediately.
-    // (Avoid calling setState synchronously inside the effect body.)
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) {
-      queueMicrotask(() => setRevealed(true));
-      return;
-    }
+    const el = ref.current;
+    if (!el || observedRef.current) return;
 
+    observedRef.current = true;
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let didReveal = false;
 
-    // Use rootMargin to avoid “stuck just below threshold” on some browsers.
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
-        if (didReveal) return;
 
-        didReveal = true;
         observer.unobserve(el);
 
-        // Small delay for staggering (timer race protection)
+        // Small delay for staggering sequences
         timeoutId = setTimeout(() => {
-          setRevealed((prev) => (prev ? prev : true));
+          setRevealed(true);
         }, delay);
       },
       {
@@ -64,21 +63,24 @@ export default function RevealSection({
     );
 
     observer.observe(el);
+
     return () => {
+      observedRef.current = false;
       observer.disconnect();
       if (timeoutId !== undefined) clearTimeout(timeoutId);
     };
-  }, [delay, revealed]);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [delay]);
 
   return (
     <Tag
       ref={ref as React.Ref<HTMLDivElement>}
       id={id}
-      className={`transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+      style={{ willChange: revealed ? "auto" : "transform, opacity" }}
+      className={`transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
         revealed
-          ? "opacity-100 translate-y-0 blur-0"
-          : "opacity-0 translate-y-10 blur-[2px]"
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-10"
       } ${className}`}
     >
       {children}

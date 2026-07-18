@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAdminCrudSection } from "@/lib/hooks/useAdminCrudSection";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import FileUploadInput from "@/components/admin/FileUploadInput";
@@ -179,6 +179,8 @@ export default function GenericCrudSection<
 
   const [form, setForm] = useState<Record<string, unknown>>(schema.emptyForm());
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
 
   // Memoized form setter that also triggers field-level side effects
   const setFormWithSideEffects = useCallback(
@@ -287,6 +289,43 @@ export default function GenericCrudSection<
     (f) => f !== titleField && f.type !== "image" && f.type !== "richtext" && f.type !== "checkbox",
   );
 
+  // ── Client-side search & filter ──
+  const hasSearch = schema.searchFields && schema.searchFields.length > 0;
+  const hasFilters = schema.filterOptions && schema.filterOptions.length > 0;
+
+  const filteredRecords = useMemo(() => {
+    let result = records;
+
+    // Text search
+    if (searchText && schema.searchFields) {
+      const q = searchText.toLowerCase();
+      result = result.filter((rec) => {
+        const recAny = rec as unknown as Record<string, unknown>;
+        return schema.searchFields!.some((field) => {
+          const val = recAny[field];
+          return typeof val === "string" && val.toLowerCase().includes(q);
+        });
+      });
+    }
+
+    // Filter options
+    if (schema.filterOptions) {
+      for (const filterOpt of schema.filterOptions) {
+        const filterValue = activeFilters[filterOpt.field];
+        if (!filterValue) continue;
+        result = result.filter((rec) => {
+          if (filterOpt.filterFn) {
+            return filterOpt.filterFn(filterValue, rec);
+          }
+          const recAny = rec as unknown as Record<string, unknown>;
+          return String(recAny[filterOpt.field] ?? "") === filterValue;
+        });
+      }
+    }
+
+    return result;
+  }, [records, searchText, activeFilters, schema.searchFields, schema.filterOptions]);
+
   const refresh = useCallback(() => fetchData(), [fetchData]);
 
   return (
@@ -311,18 +350,57 @@ export default function GenericCrudSection<
       {/* Custom content before list */}
       {schema.renderBeforeList?.({ records })}
 
+      {/* Search & Filter bar */}
+      {(hasSearch || hasFilters) && (
+        <div className="flex flex-wrap items-center gap-3">
+          {hasSearch && (
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#231F1E]/40 dark:text-gray-500 text-sm">🔍</span>
+              <input
+                type="text"
+                placeholder={`Search ${schema.entityLabel.toLowerCase()}s…`}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
+              />
+            </div>
+          )}
+          {hasFilters &&
+            schema.filterOptions!.map((filterOpt) => (
+              <select
+                key={filterOpt.field}
+                value={activeFilters[filterOpt.field] ?? ""}
+                onChange={(e) =>
+                  setActiveFilters((prev) => ({
+                    ...prev,
+                    [filterOpt.field]: e.target.value,
+                  }))
+                }
+                className="border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
+              >
+                <option value="">{filterOpt.label}: All</option>
+                {filterOpt.choices?.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            ))}
+        </div>
+      )}
+
       {/* List */}
       {schema.renderList ? (
         schema.renderList({
-          records,
+          records: filteredRecords,
           onEdit: handleEditRecord,
           onDelete: (id) => setConfirmDeleteId(id),
           refresh,
         })
       ) : (
         <div className="space-y-3">
-          {records.length > 0 ? (
-            records.map((record) => {
+          {filteredRecords.length > 0 ? (
+            filteredRecords.map((record) => {
               const recordAny = record as unknown as Record<string, unknown>;
               const title = titleField ? String(recordAny[titleField.name] ?? "") : record.id;
               const subtitle = schema.formatSubtitle
@@ -365,7 +443,9 @@ export default function GenericCrudSection<
             })
           ) : (
             <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">
-              No {schema.entityLabel.toLowerCase()}s yet.
+              {records.length === 0
+                ? `No ${schema.entityLabel.toLowerCase()}s yet.`
+                : `No ${schema.entityLabel.toLowerCase()}s match your search.`}
             </p>
           )}
         </div>

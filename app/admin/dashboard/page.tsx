@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import OverviewSection from "@/components/admin/sections/OverviewSection";
 import PostsSection from "@/components/admin/sections/PostsSection";
 import EventsSection from "@/components/admin/sections/EventsSection";
 import GallerySection from "@/components/admin/sections/GallerySection";
@@ -10,19 +11,23 @@ import OfficeBearersSection from "@/components/admin/sections/OfficeBearersSecti
 import LivingRoomSection from "@/components/admin/sections/LivingRoomSection";
 import MathetesSection from "@/components/admin/sections/MathetesSection";
 
-const TABS = ["Posts", "Events", "Gallery", "Mathetes", "Office Bearers", "Living Room"] as const;
+const TABS = ["Overview", "Posts", "Events", "Gallery", "Mathetes", "Office Bearers", "Living Room"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function AdminDashboard() {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
-  const [activeTab, setActiveTab] = useState<Tab>("Posts");
+  const [activeTab, setActiveTab] = useState<Tab>("Overview");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }: { data: { session: unknown } }) => {
       if (!data.session) router.push("/admin");
     });
   }, [supabase, router]);
+
+  const handleNavigate = useCallback((tab: string) => {
+    setActiveTab(tab as Tab);
+  }, []);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -55,6 +60,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {activeTab === "Overview" && <OverviewSection onNavigate={handleNavigate} />}
       {activeTab === "Posts" && <PostsSection />}
       {activeTab === "Events" && <EventsSection />}
       {activeTab === "Gallery" && <GallerySection />}

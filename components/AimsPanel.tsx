@@ -196,7 +196,7 @@ export default function AimsPanel() {
                   style={{
                     transition: reducedMotion
                       ? 'none'
-                      : `all 700ms cubic-bezier(0.32,0.72,0,1) ${i * 120}ms`,
+                      : `opacity 700ms cubic-bezier(0.32,0.72,0,1) ${i * 120}ms, transform 700ms cubic-bezier(0.32,0.72,0,1) ${i * 120}ms`,
                     opacity: reducedMotion || mounted ? 1 : 0,
                     transform:
                       reducedMotion || mounted
@@ -240,8 +240,7 @@ export default function AimsPanel() {
                       {/* Full text block (expandable) */}
                       <div
                         id={fullTextId}
-                        role="region"
-                        className="overflow-hidden transition-all duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]"
+                        role="region"                          className="overflow-hidden transition-[max-height,opacity] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]"
                         style={{
                           maxHeight: expanded ? '240px' : '0',
                           opacity: expanded ? 1 : 0,

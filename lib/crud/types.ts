@@ -143,6 +143,23 @@ export interface CrudSchema<T extends { id: string }> {
    */
   renderBeforeList?: (props: { records: T[] }) => React.ReactNode;
   /**
+   * Optional — field names to search against in the client-side search box.
+   * If omitted, no search box is shown.
+   */
+  searchFields?: string[];
+  /**
+   * Optional — filter options for a dropdown above the list.
+   * Each option filters records by matching the specified field.
+   */
+  filterOptions?: {
+    label: string;
+    field: string;
+    /** If provided, show a dropdown with these choices (empty = all). */
+    choices?: { value: string; label: string }[];
+    /** Custom filter function — receives the current filter value and record. */
+    filterFn?: (filterValue: string, record: T) => boolean;
+  }[];
+  /**
    * Optional — completely replace the default list rendering.
    * Useful for grid/card-based layouts like the photo gallery.
    */

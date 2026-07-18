@@ -70,6 +70,22 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Reduced motion — respects system accessibility setting
+   Forces all animations & transitions to be near-instant
+   so the final state is still reached.
+───────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
    Journey page shared styles
    (moved from app/about/journey/page.tsx <style> tag)
 ───────────────────────────────────────────────────────────── */

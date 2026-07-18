@@ -45,6 +45,14 @@ export default function RootLayout({
         {/* Set initial theme-color based on color scheme */}
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#151515" media="(prefers-color-scheme: dark)" />
+
+        {/* Preload the hero background image (LCP candidate — CSS background-image, discovered late) */}
+        <link
+          rel="preload"
+          href="/background.jpg"
+          as="image"
+          fetchPriority="high"
+        />
       </head>
       <body className="min-h-full flex flex-col bg-white dark:bg-[#151515] text-[#231F1E] dark:text-[#e5e5e5] font-body transition-colors duration-300">
         {/* Inline script to restore saved theme before React hydrates (prevents flash) */}

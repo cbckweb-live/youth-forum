@@ -45,6 +45,7 @@ export const livingRoomSchema: CrudSchema<Episode> = {
   ],
   emptyForm: () => ({ title: "", description: "", youtube_url: "", display_order: 1 }),
   formatSubtitle: (r) => `Episode #${r.display_order}`,
+  searchFields: ["title"],
 };
 
 /* ─── Events ───────────────────────────────────────────────── */
@@ -88,6 +89,7 @@ export const eventsSchema: CrudSchema<Event> = {
       month: "short",
       year: "numeric",
     }),
+  searchFields: ["title"],
 };
 
 /* ─── Mathetes ─────────────────────────────────────────────── */
@@ -126,6 +128,7 @@ export const mathetesSchema: CrudSchema<MathetesEntry> = {
   fileUploadBucket: "media",
   fileUploadFolder: "Mathetes",
   emptyForm: () => ({ title: "", description: "", photo_url: null }),
+  searchFields: ["title"],
 };
 
 /* ─── Gallery Photos ───────────────────────────────────────── */
@@ -257,6 +260,15 @@ export const postsSchema: CrudSchema<Post> = {
     published: false,
   }),
   formatSubtitle: formatPostSubtitle,
+  searchFields: ["title", "slug", "author_name"],
+  filterOptions: [{
+    label: "Category",
+    field: "category",
+    choices: [
+      { value: "news", label: "News" },
+      { value: "blog-opinion", label: "Blog / Opinion" },
+    ],
+  }],
 };
 
 /* ─── Office Bearers ───────────────────────────────────────── */
@@ -301,4 +313,5 @@ export const officeBearersSchema: CrudSchema<OfficeBearer> = {
   fileUploadBucket: "office-bearers-media",
   emptyForm: () => ({ name: "", role: "", photo_url: null, phone: "", email: "", bio: "", team_id: null }),
   formatSubtitle: (r) => r.role ?? "—",
+  searchFields: ["name", "role"],
 };

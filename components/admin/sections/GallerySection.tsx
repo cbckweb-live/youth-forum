@@ -18,6 +18,10 @@ export default function GallerySection() {
   const [uploadSaving, setUploadSaving] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // ── Filter state (persists across renders) ──
+  const [gallerySearch, setGallerySearch] = useState("");
+  const [galleryEventFilter, setGalleryEventFilter] = useState("");
+
   // ── Edit modal state ──
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [editCaption, setEditCaption] = useState("");
@@ -138,85 +142,147 @@ export default function GallerySection() {
   const schema: CrudSchema<Photo> = {
     ...gallerySchema,
     hideToolbar: true,
-    renderBeforeList: () => (
-      <form onSubmit={handleUpload} className="space-y-5 mb-10 bg-white dark:bg-[#1e1e1e] shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] rounded-2xl p-6">
-        <h2 className="font-display text-lg dark:text-[#e5e5e5]">Upload Photos</h2>
-        <FileUploadInput
-          accept="image/*"
-          label="Select one or more photos"
-          file={files?.[0] || null}
-          files={files}
-          progress={uploadProgress}
-          multiple
-          onChange={(f) => {
-            if (!f) return setFiles(null);
-            const invalid = Array.from(f).find((file) => !file.type.startsWith("image/"));
-            if (invalid) { alert(`"${invalid.name}" is not a valid image.`); return; }
-            setFiles(f);
-          }}
-        />
-        <input type="text" placeholder="Caption (optional — applies to all)" value={bulkCaption}
-          onChange={(e) => setBulkCaption(e.target.value)}
-          className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]" />
-        <input type="text" placeholder="Event tag (e.g. Annual Camp 2024)" value={bulkEventTag}
-          onChange={(e) => setBulkEventTag(e.target.value)}
-          className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]" />
-        {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
-        <button type="submit" disabled={uploadSaving}
-          className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
-          {uploadSaving ? "Uploading..." : "Upload"}
-        </button>
-        {process.env.NODE_ENV !== "production" && debugInfo && (
-          <p className="text-sm text-[#231F1E]/60 dark:text-gray-400">{debugInfo}</p>
-        )}
-      </form>
-    ),
-    renderList: ({ records, onEdit, onDelete }) => (
-      <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {records.length > 0 ? records.map((photo) => (
-          <div key={photo.id} className="relative group rounded-xl overflow-hidden bg-gray-100 dark:bg-[#2a2a2a] h-32">
-            <Image
-              src={photo.photo_url}
-              alt={String(photo.caption || "")}
-              fill
-              unoptimized
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              style={{ objectFit: "cover" }}
-              quality={75}
-              onError={(e) => { (e.target as HTMLImageElement).src = "/images/placeholder.jpg"; }}
+    renderBeforeList: ({ records }) => {
+      // Compute event tags directly from current records (no ref syncing needed)
+      const currentEventTags = Array.from(
+        new Set(records.map((r) => r.event_tag).filter(Boolean)),
+      ).sort() as string[];
+
+      return (
+        <>
+          {/* Upload form */}
+          <form onSubmit={handleUpload} className="space-y-5 mb-8 bg-white dark:bg-[#1e1e1e] shadow-md dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] rounded-2xl p-6">
+            <h2 className="font-display text-lg dark:text-[#e5e5e5]">Upload Photos</h2>
+            <FileUploadInput
+              accept="image/*"
+              label="Select one or more photos"
+              file={files?.[0] || null}
+              files={files}
+              progress={uploadProgress}
+              multiple
+              onChange={(f) => {
+                if (!f) return setFiles(null);
+                const invalid = Array.from(f).find((file) => !file.type.startsWith("image/"));
+                if (invalid) { alert(`"${invalid.name}" is not a valid image.`); return; }
+                setFiles(f);
+              }}
             />
-            <div className="p-2">
-              {photo.event_tag && <p className="text-xs text-[#6B1F2A] dark:text-[#B84C5C] truncate">{photo.event_tag}</p>}
-              {photo.caption && <p className="text-xs text-[#231F1E]/60 dark:text-gray-400 truncate">{photo.caption}</p>}
+            <input type="text" placeholder="Caption (optional — applies to all)" value={bulkCaption}
+              onChange={(e) => setBulkCaption(e.target.value)}
+              className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]" />
+            <input type="text" placeholder="Event tag (e.g. Annual Camp 2024)" value={bulkEventTag}
+              onChange={(e) => setBulkEventTag(e.target.value)}
+              className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]" />
+            {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+            <button type="submit" disabled={uploadSaving}
+              className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60">
+              {uploadSaving ? "Uploading..." : "Upload"}
+            </button>
+            {process.env.NODE_ENV !== "production" && debugInfo && (
+              <p className="text-sm text-[#231F1E]/60 dark:text-gray-400">{debugInfo}</p>
+            )}
+          </form>
+
+          {/* Search & Filter */}
+          <div className="flex flex-wrap items-center gap-3 mb-5">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#231F1E]/40 dark:text-gray-500 text-sm">🔍</span>
+              <input
+                type="text"
+                placeholder="Search photos…"
+                value={gallerySearch}
+                onChange={(e) => setGallerySearch(e.target.value)}
+                className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
+              />
             </div>
-            <div className="absolute top-2 left-2 flex gap-2">
+            <select
+              value={galleryEventFilter}
+              onChange={(e) => setGalleryEventFilter(e.target.value)}
+              className="border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
+            >
+              <option value="">Event: All</option>
+              {currentEventTags.map((tag) => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+            {(gallerySearch || galleryEventFilter) && (
               <button
-                onClick={() => {
-                  setEditingPhoto(photo);
-                  setPreviousPhotoUrl(photo.photo_url);
-                  setEditCaption(photo.caption ?? "");
-                  setEditEventTag(photo.event_tag ?? "");
-                  setEditPhotoFile(null);
-                  setEditError(null);
-                  onEdit(photo);
-                }}
-                className="bg-white/90 dark:bg-[#2a2a2a]/90 text-[#6B1F2A] dark:text-[#B84C5C] text-xs rounded-full px-3 py-1 border border-white/50 dark:border-white/10"
+                onClick={() => { setGallerySearch(""); setGalleryEventFilter(""); }}
+                className="text-xs text-[#6B1F2A] dark:text-[#B84C5C] hover:underline"
               >
-                Edit
+                Clear filters
+              </button>
+            )}
+          </div>
+        </>
+      );
+    },
+    renderList: ({ records, onEdit, onDelete }) => {
+      // Filter records inline from the records prop — always fresh
+      let displayRecords = records;
+      if (gallerySearch) {
+        const q = gallerySearch.toLowerCase();
+        displayRecords = displayRecords.filter(
+          (r) =>
+            (r.caption && r.caption.toLowerCase().includes(q)) ||
+            (r.event_tag && r.event_tag.toLowerCase().includes(q)),
+        );
+      }
+      if (galleryEventFilter) {
+        displayRecords = displayRecords.filter((r) => r.event_tag === galleryEventFilter);
+      }
+
+      return (
+        <div className="grid sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {displayRecords.length > 0 ? displayRecords.map((photo) => (
+            <div key={photo.id} className="relative group rounded-xl overflow-hidden bg-gray-100 dark:bg-[#2a2a2a] h-32">
+              <Image
+                src={photo.photo_url}
+                alt={String(photo.caption || "")}
+                fill
+                unoptimized
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                style={{ objectFit: "cover" }}
+                quality={75}
+                onError={(e) => { (e.target as HTMLImageElement).src = "/images/placeholder.jpg"; }}
+              />
+              <div className="p-2">
+                {photo.event_tag && <p className="text-xs text-[#6B1F2A] dark:text-[#B84C5C] truncate">{photo.event_tag}</p>}
+                {photo.caption && <p className="text-xs text-[#231F1E]/60 dark:text-gray-400 truncate">{photo.caption}</p>}
+              </div>
+              <div className="absolute top-2 left-2 flex gap-2">
+                <button
+                  onClick={() => {
+                    setEditingPhoto(photo);
+                    setPreviousPhotoUrl(photo.photo_url);
+                    setEditCaption(photo.caption ?? "");
+                    setEditEventTag(photo.event_tag ?? "");
+                    setEditPhotoFile(null);
+                    setEditError(null);
+                    onEdit(photo);
+                  }}
+                  className="bg-white/90 dark:bg-[#2a2a2a]/90 text-[#6B1F2A] dark:text-[#B84C5C] text-xs rounded-full px-3 py-1 border border-white/50 dark:border-white/10"
+                >
+                  Edit
+                </button>
+              </div>
+              <button
+                onClick={() => onDelete(photo.id)}
+                className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+              >
+                ✕
               </button>
             </div>
-            <button
-              onClick={() => onDelete(photo.id)}
-              className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-            >
-              ✕
-            </button>
-          </div>
-        )) : (
-          <p className="text-sm text-[#231F1E]/50 dark:text-gray-400 col-span-full">No photos yet.</p>
-        )}
-      </div>
-    ),
+          )) : (
+            <p className="text-sm text-[#231F1E]/50 dark:text-gray-400 col-span-full">
+              {records.length === 0
+                ? "No photos yet."
+                : "No photos match your search."}
+            </p>
+          )}
+        </div>
+      );
+    },
     renderEditModal: ({ onClose, saving, error }) => {
       const photo = editingPhoto;
       return (
