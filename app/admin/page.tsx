@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import TurnstileWidget from "@/components/TurnstileWidget";
+
+const TURNSTILE_SITE_KEY =
+  typeof process !== "undefined"
+    ? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+    : "";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -10,16 +16,36 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
+  const handleCaptchaToken = useCallback((token: string | null) => {
+    setCaptchaToken(token);
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+
+    // Require CAPTCHA if the site key is configured
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setError("Please complete the security check.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
     const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: captchaToken ? { captchaToken } : undefined,
+    });
+
     if (error) {
       setError("Invalid email or password.");
       setLoading(false);
+      // Reset CAPTCHA so the user gets a fresh challenge
+      setCaptchaToken(null);
     } else {
       router.push("/admin/dashboard");
     }
@@ -41,12 +67,20 @@ export default function AdminLoginPage() {
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Password (min. 8 characters)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={8}
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]"
           />
+          {TURNSTILE_SITE_KEY && (
+            <TurnstileWidget
+              siteKey={TURNSTILE_SITE_KEY}
+              onToken={handleCaptchaToken}
+              theme="auto"
+            />
+          )}
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button
             type="submit"

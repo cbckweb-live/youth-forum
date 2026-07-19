@@ -11,6 +11,16 @@ import {
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
+/** Buckets the upload endpoint is allowed to write to. */
+const ALLOWED_BUCKETS = new Set([
+  "posts-media",
+  "posts-pdf",
+  "events-media",
+  "gallery-media",
+  "office-bearers-media",
+  "media",
+]);
+
 /** Allowed characters in filenames — strip everything else. */
 const SAFE_FILENAME_RE = /[^a-zA-Z0-9._\-]/g;
 
@@ -105,6 +115,11 @@ export async function POST(request: NextRequest) {
 
   if (!file) {
     return errorResponse("No file provided.", 400);
+  }
+
+  // Reject bucket names not on the allowlist
+  if (!ALLOWED_BUCKETS.has(bucket)) {
+    return errorResponse(`Bucket "${bucket}" is not allowed.`, 403);
   }
 
   // ── Read the full file into a buffer for server-side validation ──
@@ -207,6 +222,11 @@ export async function DELETE(request: NextRequest) {
 
     if (!storageLocation) {
       return errorResponse("Invalid URL format.", 400);
+    }
+
+    // Only allow deleting files from known buckets
+    if (!ALLOWED_BUCKETS.has(storageLocation.bucket)) {
+      return errorResponse(`Bucket "${storageLocation.bucket}" is not allowed.`, 403);
     }
 
     const { error } = await serviceSupabase.storage

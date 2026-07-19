@@ -77,8 +77,8 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
   );
 
   const validateForm = useCallback((): boolean => {
-    if (password.length < 6) {
-      setValidationError("Password must be at least 6 characters long.");
+    if (password.length < 8) {
+      setValidationError("Password must be at least 8 characters long.");
       return false;
     }
     if (password !== confirmPassword) {
@@ -168,7 +168,7 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={6}
+            minLength={8}
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]"
           />
           <input
@@ -177,7 +177,7 @@ export default function UpdatePassword({ redirectTo = "/dashboard" }: UpdatePass
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            minLength={6}
+            minLength={8}
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]"
           />
           {validationError && <p className="text-sm text-rose-600">{validationError}</p>}

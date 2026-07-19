@@ -1,18 +1,22 @@
 import { NextResponse } from "next/server";
 import { createGenericRoute } from "@/lib/crud/generic-api-handler";
-import { errorResponse } from "@/lib/admin-api-utils";
 import { deleteStorageObject } from "@/lib/admin-api-utils";
+
+// Reusable sanitize function so bulk_create uses the same logic as create/update
+function sanitizeGalleryRow(payload: Record<string, unknown>) {
+  return {
+    photo_url: payload.photo_url || null,
+    caption: payload.caption || null,
+    event_tag: payload.event_tag || null,
+  };
+}
 
 export const POST = createGenericRoute({
   table: "gallery",
   actionCreate: "create",
   actionUpdate: "update",
   actionDelete: "delete",
-  sanitizePayload: (payload) => ({
-    photo_url: payload.photo_url || null,
-    caption: payload.caption || null,
-    event_tag: payload.event_tag || null,
-  }),
+  sanitizePayload: sanitizeGalleryRow,
   validate: (payload, action) => {
     if (action === "update" && !payload.photo_url) {
       return null; // Allow caption/event_tag-only updates
@@ -29,9 +33,14 @@ export const POST = createGenericRoute({
         return NextResponse.json({ error: "Missing gallery rows." }, { status: 400 });
       }
 
+      // Sanitize every row using the same function as single create/update
+      const sanitizedRows = rawRows.map((row: Record<string, unknown>) =>
+        sanitizeGalleryRow(row),
+      );
+
       const { data, error } = await serviceSupabase
         .from("gallery")
-        .insert(rawRows)
+        .insert(sanitizedRows)
         .select();
 
       if (error) {
