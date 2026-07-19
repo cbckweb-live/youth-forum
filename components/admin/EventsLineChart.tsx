@@ -69,7 +69,7 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
 
     // Area under the curve
     let area = "";
-    if (dots.length > 1) {
+    if (data.length > 1) {
       const firstX = xPos(0);
       const lastX = xPos(data.length - 1);
       const baselineY = yPos(0);
