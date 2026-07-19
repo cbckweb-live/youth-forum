@@ -3,16 +3,22 @@ import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { data: latestPhoto } = await supabase
-    .from("gallery")
-    .select("photo_url, caption, event_tag")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
+  let ogImage: { url: string; width: number; height: number }[] = [];
 
-  const ogImage = latestPhoto?.photo_url
-    ? [{ url: latestPhoto.photo_url, width: 1200, height: 630 }]
-    : [];
+  try {
+    const { data } = await supabase
+      .from("gallery")
+      .select("photo_url")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    const latestPhoto = data?.[0];
+    if (latestPhoto?.photo_url) {
+      ogImage = [{ url: latestPhoto.photo_url, width: 1200, height: 630 }];
+    }
+  } catch (e) {
+    console.error("[GalleryMetadata]", e);
+  }
 
   return {
     title: "Gallery | CBCK Youth Forum",

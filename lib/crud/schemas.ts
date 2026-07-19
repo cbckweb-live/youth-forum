@@ -90,6 +90,24 @@ export const eventsSchema: CrudSchema<Event> = {
       year: "numeric",
     }),
   searchFields: ["title"],
+  filterOptions: [
+    {
+      label: "Year",
+      field: "year",
+      choices: (() => {
+        const current = new Date().getFullYear();
+        const years: { value: string; label: string }[] = [];
+        for (let y = current + 1; y >= 2020; y--) {
+          years.push({ value: String(y), label: String(y) });
+        }
+        return years;
+      })(),
+      filterFn: (filterValue, record) => {
+        const year = new Date(record.event_date).getFullYear();
+        return String(year) === filterValue;
+      },
+    },
+  ],
 };
 
 /* ─── Mathetes ─────────────────────────────────────────────── */

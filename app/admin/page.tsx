@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import ToastContainer, { showToast } from "@/components/admin/Toast";
 
 const TURNSTILE_SITE_KEY =
   typeof process !== "undefined"
@@ -27,6 +28,7 @@ export default function AdminLoginPage() {
 
     // Require CAPTCHA if the site key is configured
     if (TURNSTILE_SITE_KEY && !captchaToken) {
+      showToast("Please complete the security check.", "error");
       setError("Please complete the security check.");
       return;
     }
@@ -42,7 +44,7 @@ export default function AdminLoginPage() {
     });
 
     if (error) {
-      setError("Invalid email or password.");
+      showToast("Invalid email or password.", "error");
       setLoading(false);
       // Reset CAPTCHA so the user gets a fresh challenge
       setCaptchaToken(null);
@@ -63,7 +65,7 @@ export default function AdminLoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]"
+            className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
           />
           <input
             type="password"
@@ -72,7 +74,7 @@ export default function AdminLoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A]"
+            className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
           />
           {TURNSTILE_SITE_KEY && (
             <TurnstileWidget
@@ -90,6 +92,8 @@ export default function AdminLoginPage() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
+        <ToastContainer />
       </div>
     </main>
   );

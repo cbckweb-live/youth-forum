@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import GenericCrudSection from "@/lib/crud/GenericCrudSection";
+import { showToast } from "@/components/admin/Toast";
 import { postsSchema, type Post } from "@/lib/crud/schemas";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import type { CrudSchema } from "@/lib/crud/types";
@@ -18,9 +19,12 @@ function validatePdf(file: File): string | null {
 /** Separate component so React hooks work correctly inside .map() */
 function PublishToggleButton({ record, refresh }: { record: Post; refresh: () => void }) {
   const [loading, setLoading] = useState(false);
+  const isPublished = record.published;
+
   return (
     <button
       onClick={async () => {
+        if (loading) return;
         setLoading(true);
         try {
           const response = await fetch("/api/admin/posts", {
@@ -29,34 +33,70 @@ function PublishToggleButton({ record, refresh }: { record: Post; refresh: () =>
             body: JSON.stringify({
               action: "toggle_publish",
               id: record.id,
-              published: !record.published,
+              published: !isPublished,
             }),
           });
 
           if (response.ok) {
             refresh();
+            const action = isPublished ? "unpublished" : "published";
+            showToast(`Post ${action} successfully`);
           } else {
             const text = await response.text().catch(() => "");
-            alert(`Publish failed: ${text || response.status}`);
+            showToast(`Publish failed: ${text || response.status}`, "error");
           }
         } catch (e) {
           const msg = e instanceof Error ? e.message : "Publish failed.";
-          alert(msg);
+          showToast(msg, "error");
         } finally {
           setLoading(false);
         }
       }}
       disabled={loading}
-      className={`${record.published ? "text-green-600" : "text-gray-400"} hover:underline text-sm`}
+      aria-label={isPublished ? "Click to unpublish this post" : "Click to publish this post"}
+      aria-pressed={isPublished}
+      title={isPublished ? "Published — click to unpublish" : "Draft — click to publish"}
+      className={
+        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 " +
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 " +
+        (isPublished
+          ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60 focus-visible:ring-green-500 "
+          : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 focus-visible:ring-amber-500 ") +
+        (loading ? "opacity-60 cursor-not-allowed" : "cursor-pointer")
+      }
     >
-      {record.published ? "Published" : "Draft"}
+      {loading ? (
+        <>
+          {/* Spinner icon */}
+          <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <span className="sr-only">Toggling…</span>
+        </>
+      ) : isPublished ? (
+        <>
+          {/* Checkmark icon */}
+          <svg className="size-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+          </svg>
+          Published
+        </>
+      ) : (
+        <>
+          {/* Draft/eye icon */}
+          <svg className="size-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+            <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+          </svg>
+          Draft
+        </>
+      )}
     </button>
   );
 }
 
 export default function PostsSection() {
-  const [mediaType, setMediaType] = useState<"none" | "photo" | "pdf">("none");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [pdfUploadProgress, setPdfUploadProgress] = useState<number | null>(null);
   const [localMediaType, setLocalMediaType] = useState<"none" | "photo" | "pdf">("none");
   const [localFile, setLocalFile] = useState<File | null>(null);
@@ -129,10 +169,10 @@ export default function PostsSection() {
 
         if (effectiveMediaType === "pdf") {
           const validationError = validatePdf(f);
-          if (validationError) { alert(validationError); return; }
+          if (validationError) { showToast(validationError, "error"); return; }
         }
         if (effectiveMediaType === "photo" && !f.type.startsWith("image/")) {
-          alert("Invalid file type. Please upload an image.");
+          showToast("Invalid file type. Please upload an image.", "error");
           return;
         }
 
@@ -146,7 +186,7 @@ export default function PostsSection() {
             setForm({ ...form, pdf_url: url });
           }
         } catch (err) {
-          alert(err instanceof Error ? err.message : "Upload failed.");
+          showToast(err instanceof Error ? err.message : "Upload failed.", "error");
         } finally {
           setLocalFile(null);
         }

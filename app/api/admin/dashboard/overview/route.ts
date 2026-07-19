@@ -23,6 +23,10 @@ export type DashboardOverview = {
     event_date: string;
     event_end_date: string | null;
   }[];
+  eventsByMonth: {
+    month: string;
+    count: number;
+  }[];
   emptyTables: string[];
   latestPostTitle: string | null;
 };
@@ -55,6 +59,7 @@ export async function GET(request: NextRequest) {
       officeBearersRecent,
       livingRoomRecent,
       upcomingEventsRaw,
+      allEventsThisYear,
     ] = await Promise.all([
       serverSupabase.from("posts").select("id", { count: "exact", head: true }),
       serverSupabase.from("events").select("id", { count: "exact", head: true }),
@@ -73,6 +78,11 @@ export async function GET(request: NextRequest) {
         .gte("event_date", new Date().toISOString().split("T")[0])
         .order("event_date", { ascending: true })
         .limit(10),
+      serverSupabase
+        .from("events")
+        .select("event_date")
+        .gte("event_date", `${new Date().getFullYear()}-01-01`)
+        .lte("event_date", `${new Date().getFullYear()}-12-31`),
     ]);
 
     const counts = {
@@ -151,6 +161,19 @@ export async function GET(request: NextRequest) {
     );
     const recentActivity = activity.slice(0, 8);
 
+    // Events grouped by month (for the line chart)
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const eventsByMonth = monthNames.map((month) => ({ month, count: 0 }));
+
+    if (!allEventsThisYear.error && allEventsThisYear.data) {
+      for (const ev of allEventsThisYear.data) {
+        const monthIndex = new Date(ev.event_date).getMonth();
+        if (monthIndex >= 0 && monthIndex < 12) {
+          eventsByMonth[monthIndex].count++;
+        }
+      }
+    }
+
     // Upcoming events
     const upcomingEvents = !upcomingEventsRaw.error
       ? (upcomingEventsRaw.data ?? [])
@@ -175,6 +198,7 @@ export async function GET(request: NextRequest) {
       counts,
       recentActivity,
       upcomingEvents,
+      eventsByMonth,
       emptyTables,
       latestPostTitle,
     } satisfies DashboardOverview);

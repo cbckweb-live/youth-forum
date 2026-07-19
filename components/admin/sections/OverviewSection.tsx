@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import type { DashboardOverview } from "@/app/api/admin/dashboard/overview/route";
+import EventsLineChart from "@/components/admin/EventsLineChart";
 
 const TABLE_LABELS: Record<string, string> = {
   posts: "Posts",
@@ -120,7 +121,7 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
 
   if (!data) return null;
 
-  const { counts, recentActivity, upcomingEvents, emptyTables } = data;
+  const { counts, recentActivity, upcomingEvents, eventsByMonth, emptyTables } = data;
 
   return (
     <div className="space-y-10">
@@ -209,6 +210,25 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
           )}
         </div>
       )}
+
+      {/* ─── Events by Month line chart ─── */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display text-base dark:text-[#e5e5e5]">Events per Month</h3>
+          <span className="text-xs text-[#231F1E]/40 dark:text-gray-500">
+            {new Date().getFullYear()}
+          </span>
+        </div>
+        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4 sm:p-6">
+          {eventsByMonth.some((m) => m.count > 0) ? (
+            <EventsLineChart data={eventsByMonth} />
+          ) : (
+            <p className="text-sm text-[#231F1E]/50 dark:text-gray-400 text-center py-8">
+              No events added for this year yet.
+            </p>
+          )}
+        </div>
+      </div>
 
       {/* ─── Quick-add buttons ─── */}
       <div className="flex flex-wrap gap-2">

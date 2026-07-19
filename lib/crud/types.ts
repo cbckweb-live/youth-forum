@@ -166,7 +166,8 @@ export interface CrudSchema<T extends { id: string }> {
   renderList?: (props: {
     records: T[];
     onEdit: (record: T) => void;
-    onDelete: (id: string) => void;
+    /** Callback to trigger delete confirmation. Pass an optional title to show in the dialog. */
+    onDelete: (id: string, title?: string) => void;
     refresh: () => void;
   }) => React.ReactNode;
   /**

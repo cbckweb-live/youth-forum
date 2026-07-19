@@ -6,6 +6,7 @@ import GenericCrudSection from "@/lib/crud/GenericCrudSection";
 import { officeBearersSchema, type OfficeBearer } from "@/lib/crud/schemas";
 import type { CrudSchema } from "@/lib/crud/types";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { showToast } from "@/components/admin/Toast";
 
 type Team = {
   id: string;
@@ -19,6 +20,7 @@ export default function OfficeBearersSection() {
   const [showTeamsModal, setShowTeamsModal] = useState(false);
   const [newTeamName, setNewTeamName] = useState("");
   const [confirmDeleteTeamId, setConfirmDeleteTeamId] = useState<string | null>(null);
+  const [confirmDeleteTeamName, setConfirmDeleteTeamName] = useState<string | null>(null);
   const [teamError, setTeamError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,10 +48,13 @@ export default function OfficeBearersSection() {
         throw new Error(text || "Failed to add team.");
       }
       setNewTeamName("");
+      showToast(`"${newTeamName.trim()}" team added`);
       const { data } = await supabase.from("teams").select("*").order("display_order", { ascending: true });
       setTeams((data as Team[]) || []);
     } catch (err) {
-      setTeamError(err instanceof Error ? err.message : "Failed to add team.");
+      const msg = err instanceof Error ? err.message : "Failed to add team.";
+      setTeamError(msg);
+      showToast(msg, "error");
     }
   }
 
@@ -66,18 +71,22 @@ export default function OfficeBearersSection() {
         setTeamError(text || "Failed to delete team.");
         return;
       }
+      setConfirmDeleteTeamName(null);
       setConfirmDeleteTeamId(null);
+      showToast(`Team deleted successfully`);
       const { data } = await supabase.from("teams").select("*").order("display_order", { ascending: true });
       setTeams((data as Team[]) || []);
     } catch (err) {
-      setTeamError(err instanceof Error ? err.message : "Failed to delete team.");
+      const msg = err instanceof Error ? err.message : "Failed to delete team.";
+      setTeamError(msg);
+      showToast(msg, "error");
     }
   }
 
   // Merge base schema with OfficeBearers-specific team_id field (dynamic from DB)
   const schema: CrudSchema<OfficeBearer> = {
     ...officeBearersSchema,
-    renderCustomFields: ({ form, setForm, editingId }) => (
+    renderCustomFields: ({ form, setForm }) => (
       <div>
         <label className="block text-sm font-medium text-[#231F1E] dark:text-[#e5e5e5] mb-1">
           Team
@@ -133,7 +142,7 @@ export default function OfficeBearersSection() {
               {teams.map((team) => (
                 <div key={team.id} className="flex items-center justify-between px-4 py-2 rounded-lg bg-gray-50 dark:bg-[#2a2a2a]">
                   <p className="text-sm dark:text-[#e5e5e5]">{team.name}</p>
-                  <button onClick={() => setConfirmDeleteTeamId(team.id)} className="text-red-500 text-sm hover:underline">Delete</button>
+                  <button onClick={() => { setConfirmDeleteTeamName(team.name); setConfirmDeleteTeamId(team.id); }} className="text-red-500 text-sm hover:underline">Delete</button>
                 </div>
               ))}
               {teams.length === 0 && <p className="text-sm text-[#231F1E]/50 dark:text-gray-400">No teams yet.</p>}
@@ -145,8 +154,10 @@ export default function OfficeBearersSection() {
       {confirmDeleteTeamId && (
         <ConfirmDialog
           message="Delete this team? Members will become unassigned."
+          itemName={confirmDeleteTeamName ?? undefined}
+          entityLabel="team"
           onConfirm={() => handleDeleteTeam(confirmDeleteTeamId)}
-          onCancel={() => setConfirmDeleteTeamId(null)}
+          onCancel={() => { setConfirmDeleteTeamId(null); setConfirmDeleteTeamName(null); }}
         />
       )}
     </>

@@ -6,6 +6,7 @@ import { gallerySchema, type Photo } from "@/lib/crud/schemas";
 import type { CrudSchema } from "@/lib/crud/types";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import ImageCropper from "@/components/admin/ImageCropper";
+import { showToast } from "@/components/admin/Toast";
 import Image from "next/image";
 
 export default function GallerySection() {
@@ -110,8 +111,11 @@ export default function GallerySection() {
       setBulkCaption("");
       setBulkEventTag("");
       setUploadProgress(null);
+      showToast(`${inserted.length} photo${inserted.length !== 1 ? "s" : ""} uploaded successfully`);
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+      const msg = err instanceof Error ? err.message : "Upload failed. Please try again.";
+      setUploadError(msg);
+      showToast(msg, "error");
       setDebugInfo(null);
     } finally {
       setUploadSaving(false);
@@ -163,7 +167,7 @@ export default function GallerySection() {
               onChange={(f) => {
                 if (!f) return setFiles(null);
                 const invalid = Array.from(f).find((file) => !file.type.startsWith("image/"));
-                if (invalid) { alert(`"${invalid.name}" is not a valid image.`); return; }
+                if (invalid) { showToast(`"${invalid.name}" is not a valid image.`, "error"); return; }
                 setFiles(f);
               }}
             />
@@ -267,7 +271,7 @@ export default function GallerySection() {
                 </button>
               </div>
               <button
-                onClick={() => onDelete(photo.id)}
+                onClick={() => onDelete(photo.id, photo.caption || photo.event_tag || "photo")}
                 className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
               >
                 ✕
@@ -328,8 +332,11 @@ export default function GallerySection() {
                 await updatePhotoHandler(photo.id, photoUrl, editCaption, editEventTag, previousPhotoUrl);
                 onClose();
                 setEditPhotoFile(null);
+                showToast("Photo updated successfully");
               } catch (err) {
-                setEditError(err instanceof Error ? err.message : "Update failed.");
+                const msg = err instanceof Error ? err.message : "Update failed.";
+                setEditError(msg);
+                showToast(msg, "error");
               } finally {
                 setEditSaving(false);
               }

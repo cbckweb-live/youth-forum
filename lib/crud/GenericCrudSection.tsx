@@ -6,6 +6,7 @@ import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import FileUploadInput from "@/components/admin/FileUploadInput";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import { useAdminImageUpload } from "@/lib/hooks/useAdminImageUpload";
+import ToastContainer, { showToast } from "@/components/admin/Toast";
 import type { CrudSchema, CrudField } from "./types";
 
 /**
@@ -177,6 +178,9 @@ export default function GenericCrudSection<
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previousImageUrl, setPreviousImageUrl] = useState<string | null>(null);
 
+  // Track the item being deleted so the confirmation dialog can show its title
+  const [deleteItemTitle, setDeleteItemTitle] = useState<string | null>(null);
+
   const [form, setForm] = useState<Record<string, unknown>>(schema.emptyForm());
   const [validationError, setValidationError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
@@ -229,6 +233,7 @@ export default function GenericCrudSection<
     setPreviousImageUrl(null);
     setImageFile(null);
     setValidationError(null);
+    setDeleteItemTitle(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -243,7 +248,7 @@ export default function GenericCrudSection<
       }
     }
 
-    await executeSubmit(async () => {
+    const ok = await executeSubmit(async () => {
       let payload = { ...form };
 
       if (imageField && imageFile) {
@@ -276,6 +281,14 @@ export default function GenericCrudSection<
         throw new Error(text || `Failed to save ${schema.entityLabel.toLowerCase()}.`);
       }
     });
+
+    if (ok) {
+      const label = editingId
+        ? `"${(form[titleField?.name ?? ""] as string) || schema.entityLabel.toLowerCase()}"`
+        : schema.entityLabel.toLowerCase();
+      const action = editingId ? "updated" : "created";
+      showToast(`${label} ${action} successfully`);
+    }
 
     setForm(schema.emptyForm());
     setImageFile(null);
@@ -328,8 +341,26 @@ export default function GenericCrudSection<
 
   const refresh = useCallback(() => fetchData(), [fetchData]);
 
+  // ── Pagination ──
+  const PAGE_SIZE = 20;
+  const [page, setPage] = useState(1);
+
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(filteredRecords.length / PAGE_SIZE)),
+    [filteredRecords.length],
+  );
+
+  const safePage = Math.min(page, totalPages);
+
+  const paginatedRecords = useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE;
+    return filteredRecords.slice(start, start + PAGE_SIZE);
+  }, [filteredRecords, safePage]);
+
   return (
     <div className="space-y-6">
+      <ToastContainer />
+
       {/* Toolbar */}
       {!schema.hideToolbar && (
         <div className="flex justify-end">
@@ -360,7 +391,7 @@ export default function GenericCrudSection<
                 type="text"
                 placeholder={`Search ${schema.entityLabel.toLowerCase()}s…`}
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
                 className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
               />
             </div>
@@ -370,12 +401,13 @@ export default function GenericCrudSection<
               <select
                 key={filterOpt.field}
                 value={activeFilters[filterOpt.field] ?? ""}
-                onChange={(e) =>
+                onChange={(e) => {
                   setActiveFilters((prev) => ({
                     ...prev,
                     [filterOpt.field]: e.target.value,
-                  }))
-                }
+                  }));
+                  setPage(1);
+                }}
                 className="border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
               >
                 <option value="">{filterOpt.label}: All</option>
@@ -394,13 +426,16 @@ export default function GenericCrudSection<
         schema.renderList({
           records: filteredRecords,
           onEdit: handleEditRecord,
-          onDelete: (id) => setConfirmDeleteId(id),
+          onDelete: (id, title) => {
+            if (title) setDeleteItemTitle(title);
+            setConfirmDeleteId(id);
+          },
           refresh,
         })
       ) : (
         <div className="space-y-3">
           {filteredRecords.length > 0 ? (
-            filteredRecords.map((record) => {
+            paginatedRecords.map((record) => {
               const recordAny = record as unknown as Record<string, unknown>;
               const title = titleField ? String(recordAny[titleField.name] ?? "") : record.id;
               const subtitle = schema.formatSubtitle
@@ -423,18 +458,30 @@ export default function GenericCrudSection<
                       </p>
                     )}
                   </div>
-                  <div className="flex gap-3 text-sm shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => handleEditRecord(record)}
-                      className="text-[#6B1F2A] dark:text-[#B84C5C] hover:underline"
+                      aria-label={`Edit ${title}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
                     >
+                      <svg className="size-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="m5.433 13.917 1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                        <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                      </svg>
                       Edit
                     </button>
                     {schema.renderRowActions?.(record, refresh)}
                     <button
-                      onClick={() => setConfirmDeleteId(record.id)}
-                      className="text-red-500 hover:underline"
+                      onClick={() => {
+                        setDeleteItemTitle(title);
+                        setConfirmDeleteId(record.id);
+                      }}
+                      aria-label={`Delete ${title}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
                     >
+                      <svg className="size-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c-.84 0-1.673.025-2.5.075V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25v.325C11.673 4.025 10.84 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clipRule="evenodd" />
+                      </svg>
                       Delete
                     </button>
                   </div>
@@ -451,17 +498,96 @@ export default function GenericCrudSection<
         </div>
       )}
 
+      {/* Pagination controls */}
+      {filteredRecords.length > PAGE_SIZE && (
+        <div className="flex items-center justify-between border-t border-gray-200 dark:border-[#2a2a2a] pt-4">
+          <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">
+            Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredRecords.length)} of {filteredRecords.length}
+          </p>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              aria-label="Previous page"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-[#231F1E]/60 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <svg className="size-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+              </svg>
+              Prev
+            </button>
+
+            {/* Page numbers with ellipsis */}
+            {(() => {
+              const pages: (number | "ellipsis")[] = [];
+              const maxVisible = 5;
+              if (totalPages <= maxVisible + 2) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+              } else {
+                pages.push(1);
+                const start = Math.max(2, safePage - 1);
+                const end = Math.min(totalPages - 1, safePage + 1);
+                if (start > 2) pages.push("ellipsis");
+                for (let i = start; i <= end; i++) pages.push(i);
+                if (end < totalPages - 1) pages.push("ellipsis");
+                pages.push(totalPages);
+              }
+              return pages.map((p, i) =>
+                p === "ellipsis" ? (
+                  <span key={`e-${i}`} className="px-1 text-xs text-[#231F1E]/30 dark:text-gray-500">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    aria-label={`Page ${p}`}
+                    aria-current={p === safePage ? "page" : undefined}
+                    className={`min-w-[28px] h-7 rounded-lg text-xs font-medium transition-all duration-200 ${
+                      p === safePage
+                        ? "bg-[#6B1F2A] text-white"
+                        : "text-[#231F1E]/60 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ),
+              );
+            })()}
+
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              aria-label="Next page"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-[#231F1E]/60 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Next
+              <svg className="size-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {/* Delete confirmation */}
       {confirmDeleteId && (
         <ConfirmDialog
-          message={`Are you sure you want to delete this ${schema.entityLabel.toLowerCase()}?`}
-          onConfirm={() => {
-            handleDelete(confirmDeleteId);
+          message={`Delete this ${schema.entityLabel.toLowerCase()}?`}
+          itemName={deleteItemTitle ?? undefined}
+          entityLabel={schema.entityLabel.toLowerCase()}
+          onConfirm={async () => {
+            const capturedTitle = deleteItemTitle;
+            await handleDelete(confirmDeleteId);
             setConfirmDeleteId(null);
+            setDeleteItemTitle(null);
+            const label = capturedTitle ? `"${capturedTitle}"` : schema.entityLabel.toLowerCase();
+            showToast(`${label} deleted successfully`);
           }}
-          onCancel={() => setConfirmDeleteId(null)}
+          onCancel={() => {
+            setConfirmDeleteId(null);
+            setDeleteItemTitle(null);
+          }}
         />
       )}
 

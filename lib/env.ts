@@ -19,6 +19,10 @@ const envSchema = z.object({
   SENTRY_PROJECT: z.string().optional(),
   SENTRY_AUTH_TOKEN: z.string().optional(),
 
+  // Launch gatekeeper bypass secret — used by proxy.ts middleware
+  // Optional for backward compatibility; proxy.ts falls back to the legacy value if unset
+  LAUNCH_BYPASS_SECRET: z.string().min(1).optional(),
+
   // Cloudflare Turnstile CAPTCHA (optional — for login page protection)
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).optional(),
   TURNSTILE_SECRET_KEY: z.string().min(1).optional(),

@@ -35,7 +35,6 @@ export function useAdminCrudSection<T extends { id: string }>(
 ) {
   const { fetchRecords: fetchRecordsProp, apiPath, actionNames, onFetchError } = options;
   const fetchRecordsRef = useRef(fetchRecordsProp);
-  fetchRecordsRef.current = fetchRecordsProp;
 
   const [records, setRecords] = useState<T[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -60,6 +59,10 @@ export function useAdminCrudSection<T extends { id: string }>(
       }
     }
   }, [onFetchError]);
+
+  useEffect(() => {
+    fetchRecordsRef.current = fetchRecordsProp;
+  }, [fetchRecordsProp]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -116,15 +119,17 @@ export function useAdminCrudSection<T extends { id: string }>(
    * }
    * ```
    */
-  async function executeSubmit(action: () => Promise<void>) {
+  async function executeSubmit(action: () => Promise<void>): Promise<boolean> {
     setSaving(true);
     setError(null);
     try {
       await action();
       closeModal();
       await fetchData();
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Please try again.");
+      return false;
     } finally {
       setSaving(false);
     }
@@ -147,7 +152,7 @@ export function useAdminCrudSection<T extends { id: string }>(
         return;
       }
       setConfirmDeleteId(null);
-      void fetchData();
+      await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete.");
     }

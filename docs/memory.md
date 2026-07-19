@@ -240,6 +240,13 @@ All planned features have been implemented. The TODO.md file is empty of remaini
 
 ## Changelog
 
+### 2026-07-19 — v1.0.1
+
+- 🔧 **Moved launch gatekeeper bypass secret to environment variable.** Removed hardcoded `BYPASS_SECRET_VALUE` from `proxy.ts`. Added `LAUNCH_BYPASS_SECRET` to the Zod env schema in `lib/env.ts` with a backward-compatible default.
+- ✨ **Added error boundaries to prevent crashes during Supabase outages.** Created `app/error.tsx` (root error boundary for all pages), `app/office-bearers/[id]/error.tsx`, and `app/about/blog-news/[slug]/error.tsx` (segment-level boundaries for dynamic routes). Each shows a friendly error message with "Try Again" and navigation links.
+
+
+
 All notable changes to this project will be documented in this section.
 
 ### 2026-07-15 — v1.0.1
