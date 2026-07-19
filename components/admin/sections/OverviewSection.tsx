@@ -47,6 +47,106 @@ const QUICK_ACTIONS = [
   { tab: "Posts", label: "+ New Post", icon: "📝", color: "bg-blue-600 hover:bg-blue-700" },
 ] as const;
 
+/** Renders a GitHub Actions workflow status card */
+function WorkflowStatusCard({
+  icon,
+  label,
+  subtitle,
+  status,
+}: {
+  icon: string;
+  label: string;
+  subtitle: string;
+  status: { lastRunAt: string | null; hoursSinceLastRun: number | null; healthy: boolean };
+}) {
+  return (
+    <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-base">{icon}</span>
+        <span className="text-xs font-medium text-[#231F1E]/50 dark:text-gray-400 uppercase tracking-wider">{label}</span>
+      </div>
+      {status.lastRunAt ? (
+        <>
+          <div className="flex items-center gap-2">
+            <span className={`inline-block w-2 h-2 rounded-full ${status.healthy ? "bg-emerald-500" : "bg-red-500"}`} />
+            <p className="text-lg font-bold dark:text-[#e5e5e5]">
+              {status.hoursSinceLastRun !== null
+                ? status.hoursSinceLastRun < 1
+                  ? "<1h ago"
+                  : status.hoursSinceLastRun < 24
+                    ? `${status.hoursSinceLastRun}h ago`
+                    : `${Math.floor(status.hoursSinceLastRun / 24)}d ago`
+                : "Unknown"}
+            </p>
+          </div>
+          <p className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 mt-0.5">
+            {subtitle}
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-gray-400" />
+            <p className="text-lg font-bold dark:text-[#e5e5e5] text-gray-400">—</p>
+          </div>
+          <p className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 mt-0.5">
+            No recent run data
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** A simple horizontal bar chart for visitors over 14 days */
+function VisitorsBarChart({ data }: { data: DashboardOverview['analyticsVisitors'] }) {
+  if (data.length === 0) {
+    return (
+      <p className="text-sm text-[#231F1E]/50 dark:text-gray-400 text-center py-8">
+        No analytics data available.
+      </p>
+    );
+  }
+
+  const maxVal = Math.max(...data.map((d) => d.visitors), 1);
+  const BAR_COLOR = "#6B1F2A";
+
+  return (
+    <div className="space-y-1.5">
+      {data.map((day) => {
+        const pct = Math.max((day.visitors / maxVal) * 100, day.visitors > 0 ? 4 : 0);
+        const dateLabel = new Date(day.date + "T00:00:00").toLocaleDateString("en-GB", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        });
+        return (
+          <div key={day.date} className="flex items-center gap-3 group">
+            <span className="text-[10px] text-[#231F1E]/50 dark:text-gray-400 w-20 shrink-0 text-right leading-none">
+              {dateLabel}
+            </span>
+            <div className="flex-1 h-5 bg-gray-100 dark:bg-[#2a2a2a] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500 group-hover:opacity-80 dark:bg-[#B84C5C]"
+                style={{
+                  width: `${pct}%`,
+                  backgroundColor: BAR_COLOR,
+                }}
+              />
+            </div>
+            <span className="text-xs font-semibold dark:text-[#e5e5e5] w-10 text-right shrink-0 tabular-nums">
+              {day.visitors}
+            </span>
+            <span className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 w-10 text-right shrink-0 tabular-nums">
+              {day.pageviews}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const [data, setData] = useState<DashboardOverview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -157,6 +257,9 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
     keepaliveStatus,
     monthlyDeltas,
     missingImages,
+    analyticsVisitors,
+    topPages,
+    backupStatus,
   } = data;
 
   return (
@@ -189,7 +292,7 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
       </div>
 
       {/* ─── Supabase Usage & Health row ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Storage used */}
         <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -239,41 +342,20 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
         </div>
 
         {/* Keepalive health */}
-        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-base">❤️</span>
-            <span className="text-xs font-medium text-[#231F1E]/50 dark:text-gray-400 uppercase tracking-wider">Keepalive</span>
-          </div>
-          {keepaliveStatus.lastRunAt ? (
-            <>
-              <div className="flex items-center gap-2">
-                <span className={`inline-block w-2 h-2 rounded-full ${keepaliveStatus.healthy ? "bg-emerald-500" : "bg-red-500"}`} />
-                <p className="text-lg font-bold dark:text-[#e5e5e5]">
-                  {keepaliveStatus.hoursSinceLastRun !== null
-                    ? keepaliveStatus.hoursSinceLastRun < 1
-                      ? "<1h ago"
-                      : keepaliveStatus.hoursSinceLastRun < 24
-                        ? `${keepaliveStatus.hoursSinceLastRun}h ago`
-                        : `${Math.floor(keepaliveStatus.hoursSinceLastRun / 24)}d ago`
-                    : "Unknown"}
-                </p>
-              </div>
-              <p className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 mt-0.5">
-                Last GitHub Actions ping
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-gray-400" />
-                <p className="text-lg font-bold dark:text-[#e5e5e5] text-gray-400">—</p>
-              </div>
-              <p className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 mt-0.5">
-                No recent run data
-              </p>
-            </>
-          )}
-        </div>
+        <WorkflowStatusCard
+          icon="❤️"
+          label="Keepalive"
+          subtitle="GitHub Actions ping"
+          status={keepaliveStatus}
+        />
+
+        {/* Backup workflow */}
+        <WorkflowStatusCard
+          icon="💾"
+          label="DB Backup"
+          subtitle="Weekly database backup"
+          status={backupStatus}
+        />
       </div>
 
       {/* ─── Missing image warnings ─── */}
@@ -409,6 +491,66 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
               No events added for this year yet.
             </p>
           )}
+        </div>
+      </div>
+
+      {/* ─── Site Traffic (Vercel Analytics) ─── */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display text-base dark:text-[#e5e5e5]">Site Traffic</h3>
+          <span className="text-xs text-[#231F1E]/40 dark:text-gray-500">
+            Last 14 days · visitors / pageviews
+          </span>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* 14-day visitors bar chart */}
+          <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-xs font-semibold text-[#231F1E]/50 dark:text-gray-400 uppercase tracking-wider">
+                Daily Visitors
+              </h4>
+              {analyticsVisitors.length > 0 && (
+                <span className="text-xs text-[#231F1E]/40 dark:text-gray-500 tabular-nums">
+                  Total: {analyticsVisitors.reduce((s, d) => s + d.visitors, 0).toLocaleString()}
+                </span>
+              )}
+            </div>
+            <VisitorsBarChart data={analyticsVisitors} />
+          </div>
+
+          {/* Top pages */}
+          <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4">
+            <h4 className="text-xs font-semibold text-[#231F1E]/50 dark:text-gray-400 uppercase tracking-wider mb-3">
+              Most Visited Pages
+            </h4>
+            {topPages.length > 0 ? (
+              <div className="space-y-1">
+                {topPages.map((page, i) => (
+                  <div
+                    key={page.path}
+                    className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
+                  >
+                    <span className="text-[10px] font-bold text-[#231F1E]/30 dark:text-gray-500 w-4 text-right shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-xs flex-1 truncate dark:text-[#e5e5e5] font-medium">
+                      {page.path === "/" ? "Home" : page.path}
+                    </span>
+                    <span className="text-[10px] text-[#231F1E]/50 dark:text-gray-400 tabular-nums shrink-0">
+                      {page.pageviews.toLocaleString()} views
+                    </span>
+                    <span className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 tabular-nums shrink-0 w-14 text-right">
+                      {page.visitors.toLocaleString()} visits
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[#231F1E]/50 dark:text-gray-400 text-center py-8">
+                Analytics data unavailable. Add VERCEL_ACCESS_TOKEN and VERCEL_PROJECT_ID to load site traffic.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

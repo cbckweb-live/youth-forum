@@ -27,6 +27,11 @@ const envSchema = z.object({
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).optional(),
   TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
 
+  // Vercel Analytics API (optional — for admin dashboard)
+  VERCEL_ACCESS_TOKEN: z.string().min(1).optional(),
+  VERCEL_PROJECT_ID: z.string().min(1).optional(),
+  VERCEL_TEAM_ID: z.string().min(1).optional(),
+
   // Environment tracking
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });

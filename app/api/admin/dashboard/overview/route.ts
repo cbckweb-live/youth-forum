@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabase, requireAdmin, getServiceSupabase } from "@/lib/admin-api-utils";
+import { env } from "@/lib/env";
 
 export type DashboardOverview = {
   counts: {
@@ -53,12 +54,30 @@ export type DashboardOverview = {
     gallery: number;
     office_bearers: number;
   };
+  // ─── Vercel Analytics ───
+  analyticsVisitors: {
+    date: string;
+    pageviews: number;
+    visitors: number;
+  }[];
+  topPages: {
+    path: string;
+    pageviews: number;
+    visitors: number;
+  }[];
+  // ─── Backup workflow status ───
+  backupStatus: {
+    lastRunAt: string | null;
+    hoursSinceLastRun: number | null;
+    healthy: boolean;
+  };
 };
 
-/** GitHub repo info for keepalive workflow */
+/** GitHub repo info */
 const GITHUB_OWNER = "cbckweb-live";
 const GITHUB_REPO = "youth-forum";
-const WORKFLOW_FILENAME = "supabase-keepalive.yml";
+const KEEPALIVE_WORKFLOW = "supabase-keepalive.yml";
+const BACKUP_WORKFLOW = "backup.yml";
 
 export async function GET(request: NextRequest) {
   const response = new NextResponse();
@@ -73,6 +92,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const now = new Date();
+
     // ── Count queries ──
     const [
       postsCount,
@@ -104,7 +125,8 @@ export async function GET(request: NextRequest) {
       serverSupabase.from("living_room_seasons").select("id,title,display_order").order("id", { ascending: false }).limit(5),
       serverSupabase.from("events")
         .select("id,title,event_date,event_end_date")
-        .gte("event_date", new Date().toISOString().split("T")[0])
+        .gte("event_date", new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0])
+        .lte("event_date", new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString())
         .order("event_date", { ascending: true })
         .limit(10),
       serverSupabase
@@ -124,7 +146,6 @@ export async function GET(request: NextRequest) {
     };
 
     // ── Monthly deltas (this month vs last month) ──
-    const now = new Date();
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
     const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
@@ -238,35 +259,109 @@ export async function GET(request: NextRequest) {
       console.error("[databaseSize] error:", e);
     }
 
-    // ── Keepalive status (GitHub Actions) ──
-    let keepaliveStatus: DashboardOverview["keepaliveStatus"] = { lastRunAt: null, hoursSinceLastRun: null, healthy: true };
-    try {
-      const ghRes = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_FILENAME}/runs?per_page=1&status=success`,
-        {
-          headers: { Accept: "application/vnd.github.v3+json" },
-          // GitHub API has 60 req/hr for unauthenticated; this is one per page load — fine
-          signal: AbortSignal.timeout(5000),
+    /** Helper: fetch a workflow run status from GitHub Actions */
+    async function fetchWorkflowStatus(filename: string): Promise<{ lastRunAt: string | null; hoursSinceLastRun: number | null; healthy: boolean }> {
+      try {
+        const ghRes = await fetch(
+          `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${filename}/runs?per_page=1&status=success`,
+          {
+            headers: { Accept: "application/vnd.github.v3+json" },
+            signal: AbortSignal.timeout(5000),
+          }
+        );
+        if (ghRes.ok) {
+          const ghData = (await ghRes.json()) as { workflow_runs: Array<{ run_started_at: string; status: string; conclusion: string | null }> };
+          if (ghData.workflow_runs && ghData.workflow_runs.length > 0) {
+            const lastRun = ghData.workflow_runs[0];
+            return {
+              lastRunAt: lastRun.run_started_at,
+              hoursSinceLastRun: Math.floor(
+                (Date.now() - new Date(lastRun.run_started_at).getTime()) / (1000 * 60 * 60)
+              ),
+              healthy: lastRun.conclusion === "success",
+            };
+          }
         }
-      );
-      if (ghRes.ok) {
-        const ghData = (await ghRes.json()) as { workflow_runs: Array<{ run_started_at: string; status: string; conclusion: string | null }> };
-        if (ghData.workflow_runs && ghData.workflow_runs.length > 0) {
-          const lastRun = ghData.workflow_runs[0];
-          keepaliveStatus = {
-            lastRunAt: lastRun.run_started_at,
-            hoursSinceLastRun: Math.floor(
-              (Date.now() - new Date(lastRun.run_started_at).getTime()) / (1000 * 60 * 60)
-            ),
-            healthy: lastRun.conclusion === "success",
-          };
-        }
-      } else {
-        // Non-fatal — keep defaults (healthy: true with null times means "unknown")
-        keepaliveStatus = { lastRunAt: null, hoursSinceLastRun: null, healthy: true };
+      } catch (e) {
+        console.error(`[${filename}] error:`, e);
       }
-    } catch (e) {
-      console.error("[keepalive] error:", e);
+      return { lastRunAt: null, hoursSinceLastRun: null, healthy: false };
+    }
+
+    // ── Keepalive status (GitHub Actions) ──
+    const keepaliveStatus = await fetchWorkflowStatus(KEEPALIVE_WORKFLOW);
+
+    // ── Backup workflow status ──
+    const backupStatus = await fetchWorkflowStatus(BACKUP_WORKFLOW);
+
+    // ── Vercel Analytics ──
+    let analyticsVisitors: DashboardOverview["analyticsVisitors"] = [];
+    let topPages: DashboardOverview["topPages"] = [];
+
+    if (env.VERCEL_ACCESS_TOKEN && env.VERCEL_PROJECT_ID) {
+      try {
+        const now = new Date();
+        const since = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+        const sinceStr = since.toISOString().split("T")[0];
+        const untilStr = now.toISOString().split("T")[0];
+
+        const commonParams = new URLSearchParams({
+          projectId: env.VERCEL_PROJECT_ID,
+          since: sinceStr,
+          until: untilStr,
+        });
+        if (env.VERCEL_TEAM_ID) {
+          commonParams.set("teamId", env.VERCEL_TEAM_ID);
+        }
+
+        const headers: HeadersInit = {
+          Authorization: `Bearer ${env.VERCEL_ACCESS_TOKEN}`,
+        };
+
+        // ── 14-day visitors time series ──
+        const dailyParams = new URLSearchParams(commonParams);
+        dailyParams.set("by", "day");
+        const dailyRes = await fetch(
+          `https://api.vercel.com/v1/query/web-analytics/visits/aggregate?${dailyParams.toString()}`,
+          { headers, signal: AbortSignal.timeout(8000) }
+        );
+        if (dailyRes.ok) {
+          const dailyData = (await dailyRes.json()) as {
+            data: Array<{ timestamp: string; pageviews: number; visitors: number }>;
+          };
+          if (dailyData.data) {
+            analyticsVisitors = dailyData.data.map((d) => ({
+              date: d.timestamp.split("T")[0],
+              pageviews: d.pageviews,
+              visitors: d.visitors,
+            }));
+          }
+        }
+
+        // ── Top pages ──
+        const topParams = new URLSearchParams(commonParams);
+        topParams.set("by", "route");
+        topParams.set("limit", "10");
+        const topRes = await fetch(
+          `https://api.vercel.com/v1/query/web-analytics/visits/aggregate?${topParams.toString()}`,
+          { headers, signal: AbortSignal.timeout(8000) }
+        );
+        if (topRes.ok) {
+          const topData = (await topRes.json()) as {
+            data: Array<{ route: string; pageviews: number; visitors: number }>;
+          };
+          if (topData.data) {
+            topPages = topData.data.map((d) => ({
+              path: d.route,
+              pageviews: d.pageviews,
+              visitors: d.visitors,
+            }));
+          }
+        }
+      } catch (e) {
+        console.error("[vercel-analytics] error:", e);
+        // Non-fatal — keep empty arrays
+      }
     }
 
     // ── Build recent activity ──
@@ -378,6 +473,9 @@ export async function GET(request: NextRequest) {
       keepaliveStatus,
       monthlyDeltas,
       missingImages,
+      analyticsVisitors,
+      topPages,
+      backupStatus,
     } satisfies DashboardOverview);
   } catch (err) {
     console.error("[dashboard/overview]", err);
