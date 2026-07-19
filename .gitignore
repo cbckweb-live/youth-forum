@@ -37,8 +37,6 @@ yarn-error.log*
 .env.production
 node_modules/
 
-# lock files from other package managers
-package-lock.json
 
 # vercel
 .vercel

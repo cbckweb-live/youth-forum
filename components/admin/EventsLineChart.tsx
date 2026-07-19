@@ -40,11 +40,11 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
     }
 
     const chartW = 100;
-    const chartH = 50;
+    const chartH = 38;
     const padL = 0;
     const padR = 0;
     const padT = 4;
-    const padB = 10;
+    const padB = 8;
     const drawW = chartW - padL - padR;
     const drawH = chartH - padT - padB;
     const points = data.length - 1;
@@ -90,7 +90,7 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
   return (
     <div className="w-full">
       <svg
-        viewBox="0 0 100 50"
+        viewBox="0 0 100 38"
         className="w-full h-auto overflow-visible"
         preserveAspectRatio="xMidYMid meet"
         role="img"
@@ -98,7 +98,7 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
       >
         {/* Y-axis grid lines */}
         {yTicks.map((v) => {
-          const y = 4 + 36 - (yMax > 0 ? (v / yMax) * 36 : 0);
+          const y = 4 + 26 - (yMax > 0 ? (v / yMax) * 26 : 0);
           return (
             <line
               key={`grid-${v}`}
@@ -108,7 +108,7 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
               y2={y}
               stroke={GRID_COLOR}
               strokeOpacity={GRID_OPACITY}
-              strokeWidth={0.3}
+              strokeWidth={0.4}
             />
           );
         })}
@@ -127,12 +127,12 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
         {dots.length > 1 && (
           <>
             <path
-              d={`M${dots[0].x},46 L${pathD} L${dots[dots.length - 1].x},46 Z`}
+              d={`M${dots[0].x},34 L${pathD} L${dots[dots.length - 1].x},34 Z`}
               fill="url(#lineAreaGrad)"
               className="dark:hidden"
             />
             <path
-              d={`M${dots[0].x},46 L${pathD} L${dots[dots.length - 1].x},46 Z`}
+              d={`M${dots[0].x},34 L${pathD} L${dots[dots.length - 1].x},34 Z`}
               fill="url(#lineAreaGradDark)"
               className="hidden dark:block"
             />
@@ -144,7 +144,7 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
           d={pathD}
           fill="none"
           stroke={LINE_COLOR}
-          strokeWidth={0.8}
+          strokeWidth={1.0}
           strokeLinecap="round"
           strokeLinejoin="round"
           className="dark:stroke-[#B84C5C]"
@@ -155,10 +155,10 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
           <g key={dot.month}>
             {/* Invisible wider hit area for tooltip */}
             <rect
-              x={dot.x - 3}
-              y={dot.y - 8}
-              width={6}
-              height={28}
+              x={dot.x - 5}
+              y={dot.y - 6}
+              width={10}
+              height={12}
               fill="transparent"
               className="group"
             />
@@ -166,10 +166,10 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
             <circle
               cx={dot.x}
               cy={dot.y}
-              r={1.2}
+              r={1.8}
               fill={DOT_FILL}
               stroke={DOT_STROKE}
-              strokeWidth={0.4}
+              strokeWidth={0.7}
               className="dark:fill-[#B84C5C]"
             />
           </g>
@@ -180,12 +180,13 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
           <text
             key={`label-${dot.month}`}
             x={dot.x}
-            y={48}
+            y={36}
             textAnchor={i === 0 ? "start" : i === dots.length - 1 ? "end" : "middle"}
             fill={AXIS_LABEL_COLOR}
             fillOpacity={AXIS_LABEL_OPACITY}
-            fontSize={3.5}
+            fontSize={4}
             fontFamily="var(--font-body, Inter, sans-serif)"
+            fontWeight={500}
           >
             {dot.month}
           </text>
@@ -196,13 +197,13 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
           <text
             key={`val-${dot.month}`}
             x={dot.x}
-            y={dot.y - 2.5}
+            y={dot.y - 3}
             textAnchor="middle"
             fill={LINE_COLOR}
             fillOpacity={VALUE_LABEL_OPACITY}
-            fontSize={3.5}
+            fontSize={4}
             fontFamily="var(--font-body, Inter, sans-serif)"
-            fontWeight={600}
+            fontWeight={700}
             className="dark:fill-[#B84C5C]"
           >
             {dot.count}

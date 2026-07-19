@@ -9,10 +9,17 @@ export async function proxy(request: NextRequest) {
   // 1. "COMING SOON" LAUNCH GATEKEEPER LOGIC
   // ==========================================
   const BYPASS_COOKIE_NAME = 'cbck_launch_bypass';
-  const BYPASS_SECRET_VALUE = process.env.LAUNCH_BYPASS_SECRET || 'cbck_office_bearers_2026';
+  const BYPASS_SECRET_VALUE = process.env.LAUNCH_BYPASS_SECRET;
+  if (!BYPASS_SECRET_VALUE) {
+    console.error('LAUNCH_BYPASS_SECRET environment variable is not set!');
+  }
 
   // Secret Team Backdoor Link Handler: https://cbckyouthforum.live/?preview=true
   if (url.searchParams.get('preview') === 'true') {
+    if (!BYPASS_SECRET_VALUE) {
+      console.error('Cannot set bypass cookie: LAUNCH_BYPASS_SECRET is not configured');
+      return NextResponse.redirect(new URL('/', request.url));
+    }
     const redirectResponse = NextResponse.redirect(new URL('/', request.url));
     redirectResponse.cookies.set(BYPASS_COOKIE_NAME, BYPASS_SECRET_VALUE, {
       path: '/',

@@ -219,7 +219,7 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
             {new Date().getFullYear()}
           </span>
         </div>
-        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4 sm:p-6">
+        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-3 sm:p-4 max-w-md">
           {eventsByMonth.some((m) => m.count > 0) ? (
             <EventsLineChart data={eventsByMonth} />
           ) : (
