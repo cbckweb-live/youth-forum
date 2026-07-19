@@ -25,7 +25,7 @@ export async function proxy(request: NextRequest) {
       path: '/',
       maxAge: 60 * 60 * 24 * 7, 
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });
     return redirectResponse;
