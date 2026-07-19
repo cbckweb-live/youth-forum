@@ -11,50 +11,48 @@ type EventsLineChartProps = {
   data: DataPoint[];
 };
 
-const GRID_COLOR = "currentColor";
-const GRID_OPACITY = 0.08;
 const LINE_COLOR = "#6B1F2A";
 const LINE_COLOR_DARK = "#B84C5C";
-const DOT_FILL = "#6B1F2A";
-const DOT_FILL_DARK = "#B84C5C";
-const DOT_STROKE = "#ffffff";
-const AXIS_LABEL_COLOR = "currentColor";
-const AXIS_LABEL_OPACITY = 0.4;
-const VALUE_LABEL_OPACITY = 0.6;
+
+// Chart layout constants — shared between SVG rendering and useMemo
+const PAD_TOP = 6;
+const PAD_BOTTOM = 10;
+const DRAW_HEIGHT = 26;
+const CHART_HEIGHT = PAD_TOP + DRAW_HEIGHT + PAD_BOTTOM;
+
+const CHART_WIDTH = 100;
+const PAD_LEFT = 0;
+const PAD_RIGHT = 0;
 
 export default function EventsLineChart({ data }: EventsLineChartProps) {
-  const { pathD, dots, yLabels, yMax, yTicks } = useMemo(() => {
+  const { pathD, areaD, dots, yTicks, yMax } = useMemo(() => {
     const maxVal = Math.max(1, ...data.map((d) => d.count));
-    const paddedMax = maxVal + Math.max(1, Math.ceil(maxVal * 0.15));
-    const ticks = Math.min(5, paddedMax);
+    const paddedMax = maxVal + Math.max(1, Math.ceil(maxVal * 0.2));
 
-    // Figure out nice round tick values
-    const step = Math.max(1, Math.ceil(paddedMax / ticks));
+    // Y-axis ticks — round to nice intervals
+    const tickCount = 4;
+    const rawStep = paddedMax / tickCount;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+    const niceStep = Math.ceil(rawStep / magnitude) * magnitude;
     const yTickValues: number[] = [];
-    for (let v = 0; v <= paddedMax; v += step) {
+    for (let v = 0; v <= paddedMax; v += niceStep) {
       yTickValues.push(v);
     }
-    // Ensure we always include maxVal
     if (yTickValues[yTickValues.length - 1] < maxVal) {
       yTickValues.push(maxVal);
     }
 
-    const chartW = 100;
-    const chartH = 38;
-    const padL = 0;
-    const padR = 0;
-    const padT = 4;
-    const padB = 8;
-    const drawW = chartW - padL - padR;
-    const drawH = chartH - padT - padB;
+    // Chart dimensions (viewBox)
+    const drawW = CHART_WIDTH - PAD_LEFT - PAD_RIGHT;
+    const drawH = DRAW_HEIGHT;
     const points = data.length - 1;
 
     const xPos = (i: number) =>
-      padL + (points > 0 ? (i / points) * drawW : drawW / 2);
+      PAD_LEFT + (points > 0 ? (i / points) * drawW : drawW / 2);
     const yPos = (v: number) =>
-      padT + drawH - (paddedMax > 0 ? (v / paddedMax) * drawH : 0);
+      PAD_TOP + drawH - (paddedMax > 0 ? (v / paddedMax) * drawH : 0);
 
-    // Build path
+    // Build smooth path
     let path = "";
     data.forEach((d, i) => {
       const x = xPos(i);
@@ -69,6 +67,15 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
       }
     });
 
+    // Area under the curve
+    let area = "";
+    if (dots.length > 1) {
+      const firstX = xPos(0);
+      const lastX = xPos(data.length - 1);
+      const baselineY = yPos(0);
+      area = `M${firstX},${baselineY} ${path} L${lastX},${baselineY} Z`;
+    }
+
     const dotPoints = data.map((d, i) => ({
       x: xPos(i),
       y: yPos(d.count),
@@ -78,27 +85,51 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
 
     return {
       pathD: path,
+      areaD: area,
       dots: dotPoints,
-      yLabels: yTickValues,
-      yMax: paddedMax,
       yTicks: yTickValues,
+      yMax: paddedMax,
     };
   }, [data]);
 
   if (data.length === 0) return null;
 
+  /** Determine if we should show this month label to avoid crowding */
+  const shouldShowLabel = (i: number, total: number) => {
+    // Always show first, last, and months with events
+    if (i === 0 || i === total - 1 || dots[i].count > 0) return true;
+    // For long series, show every other month
+    if (total > 6 && i % 2 !== 0) return false;
+    return true;
+  };
+
+  // Simplify month labels to 3 chars
+  const shortMonths = dots.map((d) => d.month.slice(0, 3));
+
   return (
     <div className="w-full">
       <svg
-        viewBox="0 0 100 38"
+        viewBox={`0 0 100 ${CHART_HEIGHT}`}
         className="w-full h-auto overflow-visible"
         preserveAspectRatio="xMidYMid meet"
         role="img"
         aria-label={`Events per month chart: ${data.map((d) => `${d.month}: ${d.count}`).join(", ")}`}
       >
-        {/* Y-axis grid lines */}
+        {/* ── Gradient definitions ── */}
+        <defs>
+          <linearGradient id="lineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={LINE_COLOR} stopOpacity={0.15} />
+            <stop offset="100%" stopColor={LINE_COLOR} stopOpacity={0.02} />
+          </linearGradient>
+          <linearGradient id="lineAreaGradDark" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={LINE_COLOR_DARK} stopOpacity={0.2} />
+            <stop offset="100%" stopColor={LINE_COLOR_DARK} stopOpacity={0.03} />
+          </linearGradient>
+        </defs>
+
+        {/* ── Y-axis grid lines (subtle) ── */}
         {yTicks.map((v) => {
-          const y = 4 + 26 - (yMax > 0 ? (v / yMax) * 26 : 0);
+          const y = PAD_TOP + DRAW_HEIGHT - (yMax > 0 ? (v / yMax) * DRAW_HEIGHT : 0);
           return (
             <line
               key={`grid-${v}`}
@@ -106,40 +137,22 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
               y1={y}
               x2={100}
               y2={y}
-              stroke={GRID_COLOR}
-              strokeOpacity={GRID_OPACITY}
-              strokeWidth={0.4}
+              stroke="currentColor"
+              strokeOpacity={0.06}
+              strokeWidth={0.3}
             />
           );
         })}
 
-        {/* Area fill under the line */}
-        <defs>
-          <linearGradient id="lineAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={LINE_COLOR} stopOpacity={0.2} />
-            <stop offset="100%" stopColor={LINE_COLOR} stopOpacity={0.02} />
-          </linearGradient>
-          <linearGradient id="lineAreaGradDark" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={LINE_COLOR_DARK} stopOpacity={0.25} />
-            <stop offset="100%" stopColor={LINE_COLOR_DARK} stopOpacity={0.03} />
-          </linearGradient>
-        </defs>
-        {dots.length > 1 && (
+        {/* ── Area fill ── */}
+        {areaD && (
           <>
-            <path
-              d={`M${dots[0].x},34 L${pathD} L${dots[dots.length - 1].x},34 Z`}
-              fill="url(#lineAreaGrad)"
-              className="dark:hidden"
-            />
-            <path
-              d={`M${dots[0].x},34 L${pathD} L${dots[dots.length - 1].x},34 Z`}
-              fill="url(#lineAreaGradDark)"
-              className="hidden dark:block"
-            />
+            <path d={areaD} fill="url(#lineAreaGrad)" className="dark:hidden" />
+            <path d={areaD} fill="url(#lineAreaGradDark)" className="hidden dark:block" />
           </>
         )}
 
-        {/* The line path */}
+        {/* ── The line ── */}
         <path
           d={pathD}
           fill="none"
@@ -150,65 +163,59 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
           className="dark:stroke-[#B84C5C]"
         />
 
-        {/* Data dots */}
-        {dots.map((dot) => (
+        {/* ── Dots with value labels ── */}
+        {dots.map((dot, i) => (
           <g key={dot.month}>
-            {/* Invisible wider hit area for tooltip */}
-            <rect
-              x={dot.x - 5}
-              y={dot.y - 6}
-              width={10}
-              height={12}
-              fill="transparent"
-              className="group"
-            />
-            {/* Dot */}
+            {/* Dot circle */}
             <circle
               cx={dot.x}
               cy={dot.y}
-              r={1.8}
-              fill={DOT_FILL}
-              stroke={DOT_STROKE}
-              strokeWidth={0.7}
+              r={dot.count > 0 ? 2 : 0}
+              fill={dot.count > 0 ? LINE_COLOR : "none"}
+              stroke="white"
+              strokeWidth={0.6}
               className="dark:fill-[#B84C5C]"
             />
+            {/* Value label (only for non-zero counts) */}
+            {dot.count > 0 && (
+              <text
+                x={dot.x}
+                y={dot.y - 4}
+                textAnchor="middle"
+                fill={LINE_COLOR}
+                fillOpacity={0.75}
+                fontSize={3.5}
+                fontFamily="var(--font-body, Inter, sans-serif)"
+                fontWeight={700}
+                className="dark:fill-[#B84C5C]"
+              >
+                {dot.count}
+              </text>
+            )}
           </g>
         ))}
 
-        {/* X-axis month labels */}
-        {dots.map((dot, i) => (
-          <text
-            key={`label-${dot.month}`}
-            x={dot.x}
-            y={36}
-            textAnchor={i === 0 ? "start" : i === dots.length - 1 ? "end" : "middle"}
-            fill={AXIS_LABEL_COLOR}
-            fillOpacity={AXIS_LABEL_OPACITY}
-            fontSize={4}
-            fontFamily="var(--font-body, Inter, sans-serif)"
-            fontWeight={500}
-          >
-            {dot.month}
-          </text>
-        ))}
-
-        {/* Value labels above dots */}
-        {dots.map((dot) => (
-          <text
-            key={`val-${dot.month}`}
-            x={dot.x}
-            y={dot.y - 3}
-            textAnchor="middle"
-            fill={LINE_COLOR}
-            fillOpacity={VALUE_LABEL_OPACITY}
-            fontSize={4}
-            fontFamily="var(--font-body, Inter, sans-serif)"
-            fontWeight={700}
-            className="dark:fill-[#B84C5C]"
-          >
-            {dot.count}
-          </text>
-        ))}
+        {/* ── Month labels (bottom) ── */}
+        {dots.map((dot, i) => {
+          if (!shouldShowLabel(i, dots.length)) return null;
+          return (
+            <text
+              key={`label-${dot.month}`}
+              x={dot.x}
+              y={39}
+              textAnchor={
+                i === 0 ? "start" : i === dots.length - 1 ? "end" : "middle"
+              }
+              fill="currentColor"
+              fillOpacity={0.35}
+              fontSize={3.2}
+              fontFamily="var(--font-body, Inter, sans-serif)"
+              fontWeight={500}
+            >
+              {shortMonths[i]}
+            </text>
+          );
+        })}
       </svg>
     </div>
   );

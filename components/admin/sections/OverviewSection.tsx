@@ -40,6 +40,13 @@ const TABLE_SCHEMA_NAMES: Record<string, string> = {
   living_room: "Living Room",
 };
 
+/** Colour & icon for the quick-action buttons */
+const QUICK_ACTIONS = [
+  { tab: "Events", label: "+ Add Event", icon: "📅", color: "bg-amber-600 hover:bg-amber-700" },
+  { tab: "Gallery", label: "+ Upload Photos", icon: "🖼️", color: "bg-emerald-600 hover:bg-emerald-700" },
+  { tab: "Posts", label: "+ New Post", icon: "📝", color: "bg-blue-600 hover:bg-blue-700" },
+] as const;
+
 export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const [data, setData] = useState<DashboardOverview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -100,6 +107,24 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
     }
   }
 
+  /** Renders a small delta indicator for monthly comparison */
+  function DeltaBadge({ value }: { value: number }) {
+    if (value === 0) return null;
+    const isPositive = value > 0;
+    return (
+      <span
+        className={`inline-flex items-center gap-0.5 text-[10px] font-semibold rounded-full px-1.5 py-0.5 leading-none ${
+          isPositive
+            ? "text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40"
+            : "text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/40"
+        }`}
+      >
+        <span className="text-[10px]">{isPositive ? "▲" : "▼"}</span>
+        {Math.abs(value)} this month
+      </span>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -121,10 +146,21 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
 
   if (!data) return null;
 
-  const { counts, recentActivity, upcomingEvents, eventsByMonth, emptyTables } = data;
+  const {
+    counts,
+    recentActivity,
+    upcomingEvents,
+    eventsByMonth,
+    emptyTables,
+    storageUsed,
+    databaseSize,
+    keepaliveStatus,
+    monthlyDeltas,
+    missingImages,
+  } = data;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* ─── Welcome header ─── */}
       <div>
         <h2 className="font-display text-xl dark:text-[#e5e5e5]">Dashboard Overview</h2>
@@ -138,6 +174,146 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
         </p>
       </div>
 
+      {/* ─── Quick-action shortcuts ─── */}
+      <div className="flex flex-wrap gap-2">
+        {QUICK_ACTIONS.map((action) => (
+          <button
+            key={action.tab}
+            onClick={() => goTo(action.tab)}
+            className={`inline-flex items-center gap-1.5 text-white rounded-xl px-4 py-2.5 text-sm font-medium transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 ${action.color}`}
+          >
+            <span className="text-sm">{action.icon}</span>
+            {action.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ─── Supabase Usage & Health row ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Storage used */}
+        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-base">💾</span>
+            <span className="text-xs font-medium text-[#231F1E]/50 dark:text-gray-400 uppercase tracking-wider">Storage</span>
+          </div>
+          {storageUsed ? (
+            <>
+              <p className="text-lg font-bold dark:text-[#e5e5e5]">{storageUsed.humanReadable}</p>
+              <p className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 mb-2">of 1 GB free tier</p>
+              {/* Progress bar */}
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-[#2a2a2a] rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    storageUsed.percentageOfQuota > 80
+                      ? "bg-red-500"
+                      : storageUsed.percentageOfQuota > 50
+                        ? "bg-amber-500"
+                        : "bg-emerald-500"
+                  }`}
+                  style={{ width: `${Math.min(storageUsed.percentageOfQuota, 100)}%` }}
+                />
+              </div>
+              <p className="text-[10px] mt-1 text-[#231F1E]/40 dark:text-gray-500">
+                {storageUsed.percentageOfQuota}% used
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-[#231F1E]/40 dark:text-gray-500">Unavailable</p>
+          )}
+        </div>
+
+        {/* Database size */}
+        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-base">🗄️</span>
+            <span className="text-xs font-medium text-[#231F1E]/50 dark:text-gray-400 uppercase tracking-wider">Database</span>
+          </div>
+          {databaseSize ? (
+            <>
+              <p className="text-lg font-bold dark:text-[#e5e5e5]">{databaseSize.humanReadable}</p>
+              <p className="text-[10px] text-[#231F1E]/40 dark:text-gray-500">Current DB size</p>
+            </>
+          ) : (
+            <p className="text-sm text-[#231F1E]/40 dark:text-gray-500">Unavailable</p>
+          )}
+        </div>
+
+        {/* Keepalive health */}
+        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-base">❤️</span>
+            <span className="text-xs font-medium text-[#231F1E]/50 dark:text-gray-400 uppercase tracking-wider">Keepalive</span>
+          </div>
+          {keepaliveStatus.lastRunAt ? (
+            <>
+              <div className="flex items-center gap-2">
+                <span className={`inline-block w-2 h-2 rounded-full ${keepaliveStatus.healthy ? "bg-emerald-500" : "bg-red-500"}`} />
+                <p className="text-lg font-bold dark:text-[#e5e5e5]">
+                  {keepaliveStatus.hoursSinceLastRun !== null
+                    ? keepaliveStatus.hoursSinceLastRun < 1
+                      ? "<1h ago"
+                      : keepaliveStatus.hoursSinceLastRun < 24
+                        ? `${keepaliveStatus.hoursSinceLastRun}h ago`
+                        : `${Math.floor(keepaliveStatus.hoursSinceLastRun / 24)}d ago`
+                    : "Unknown"}
+                </p>
+              </div>
+              <p className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 mt-0.5">
+                Last GitHub Actions ping
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-gray-400" />
+                <p className="text-lg font-bold dark:text-[#e5e5e5] text-gray-400">—</p>
+              </div>
+              <p className="text-[10px] text-[#231F1E]/40 dark:text-gray-500 mt-0.5">
+                No recent run data
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ─── Missing image warnings ─── */}
+      {(missingImages.gallery > 0 || missingImages.office_bearers > 0) && (
+        <div className="flex flex-wrap gap-2">
+          {missingImages.gallery > 0 && (
+            <div className="inline-flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-2.5">
+              <span className="text-sm">🖼️</span>
+              <div>
+                <p className="text-xs font-medium text-red-700 dark:text-red-400">
+                  {missingImages.gallery} gallery photo{missingImages.gallery > 1 ? "s" : ""} missing image{missingImages.gallery > 1 ? "s" : ""}
+                </p>
+                <button
+                  onClick={() => goTo("Gallery")}
+                  className="text-[10px] text-red-600 dark:text-red-400 underline hover:no-underline"
+                >
+                  View in Gallery
+                </button>
+              </div>
+            </div>
+          )}
+          {missingImages.office_bearers > 0 && (
+            <div className="inline-flex items-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-2.5">
+              <span className="text-sm">👤</span>
+              <div>
+                <p className="text-xs font-medium text-red-700 dark:text-red-400">
+                  {missingImages.office_bearers} office bearer{missingImages.office_bearers > 1 ? "s" : ""} missing photo{missingImages.office_bearers > 1 ? "s" : ""}
+                </p>
+                <button
+                  onClick={() => goTo("Office Bearers")}
+                  className="text-[10px] text-red-600 dark:text-red-400 underline hover:no-underline"
+                >
+                  View in Office Bearers
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ─── Content counts grid ─── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {(Object.keys(counts) as (keyof typeof counts)[]).map((key) => (
@@ -146,7 +322,13 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
             onClick={() => goTo(TABLE_SCHEMA_NAMES[key])}
             className={`rounded-xl border p-4 text-left transition-all hover:shadow-md dark:hover:shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:-translate-y-0.5 ${TABLE_COLORS[key]}`}
           >
-            <span className="text-xl">{TABLE_ICONS[key]}</span>
+            <div className="flex items-start justify-between">
+              <span className="text-xl">{TABLE_ICONS[key]}</span>
+              {/* Monthly delta badge — only for posts, events, gallery */}
+              {("posts" === key || "events" === key || "gallery" === key) && (
+                <DeltaBadge value={monthlyDeltas[key]} />
+              )}
+            </div>
             <p className="text-2xl font-bold mt-2 dark:text-[#e5e5e5]">
               {counts[key]}
             </p>
@@ -228,19 +410,6 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
             </p>
           )}
         </div>
-      </div>
-
-      {/* ─── Quick-add buttons ─── */}
-      <div className="flex flex-wrap gap-2">
-        {(["Posts", "Events", "Gallery"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => goTo(tab)}
-            className="bg-[#6B1F2A] text-white rounded-full px-5 py-2 text-sm font-medium hover:bg-[#7d2432] transition-colors shadow-sm"
-          >
-            + New {tab === "Gallery" ? "Photos" : tab === "Events" ? "Event" : "Post"}
-          </button>
-        ))}
       </div>
 
       {/* ─── Recent Activity ─── */}
