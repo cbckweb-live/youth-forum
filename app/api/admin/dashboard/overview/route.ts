@@ -340,7 +340,7 @@ export async function GET(request: NextRequest) {
 
         // ── Top pages ──
         const topParams = new URLSearchParams(commonParams);
-        topParams.set("by", "route");
+        topParams.set("by", "requestPath");
         topParams.set("limit", "5");
         const topRes = await fetch(
           `https://api.vercel.com/v1/query/web-analytics/visits/aggregate?${topParams.toString()}`,
@@ -348,14 +348,16 @@ export async function GET(request: NextRequest) {
         );
         if (topRes.ok) {
           const topData = (await topRes.json()) as {
-            data: Array<{ route: string; pageviews: number; visitors: number }>;
+            data: Array<{ requestPath: string; pageviews: number; visitors: number }>;
           };
           if (topData.data) {
-            topPages = topData.data.map((d) => ({
-              path: d.route,
-              pageviews: d.pageviews,
-              visitors: d.visitors,
-            }));
+            topPages = topData.data
+              .filter((d) => d.requestPath !== "Others")
+              .map((d) => ({
+                path: d.requestPath,
+                pageviews: d.pageviews,
+                visitors: d.visitors,
+              }));
           }
         }
       } catch (e) {
