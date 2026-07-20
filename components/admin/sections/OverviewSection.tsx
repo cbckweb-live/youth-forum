@@ -98,7 +98,7 @@ function WorkflowStatusCard({
   );
 }
 
-/** A simple horizontal bar chart for visitors over 14 days */
+/** A simple horizontal bar chart for visitors over 8 days */
 function VisitorsBarChart({ data }: { data: DashboardOverview['analyticsVisitors'] }) {
   if (data.length === 0) {
     return (
@@ -499,7 +499,7 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-display text-base dark:text-[#e5e5e5]">Site Traffic</h3>
           <span className="text-xs text-[#231F1E]/40 dark:text-gray-500">
-            Last 14 days · visitors / pageviews
+            Last 8 days · visitors / pageviews
           </span>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

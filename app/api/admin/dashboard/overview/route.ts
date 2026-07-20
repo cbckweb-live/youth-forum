@@ -301,7 +301,7 @@ export async function GET(request: NextRequest) {
     if (env.VERCEL_ACCESS_TOKEN && env.VERCEL_PROJECT_ID) {
       try {
         const now = new Date();
-        const since = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+        const since = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
         const sinceStr = since.toISOString().split("T")[0];
         const untilStr = now.toISOString().split("T")[0];
 
@@ -318,7 +318,7 @@ export async function GET(request: NextRequest) {
           Authorization: `Bearer ${env.VERCEL_ACCESS_TOKEN}`,
         };
 
-        // ── 14-day visitors time series ──
+        // ── 8-day visitors time series ──
         const dailyParams = new URLSearchParams(commonParams);
         dailyParams.set("by", "day");
         const dailyRes = await fetch(
@@ -341,7 +341,7 @@ export async function GET(request: NextRequest) {
         // ── Top pages ──
         const topParams = new URLSearchParams(commonParams);
         topParams.set("by", "route");
-        topParams.set("limit", "10");
+        topParams.set("limit", "5");
         const topRes = await fetch(
           `https://api.vercel.com/v1/query/web-analytics/visits/aggregate?${topParams.toString()}`,
           { headers, signal: AbortSignal.timeout(8000) }
