@@ -76,16 +76,19 @@ export default async function PostDetailPage({
         {post.title}
       </h1>
 
-      <div className="flex items-center gap-3 text-sm text-[#231F1E]/50 dark:text-gray-400 mb-8">
-        {post.author_name && <span>By {post.author_name}</span>}
-        {post.author_name && <span>·</span>}
-        <span>
-          {new Date(post.created_at).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </span>
+      <div className="flex items-center justify-between gap-3 text-sm text-[#231F1E]/50 dark:text-gray-400 mb-8">
+        <div className="flex items-center gap-3">
+          {post.author_name && <span>By {post.author_name}</span>}
+          {post.author_name && <span>·</span>}
+          <span>
+            {new Date(post.created_at).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
+        </div>
+        <SharePostButtons title={post.title} url={`${baseUrl}/about/blog-news/${post.slug}`} compact />
       </div>
 
       {post.photo_url && (
@@ -105,9 +108,8 @@ export default async function PostDetailPage({
         html={post.content}
         className="prose prose-sm sm:prose max-w-none text-[#231F1E] dark:text-[#e5e5e5] prose-headings:font-display prose-a:text-[#6B1F2A] dark:prose-a:text-[#B84C5C]"
       />
-      <div>
-      <SharePostButtons title={post.title} url={`${baseUrl}/about/blog-news/${post.slug}`} />
-      </div>
+
+      <hr className="my-16 border-t border-[#231F1E]/10 dark:border-white/10" />
       {post.pdf_url && (
         <div className="mt-10 p-4 border border-[#231F1E]/10 dark:border-white/10 rounded-xl flex items-center justify-between">
           <p className="text-sm font-medium">📄 Attached Document</p>
