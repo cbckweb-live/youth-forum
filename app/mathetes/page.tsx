@@ -53,6 +53,7 @@ export default async function MathetesPage() {
         alt="Mathetes Fellowship"
         width={480}
         height={240}
+        priority
         className="mx-auto mb-8 h-auto w-full max-w-60 sm:max-w-80 md:max-w-100 lg:max-w-120"
       />
 

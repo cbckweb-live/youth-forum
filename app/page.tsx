@@ -161,15 +161,15 @@ export default async function HomePage() {
 
   return (
     <main className="bg-white dark:bg-[#151515] text-[#231F1E] dark:text-[#e5e5e5]">
-      {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
+      {/* Hero Section — Full-bleed background image with frosted card overlay */}
 
 <section
-  className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16 w-full max-w-6xl mx-auto text-center relative overflow-hidden"
+  className="relative w-full overflow-hidden py-12 sm:py-16 lg:py-20"
   // Background-color fills the area instantly (good for Speed Index)
   // while next/image below loads progressively for LCP optimization.
   style={{ backgroundColor: "#6B5B4D" }}
 >
-  {/* Full-bleed background image — preloaded via priority prop */}
+  {/* Full-bleed background image — spans entire viewport width */}
   <Image
     src="/background.jpg"
     alt=""
@@ -177,11 +177,17 @@ export default async function HomePage() {
     fill
     priority
     loading="eager"
-    sizes="(max-width: 1200px) 100vw, 1200px"
-    className="absolute inset-0 object-cover object-center -z-10"
+    sizes="100vw"
+    className="object-cover object-center -z-10"
   />
-  {/* Frosted card sits directly over the background image for text readability */}
-  <div className="relative text-center bg-white/75 dark:bg-[#1e1e1e]/85 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+
+  {/* Dark gradient overlay — ensures text readability against any image brightness */}
+  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50" />
+
+  {/* Centered content container */}
+  <div className="relative max-w-6xl mx-auto px-4 sm:px-8 text-center">
+    {/* Frosted card sits over the background image with good contrast */}
+    <div className="bg-white/85 dark:bg-[#1e1e1e]/90 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10 shadow-lg dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
     <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-4 font-medium text-center mx-auto">
       Welcome
     </p>
@@ -238,6 +244,7 @@ export default async function HomePage() {
     </p>
 
    
+  </div>
   </div>
 </section>
 
