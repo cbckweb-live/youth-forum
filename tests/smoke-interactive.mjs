@@ -237,7 +237,216 @@ try {
   }
 
   // ====================================================================
-  // 4. HOME REDIRECT TEST
+  // 4. GALLERY — image loading checks
+  // ====================================================================
+  console.log("\n📋  Gallery — Image Loading\n");
+
+  {
+    const errors = [];
+    startCapture(page, errors);
+    const resp = await page.goto(`${BASE}/gallery`, { waitUntil: "networkidle0", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 2000));
+    page.removeAllListeners("console");
+
+    const realErrors = filterErrors(errors);
+    testResult("Gallery loads without console errors", realErrors.length === 0, `${realErrors.length} error(s): ${realErrors.map(e => e.text).join("; ")}`);
+    testResult("HTTP 200 OK", resp?.status() === 200, `HTTP ${resp?.status()}`);
+    testResult("Page title includes 'Gallery'", await page.$eval("h1", (el) => el.textContent).then(t => t.includes("Gallery")).catch(() => false), "h1 not found or wrong text");
+
+    // Check for images or empty state message
+    const imageCount = await page.$$eval("img[alt]", (imgs) => imgs.length).catch(() => 0);
+    const emptyMsg = await page.evaluate(() =>
+      document.body.innerText.includes("No photos have been added yet")
+    ).catch(() => false);
+
+    if (imageCount > 0) {
+      testResult(`Gallery has ${imageCount} image(s) rendered`, true, "");
+
+      // Check for visually broken images (naturalWidth === 0)
+      // Puppeteer can evaluate in the browser context
+      const brokenCount = await page.evaluate(() => {
+        const imgs = Array.from(document.querySelectorAll("img[alt]"));
+        // Filter images that have src set but are visually broken
+        return imgs.filter((img) => img.complete && img.naturalWidth === 0 && img.getAttribute("src")).length;
+      }).catch(() => 0);
+      testResult("No broken images", brokenCount === 0, `${brokenCount} broken image(s) detected`);
+
+      // Check image sections have event tag headings
+      const sectionHeadings = await page.$$eval("h2", (hs) => hs.map(h => h.textContent)).catch(() => []);
+      testResult(`Gallery has ${sectionHeadings.length} section(s) (event tags)`, sectionHeadings.length > 0, `0 sections`);
+    } else if (emptyMsg) {
+      console.log("  ℹ️  Gallery is empty — no photos in database (this is normal for a fresh DB)");
+    } else {
+      testResult("Gallery content rendered (images or empty state)", false, "no images and no empty-state message found");
+    }
+  }
+
+  // ====================================================================
+  // 5. EVENT CARDS — lightbox interaction
+  // ====================================================================
+  console.log("\n📋  Event Cards — Lightbox Interaction\n");
+
+  {
+    const errors = [];
+    startCapture(page, errors);
+    const resp = await page.goto(`${BASE}/events`, { waitUntil: "networkidle0", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 2000));
+    page.removeAllListeners("console");
+
+    const realErrors = filterErrors(errors);
+    testResult("Events page loads without console errors", realErrors.length === 0, `${realErrors.length} error(s): ${realErrors.map(e => e.text).join("; ")}`);
+    testResult("HTTP 200 OK", resp?.status() === 200, `HTTP ${resp?.status()}`);
+    testResult("Page title includes 'Events'", await page.$eval("h1", (el) => el.textContent).then(t => t.includes("Events Calendar")), "h1 not found or wrong text");
+
+    // Check for event cards with image buttons (lightbox trigger)
+    const imageButtons = await page.$$('button[aria-label="Enlarge image"]').catch(() => []);
+    const hasEventCards = imageButtons.length > 0;
+
+    if (hasEventCards) {
+      testResult(`Found ${imageButtons.length} event card(s) with images`, true, "");
+
+      // Click the first image to open the lightbox
+      const clickErrors = [];
+      startCapture(page, clickErrors);
+      await imageButtons[0].click();
+      await new Promise((r) => setTimeout(r, 1500));
+      page.removeAllListeners("console");
+
+      const realClickErrors = filterErrors(clickErrors);
+      testResult("Lightbox opens without console errors", realClickErrors.length === 0, `${realClickErrors.length} error(s): ${realClickErrors.map(e => e.text).join("; ")}`);
+
+      // Verify the lightbox overlay is visible
+      const lightboxVisible = await page.evaluate(() => {
+        const overlay = document.querySelector('[class*="fixed"][class*="inset-0"][class*="z-50"]');
+        return !!overlay && overlay.classList.contains("fixed");
+      }).catch(() => false);
+      testResult("Lightbox overlay is visible after click", lightboxVisible, "lightbox overlay not found");
+
+      // Verify the lightbox has a close button
+      const hasCloseBtn = await page.evaluate(() => {
+        return Array.from(document.querySelectorAll("button")).some((btn) =>
+          btn.textContent?.includes("Close")
+        );
+      }).catch(() => false);
+      testResult("Lightbox has a close button", hasCloseBtn, "close button not found");
+
+      // Close the lightbox by clicking the close button
+      if (lightboxVisible) {
+        // Find the close button (contains "Close" text)
+        const allBtns = await page.$$("button");
+        for (const btn of allBtns) {
+          const text = await btn.evaluate(el => el.textContent).catch(() => "");
+          if (text?.includes("Close")) {
+            await btn.click();
+            break;
+          }
+        }
+        await new Promise((r) => setTimeout(r, 1000));
+
+        // Verify lightbox is closed
+        const stillVisible = await page.evaluate(() => {
+          return !!document.querySelector(".fixed.inset-0.z-50");
+        }).catch(() => false);
+        testResult("Lightbox closes when clicking close button", !stillVisible, "lightbox overlay still visible after close");
+      }
+    } else {
+      // Check if there are events at all (no events in DB)
+      const noEventsMsg = await page.evaluate(() =>
+        document.body.innerText.includes("No events added")
+      ).catch(() => false);
+
+      if (noEventsMsg) {
+        console.log("  ℹ️  No events in database — skipping lightbox interaction (this is normal for a fresh DB)");
+      } else {
+        // Events exist but none have images — that's also valid
+        const eventCards = await page.$$('[class*="rounded-2xl"]').catch(() => []);
+        testResult(`Found ${eventCards.length} event card(s) (no images to test lightbox)`, eventCards.length > 0, "no event cards found");
+        console.log("  ℹ️  Events exist but none have images — lightbox test skipped");
+      }
+    }
+  }
+
+  // ====================================================================
+  // 6. NAVIGATION — click through navbar links between pages
+  // ====================================================================
+  console.log("\n📋  Navigation — Page-to-Page via Navbar\n");
+
+  // Helper: navigate by clicking a navbar link and verify the destination
+  async function navigateTo(linkName, expectedPath, expectedTitle) {
+    const errors = [];
+    startCapture(page, errors);
+
+    // Find and click the navbar link
+    const navLinks = await page.$$('nav a[href]');
+    let clicked = false;
+    for (const link of navLinks) {
+      const href = await link.evaluate(el => el.getAttribute("href")).catch(() => "");
+      if (href === expectedPath) {
+        // Use Promise.all to wait for both click and navigation
+        await Promise.all([
+          page.waitForNavigation({ waitUntil: "networkidle0", timeout: 20000 }),
+          link.click(),
+        ]);
+        clicked = true;
+        break;
+      }
+    }
+
+    await new Promise((r) => setTimeout(r, 1500));
+    page.removeAllListeners("console");
+
+    const realErrors = filterErrors(errors);
+    const currentUrl = page.url();
+
+    testResult(`Click '${linkName}' navbar link`, clicked, `link with href="${expectedPath}" not found`);
+    if (clicked) {
+      testResult(`Navigated to ${expectedPath}`, currentUrl.includes(expectedPath) || currentUrl.replace(/\/$/, "").endsWith(expectedPath), `expected ${expectedPath}, got ${currentUrl}`);
+      testResult(`Page loads without console errors`, realErrors.length === 0, `${realErrors.length} error(s): ${realErrors.map(e => e.text).join("; ")}`);
+      if (expectedTitle) {
+        const pageTitle = await page.$eval("h1", (el) => el.textContent).catch(() => "");
+        testResult(`H1 includes '${expectedTitle}'`, pageTitle.includes(expectedTitle), `got "${pageTitle}"`);
+      }
+    }
+  }
+
+  // Navigate through pages via navbar
+  await navigateTo("Gallery", "/gallery", "Gallery");
+
+  await navigateTo("Events", "/events", "Events Calendar");
+
+  await navigateTo("Mathetes", "/mathetes", null);
+  {
+    // Mathetes page has an image, not an h1 for the title
+    const pageContent = await page.evaluate(() => document.body.innerText).catch(() => "");
+    testResult("Mathetes page content loaded", pageContent.length > 100, `only ${pageContent.length} chars`);
+  }
+
+  await navigateTo("Office Bearers", "/office-bearers", null);
+  {
+    // Office Bearers page — check content loaded
+    const pageContent = await page.evaluate(() => document.body.innerText).catch(() => "");
+    testResult("Office Bearers page content loaded", pageContent.length > 50, `only ${pageContent.length} chars`);
+  }
+
+  await navigateTo("Cezo Mepu", "/cezo-mepu", null);
+  {
+    // Cezo Mepu page
+    const pageContent = await page.evaluate(() => document.body.innerText).catch(() => "");
+    testResult("Cezo Mepu page content loaded", pageContent.length > 50, `only ${pageContent.length} chars`);
+  }
+
+  await navigateTo("The Living Room", "/living-room", "The Living Room");
+
+  // Finally, navigate home
+  await navigateTo("Home", "/", null);
+  {
+    // Homepage should have content (hero section)
+    const pageContent = await page.evaluate(() => document.body.innerText).catch(() => "");
+    testResult("Homepage content loaded", pageContent.length > 50, `only ${pageContent.length} chars`);
+  }
+
+  // ====================================================================
+  // 7. HOME REDIRECT TEST
   // ====================================================================
   console.log("\n📋  Home & Bypass\n");
 
