@@ -1,0 +1,199 @@
+▲ Next.js 16.2.11 (Turbopack)
+- Local:         http://localhost:3555
+- Network:       http://192.168.31.215:3555
+- Environments: .env.local
+✓ Ready in 2.5s
+○ Compiling instrumentation Node.js ...
+
+○ Compiling /coming-soon ...
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to C:\Users\lenovo\AppData\Local\Temp\next-panic-dcc49ed89ea72577ef2465e73d4323ae.log.
+
+To help make Turbopack better, report this error by ]8;;https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20write%20app%20endpoint%20%2Fcoming-soon%2Fpage&body=Turbopack%20version%3A%20%60v16.2.11%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20write%20app%20endpoint%20%2Fcoming-soon%2Fpage%0A%0ACaused%20by%3A%0A-%20%5Bproject%5D%2Fapp%2Fglobals.css%20%5Bapp-client%5D%20%28css%29%0A-%20reading%20file%20%22C%3A%5C%5CWebsite%5C%5Cyouth-forum%5C%5CNUL%22%0A-%20Incorrect%20function.%20%28os%20error%201%29%0A%0ADebug%20info%3A%0A-%20Execution%20of%20get_written_endpoint_with_issues_operation%20failed%0A-%20Execution%20of%20endpoint_write_to_disk%20failed%0A-%20Execution%20of%20%3CAppEndpoint%20as%20Endpoint%3E%3A%3Aoutput%20failed%0A-%20Failed%20to%20write%20app%20endpoint%20%2Fcoming-soon%2Fpage%0A-%20Execution%20of%20%2Aall_asset_paths%20failed%0A-%20Execution%20of%20%2AAppEndpointOutput%3A%3Aoutput_assets%20failed%0A-%20Execution%20of%20AppEndpoint%3A%3Aoutput%20failed%0A-%20Execution%20of%20AppProject%3A%3Aapp_module_graphs%20failed%0A-%20Execution%20of%20%2A%3CAppEndpoint%20as%20Endpoint%3E%3A%3Aadditional_entries%20failed%0A-%20Execution%20of%20ModuleGraph%3A%3Afrom_graphs%20failed%0A-%20Execution%20of%20ModuleGraph%3A%3Acreate%20failed%0A-%20Execution%20of%20SingleModuleGraph%3A%3Anew_with_entries_visited_intern%20failed%0A-%20%5Bproject%5D%2Fapp%2Fglobals.css%20%5Bapp-client%5D%20%28css%29%0A-%20Execution%20of%20primary_chunkable_referenced_modules%20failed%0A-%20Execution%20of%20%3CCssModule%20as%20Module%3E%3A%3Areferences%20failed%0A-%20Execution%20of%20parse_css%20failed%0A-%20Execution%20of%20%3CPostCssTransformedAsset%20as%20Asset%3E%3A%3Acontent%20failed%0A-%20Execution%20of%20PostCssTransformedAsset%3A%3Aprocess%20failed%0A-%20Execution%20of%20evaluate_webpack_loader%20failed%0A-%20Execution%20of%20%3CDiskFileSystem%20as%20FileSystem%3E%3A%3Aread%20failed%0A-%20reading%20file%20%22C%3A%5C%5CWebsite%5C%5Cyouth-forum%5C%5CNUL%22%0A-%20Incorrect%20function.%20%28os%20error%201%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace\clicking here.]8;;\
+-----
+
+○ Compiling /_error ...
+ GET / 500 in 21.1s (next.js: 19.2s, proxy.ts: 979ms, application-code: 914ms)
+ GET / 200 in 20.8s (next.js: 18.0s, proxy.ts: 27ms, application-code: 2.7s)
+ GET / 200 in 6.8s (next.js: 4.8s, proxy.ts: 12ms, application-code: 2.0s)
+ GET / 200 in 860ms (next.js: 46ms, proxy.ts: 17ms, application-code: 798ms)
+ GET /office-bearers 200 in 177ms (next.js: 53ms, proxy.ts: 60ms, application-code: 63ms)
+ GET /mathetes 200 in 174ms (next.js: 87ms, proxy.ts: 15ms, application-code: 72ms)
+ GET /gallery 200 in 78ms (next.js: 37ms, proxy.ts: 15ms, application-code: 26ms)
+○ Compiling / ...
+ GET / 200 in 10.1s (next.js: 5.2s, proxy.ts: 37ms, application-code: 4.8s)
+✓ Finished writing to filesystem cache in 11.7s
+○ Compiling /office-bearers ...
+✓ Finished filesystem cache database compaction in 12.0s
+ GET /office-bearers 200 in 8.8s (next.js: 7.2s, proxy.ts: 8ms, application-code: 1623ms)
+ GET /office-bearers 200 in 3.0s (next.js: 167ms, proxy.ts: 55ms, application-code: 2.8s)
+✓ Finished writing to filesystem cache in 12.2s
+○ Compiling /mathetes ...
+✓ Finished filesystem cache database compaction in 13.1s
+ GET /mathetes 200 in 11.9s (next.js: 9.9s, proxy.ts: 10ms, application-code: 2.1s)
+[browser] Image with src "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Mathetes/Mathetes.jpeg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/media/Mathetes/methetes3.jpeg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+○ Compiling /gallery ...
+ GET /gallery 200 in 21.6s (next.js: 18.6s, proxy.ts: 15ms, application-code: 3.0s)
+✓ Finished filesystem cache database compaction in 10.3s
+ GET /gallery 200 in 4.2s (next.js: 1242ms, proxy.ts: 19ms, application-code: 3.0s)
+ GET /gallery 200 in 2.5s (next.js: 235ms, proxy.ts: 1019ms, application-code: 1235ms)
+ GET /gallery 200 in 610ms (next.js: 87ms, proxy.ts: 72ms, application-code: 452ms)
+ GET /gallery 200 in 608ms (next.js: 143ms, proxy.ts: 73ms, application-code: 392ms)
+ GET /gallery 200 in 608ms (next.js: 214ms, proxy.ts: 87ms, application-code: 307ms)
+ GET /gallery 200 in 609ms (next.js: 268ms, proxy.ts: 91ms, application-code: 251ms)
+ GET / 200 in 4.0s (next.js: 701ms, proxy.ts: 8ms, application-code: 3.3s)
+✓ Compiled in 816ms
+ GET /gallery 200 in 1447ms (next.js: 16ms, proxy.ts: 9ms, application-code: 1422ms)
+ GET /gallery 200 in 1280ms (next.js: 461ms, proxy.ts: 282ms, application-code: 536ms)
+ GET / 200 in 5.4s (next.js: 1154ms, proxy.ts: 11ms, application-code: 4.3s)
+✓ Compiled in 6.9s
+ GET / 200 in 3.0s (next.js: 1753ms, proxy.ts: 15ms, application-code: 1272ms)
+ GET / 200 in 967ms (next.js: 210ms, proxy.ts: 305ms, application-code: 452ms)
+ GET / 200 in 349ms (next.js: 37ms, proxy.ts: 34ms, application-code: 279ms)
+ GET / 200 in 1149ms (next.js: 142ms, proxy.ts: 13ms, application-code: 994ms)
+ GET / 200 in 1020ms (next.js: 26ms, proxy.ts: 11ms, application-code: 984ms)
+ GET / 200 in 1704ms (next.js: 16ms, proxy.ts: 16ms, application-code: 1673ms)
+○ Compiling /_not-found/page ...
+ GET / 200 in 11.9s (next.js: 11.6s, proxy.ts: 20ms, application-code: 249ms)
+ GET /llms.txt 200 in 3.6s (next.js: 3.2s, proxy.ts: 8ms, application-code: 339ms)
+ GET / 200 in 16.0s (next.js: 15.4s, proxy.ts: 48ms, application-code: 538ms)
+✓ Finished writing to filesystem cache in 30.6s
+ GET /llms.txt 200 in 409ms (next.js: 144ms, proxy.ts: 15ms, application-code: 249ms)
+ GET / 200 in 312ms (next.js: 52ms, proxy.ts: 15ms, application-code: 245ms)
+ GET /llms.txt 200 in 211ms (next.js: 103ms, proxy.ts: 6ms, application-code: 102ms)
+✓ Finished writing to filesystem cache in 39.5s
+✓ Finished writing to filesystem cache in 29.4s
+✓ Finished filesystem cache database compaction in 12.3s
+✓ Finished filesystem cache database compaction in 20.8s
+ GET / 200 in 5.3s (next.js: 132ms, proxy.ts: 235ms, application-code: 4.9s)
+○ Compiling /about/aims ...
+ GET /about/aims 200 in 13.1s (next.js: 12.8s, proxy.ts: 15ms, application-code: 343ms)
+○ Compiling /about/blog-news ...
+ GET /about/blog-news 200 in 8.4s (next.js: 6.8s, proxy.ts: 9ms, application-code: 1565ms)
+○ Compiling /about/journey ...
+ GET /about/journey 200 in 3.4s (next.js: 3.1s, proxy.ts: 17ms, application-code: 287ms)
+ GET /cezo-mepu 200 in 3.4s (next.js: 2.1s, proxy.ts: 11ms, application-code: 1342ms)
+ GET /coming-soon 200 in 222ms (next.js: 24ms, proxy.ts: 17ms, application-code: 181ms)
+ GET /developers 200 in 3.5s (next.js: 2.9s, proxy.ts: 6ms, application-code: 501ms)
+ GET /events 200 in 3.5s (next.js: 2.7s, proxy.ts: 8ms, application-code: 850ms)
+ GET /events/archive 200 in 2.5s (next.js: 2.2s, proxy.ts: 20ms, application-code: 301ms)
+ GET /gallery 200 in 519ms (next.js: 172ms, proxy.ts: 7ms, application-code: 340ms)
+ GET /living-room 200 in 2.1s (next.js: 1769ms, proxy.ts: 7ms, application-code: 358ms)
+○ Compiling /login ...
+ GET /login 200 in 10.2s (next.js: 9.6s, proxy.ts: 9ms, application-code: 566ms)
+ GET /mathetes 200 in 7.6s (next.js: 2.2s, proxy.ts: 7ms, application-code: 5.4s)
+ GET / 200 in 1322ms (next.js: 20ms, proxy.ts: 15ms, application-code: 1287ms)
+ GET /about/aims 200 in 301ms (next.js: 37ms, proxy.ts: 8ms, application-code: 255ms)
+ GET /about/blog-news 200 in 667ms (next.js: 16ms, proxy.ts: 8ms, application-code: 643ms)
+ GET /about/journey 200 in 473ms (next.js: 12ms, proxy.ts: 7ms, application-code: 455ms)
+○ Compiling /office-bearers ...
+ GET /cezo-mepu 200 in 1428ms (next.js: 204ms, proxy.ts: 14ms, application-code: 1210ms)
+ GET /coming-soon 200 in 361ms (next.js: 80ms, proxy.ts: 10ms, application-code: 271ms)
+ GET /developers 200 in 944ms (next.js: 71ms, proxy.ts: 26ms, application-code: 847ms)
+ GET /events 200 in 1021ms (next.js: 18ms, proxy.ts: 7ms, application-code: 996ms)
+ GET /events/archive 200 in 1078ms (next.js: 63ms, proxy.ts: 40ms, application-code: 975ms)
+ GET /gallery 200 in 13.4s (next.js: 10.5s, proxy.ts: 9ms, application-code: 2.9s)
+ GET /office-bearers 200 in 20.8s (next.js: 18.5s, proxy.ts: 7ms, application-code: 2.3s)
+ GET /living-room 200 in 815ms (next.js: 100ms, proxy.ts: 51ms, application-code: 664ms)
+ GET /login 200 in 523ms (next.js: 274ms, proxy.ts: 9ms, application-code: 241ms)
+ GET /mathetes 200 in 863ms (next.js: 27ms, proxy.ts: 15ms, application-code: 821ms)
+ GET /office-bearers 200 in 982ms (next.js: 11ms, proxy.ts: 6ms, application-code: 966ms)
+○ Compiling /admin ...
+✓ Finished writing to filesystem cache in 64s
+ GET /admin 200 in 50s (next.js: 49s, proxy.ts: 18ms, application-code: 267ms)
+ GET /admin 200 in 47s (next.js: 47s, proxy.ts: 10ms, application-code: 227ms)
+✓ Finished writing to filesystem cache in 11.7s
+✓ Finished filesystem cache database compaction in 21.3s
+✓ Finished filesystem cache database compaction in 31.1s
+ GET / 200 in 8.3s (next.js: 375ms, proxy.ts: 1154ms, application-code: 6.8s)
+ GET /about/aims 200 in 820ms (next.js: 156ms, proxy.ts: 13ms, application-code: 651ms)
+ GET /about/blog-news 200 in 4.7s (next.js: 37ms, proxy.ts: 11ms, application-code: 4.7s)
+ GET /about/journey 200 in 4.4s (next.js: 141ms, proxy.ts: 214ms, application-code: 4.0s)
+ GET /cezo-mepu 200 in 1650ms (next.js: 190ms, proxy.ts: 7ms, application-code: 1454ms)
+ GET /coming-soon 200 in 613ms (next.js: 22ms, proxy.ts: 96ms, application-code: 494ms)
+ GET /developers 200 in 562ms (next.js: 54ms, proxy.ts: 9ms, application-code: 499ms)
+ GET /events 200 in 992ms (next.js: 194ms, proxy.ts: 7ms, application-code: 792ms)
+ GET /events/archive 200 in 305ms (next.js: 55ms, proxy.ts: 8ms, application-code: 242ms)
+ GET /gallery 200 in 1070ms (next.js: 19ms, proxy.ts: 9ms, application-code: 1042ms)
+ GET /living-room 200 in 661ms (next.js: 12ms, proxy.ts: 8ms, application-code: 641ms)
+ GET /login 200 in 247ms (next.js: 11ms, proxy.ts: 6ms, application-code: 229ms)
+ GET /mathetes 200 in 1629ms (next.js: 82ms, proxy.ts: 6ms, application-code: 1541ms)
+ GET /office-bearers 200 in 1198ms (next.js: 46ms, proxy.ts: 7ms, application-code: 1145ms)
+ GET /admin 200 in 113ms (next.js: 11ms, proxy.ts: 6ms, application-code: 97ms)
+ GET / 200 in 1278ms (next.js: 72ms, proxy.ts: 19ms, application-code: 1187ms)
+ GET /about/aims 200 in 759ms (next.js: 86ms, proxy.ts: 16ms, application-code: 657ms)
+ GET /about/blog-news 200 in 518ms (next.js: 81ms, proxy.ts: 10ms, application-code: 427ms)
+[browser] Image with src "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/posts-media/1782405116545-DSCF0943.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET /about/journey 200 in 935ms (next.js: 308ms, proxy.ts: 9ms, application-code: 618ms)
+ GET /cezo-mepu 200 in 1365ms (next.js: 108ms, proxy.ts: 10ms, application-code: 1247ms)
+ GET /coming-soon 200 in 595ms (next.js: 14ms, proxy.ts: 9ms, application-code: 572ms)
+ GET /developers 200 in 482ms (next.js: 13ms, proxy.ts: 9ms, application-code: 461ms)
+ GET /events 200 in 684ms (next.js: 18ms, proxy.ts: 10ms, application-code: 655ms)
+ GET /events/archive 200 in 314ms (next.js: 27ms, proxy.ts: 11ms, application-code: 277ms)
+ GET /gallery 200 in 1137ms (next.js: 127ms, proxy.ts: 13ms, application-code: 996ms)
+[browser] Image with src "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/gallery-media/1783526936296-A7403407.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/gallery-media/1783526936098-A7403625.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+✓ Finished filesystem cache database compaction in 14.8s
+ GET /living-room 200 in 1105ms (next.js: 13ms, proxy.ts: 9ms, application-code: 1082ms)
+ GET /login 200 in 429ms (next.js: 13ms, proxy.ts: 7ms, application-code: 408ms)
+ GET /mathetes 200 in 1631ms (next.js: 17ms, proxy.ts: 11ms, application-code: 1603ms)
+ GET /office-bearers 200 in 1168ms (next.js: 35ms, proxy.ts: 11ms, application-code: 1122ms)
+[browser] Image with src "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/office-bearers-media/1783534034768-DSCF4945-cropped.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET /admin 200 in 350ms (next.js: 112ms, proxy.ts: 10ms, application-code: 228ms)
+ GET / 200 in 4.6s (next.js: 13ms, proxy.ts: 8ms, application-code: 4.5s)
+ GET /about/aims 200 in 181ms (next.js: 17ms, proxy.ts: 10ms, application-code: 154ms)
+ GET /about/blog-news 200 in 502ms (next.js: 55ms, proxy.ts: 7ms, application-code: 440ms)
+ GET /about/journey 200 in 170ms (next.js: 27ms, proxy.ts: 8ms, application-code: 135ms)
+ GET /cezo-mepu 200 in 989ms (next.js: 105ms, proxy.ts: 7ms, application-code: 877ms)
+ GET /coming-soon 200 in 165ms (next.js: 14ms, proxy.ts: 8ms, application-code: 143ms)
+ GET /developers 200 in 443ms (next.js: 20ms, proxy.ts: 9ms, application-code: 414ms)
+ GET /events 200 in 508ms (next.js: 14ms, proxy.ts: 9ms, application-code: 485ms)
+ GET /events/archive 200 in 285ms (next.js: 19ms, proxy.ts: 10ms, application-code: 256ms)
+ GET /gallery 200 in 739ms (next.js: 92ms, proxy.ts: 47ms, application-code: 599ms)
+ GET /living-room 200 in 692ms (next.js: 14ms, proxy.ts: 7ms, application-code: 671ms)
+ GET /login 200 in 247ms (next.js: 28ms, proxy.ts: 13ms, application-code: 205ms)
+ GET /mathetes 200 in 872ms (next.js: 33ms, proxy.ts: 11ms, application-code: 828ms)
+ GET /office-bearers 200 in 951ms (next.js: 48ms, proxy.ts: 16ms, application-code: 887ms)
+ GET /admin 200 in 133ms (next.js: 13ms, proxy.ts: 7ms, application-code: 113ms)
+ GET / 200 in 1948ms (next.js: 18ms, proxy.ts: 11ms, application-code: 1919ms)
+ GET /about/aims 200 in 335ms (next.js: 19ms, proxy.ts: 14ms, application-code: 303ms)
+ GET /about/blog-news 200 in 1266ms (next.js: 25ms, proxy.ts: 14ms, application-code: 1227ms)
+[browser] Image with src "https://emsfthlfptmysgzpectv.supabase.co/storage/v1/object/public/posts-media/1782405116545-DSCF0943.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET /about/journey 200 in 1606ms (next.js: 929ms, proxy.ts: 9ms, application-code: 668ms)
+ GET / 200 in 530ms (next.js: 276ms, proxy.ts: 122ms, application-code: 132ms)
+✓ Finished writing to filesystem cache in 26.3s
+✓ Finished filesystem cache database compaction in 12.3s
+✓ Compiled in 18.3s
+✓ Compiled in 23ms
+ GET / 200 in 44s (next.js: 10.5s, proxy.ts: 8.2s, application-code: 25.1s)
+ GET / 200 in 16.5s (next.js: 12.0s, proxy.ts: 1387ms, application-code: 3.1s)
+ GET / 200 in 17.0s (next.js: 1482ms, proxy.ts: 1727ms, application-code: 13.8s)
+ GET / 200 in 16.7s (next.js: 6.9s, proxy.ts: 1452ms, application-code: 8.4s)
+✓ Compiled in 1628ms
+ GET / 200 in 3.2s (next.js: 1450ms, proxy.ts: 58ms, application-code: 1692ms)
+ GET / 200 in 723ms (next.js: 42ms, proxy.ts: 347ms, application-code: 334ms)
+✓ Compiled in 611ms
+ GET / 200 in 1462ms (next.js: 682ms, proxy.ts: 283ms, application-code: 497ms)
+ GET / 200 in 378ms (next.js: 34ms, proxy.ts: 13ms, application-code: 331ms)
+✓ Finished writing to filesystem cache in 18.1s
+○ Compiling instrumentation Edge ...
+○ Compiling proxy ...
+✓ Finished writing to filesystem cache in 5.4min
+✓ Finished writing to filesystem cache in 2.5min
+✓ Finished filesystem cache database compaction in 30.5s
+✓ Finished writing to filesystem cache in 87s
+✓ Finished writing to filesystem cache in 25.9s
+✓ Compiled in 943.1s
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Finished writing to filesystem cache in 85s
+✓ Finished filesystem cache database compaction in 16.4s
+✓ Finished filesystem cache database compaction in 28.1s

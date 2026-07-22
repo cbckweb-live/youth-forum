@@ -43,6 +43,24 @@ export function errorResponse(message: string, status: number) {
 }
 
 /**
+ * Returns a generic JSON error response after logging the full error server-side.
+ * Use this instead of `errorResponse(err.message, 500)` to avoid leaking internal
+ * details (stack traces, file paths, DB error messages) to the client.
+ *
+ * @param logPrefix  A label for the console.error log (e.g. "[events/create]")
+ * @param err        The actual error object (logged server-side only)
+ * @param message    The generic message returned to the client
+ * @param status     HTTP status code (default 500)
+ */
+export function safeErrorResponse(logPrefix: string, err: unknown, message: string, status = 500) {
+  console.error(`${logPrefix}:`, err instanceof Error ? err.message : err);
+  if (err instanceof Error && err.stack) {
+    console.error(`${logPrefix} stack:`, err.stack);
+  }
+  return errorResponse(message, status);
+}
+
+/**
  * Requires a valid admin session. Returns `{ ok: true }` on success,
  * or `{ error: NextResponse }` with 401/403 on failure.
  */

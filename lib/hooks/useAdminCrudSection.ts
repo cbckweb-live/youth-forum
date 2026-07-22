@@ -52,6 +52,7 @@ export function useAdminCrudSection<T extends { id: string }>(
         setError(null);
       }
     } catch (err) {
+      console.error("[useAdminCrudSection/fetchData]", err);
       const msg = onFetchError ? onFetchError(err) : err instanceof Error ? err.message : "Failed to load data.";
       if (mountedRef.current) {
         setError(msg);
@@ -128,6 +129,7 @@ export function useAdminCrudSection<T extends { id: string }>(
       await fetchData();
       return true;
     } catch (err) {
+      console.error("[useAdminCrudSection/executeSubmit]", err);
       setError(err instanceof Error ? err.message : "Please try again.");
       return false;
     } finally {
@@ -154,6 +156,7 @@ export function useAdminCrudSection<T extends { id: string }>(
       setConfirmDeleteId(null);
       await fetchData();
     } catch (err) {
+      console.error("[useAdminCrudSection/handleDelete]", err);
       setError(err instanceof Error ? err.message : "Failed to delete.");
     }
   }

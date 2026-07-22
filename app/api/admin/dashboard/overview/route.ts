@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSupabase, requireAdmin, getServiceSupabase } from "@/lib/admin-api-utils";
+import { getServerSupabase, requireAdmin, getServiceSupabase, safeErrorResponse } from "@/lib/admin-api-utils";
 import { env } from "@/lib/env";
 
 export type DashboardOverview = {
@@ -480,7 +480,6 @@ export async function GET(request: NextRequest) {
       backupStatus,
     } satisfies DashboardOverview);
   } catch (err) {
-    console.error("[dashboard/overview]", err);
-    return NextResponse.json({ error: "Failed to fetch dashboard overview." }, { status: 500 });
+    return safeErrorResponse("[dashboard/overview]", err, "Failed to fetch dashboard overview.", 500);
   }
 }

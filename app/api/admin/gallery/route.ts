@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createGenericRoute } from "@/lib/crud/generic-api-handler";
-import { deleteStorageObject } from "@/lib/admin-api-utils";
+import { deleteStorageObject, safeErrorResponse } from "@/lib/admin-api-utils";
 
 // Reusable sanitize function so bulk_create uses the same logic as create/update
 function sanitizeGalleryRow(payload: Record<string, unknown>) {
@@ -44,7 +44,7 @@ export const POST = createGenericRoute({
         .select();
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return safeErrorResponse("[gallery/bulk_create]", error, "Failed to create gallery rows.", 500);
       }
       return NextResponse.json({ insertedRows: data });
     },

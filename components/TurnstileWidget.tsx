@@ -31,6 +31,7 @@ export default function TurnstileWidget({ siteKey, onToken, theme = "auto" }: Pr
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [scriptError, setScriptError] = useState(false);
 
   useEffect(() => {
     // Script already loaded?
@@ -46,6 +47,13 @@ export default function TurnstileWidget({ siteKey, onToken, theme = "auto" }: Pr
     script.async = true;
     script.defer = true;
     script.onload = () => startTransition(() => setLoaded(true));
+    script.onerror = () => {
+      console.warn("[TurnstileWidget] Failed to load Turnstile script from Cloudflare CDN.");
+      startTransition(() => {
+        setScriptError(true);
+        onToken(null);
+      });
+    };
     document.body.appendChild(script);
 
     return () => {
@@ -53,7 +61,7 @@ export default function TurnstileWidget({ siteKey, onToken, theme = "auto" }: Pr
         window.turnstile.remove(widgetIdRef.current);
       }
     };
-  }, []);
+  }, [onToken]);
 
   useEffect(() => {
     if (!loaded || !window.turnstile || !containerRef.current) return;
@@ -77,6 +85,14 @@ export default function TurnstileWidget({ siteKey, onToken, theme = "auto" }: Pr
       theme,
     });
   }, [loaded, siteKey, onToken, theme]);
+
+  if (scriptError) {
+    return (
+      <p className="text-xs text-red-500 dark:text-red-400 text-center">
+        Security check unavailable. Please refresh the page or try again later.
+      </p>
+    );
+  }
 
   return <div ref={containerRef} className="flex justify-center" />;
 }

@@ -26,8 +26,18 @@ export default function OfficeBearersSection() {
   useEffect(() => {
     const id = window.setTimeout(() => {
       void (async () => {
-        const { data } = await supabase.from("teams").select("*").order("display_order", { ascending: true });
-        setTeams((data as Team[]) || []);
+        try {
+          const { data, error } = await supabase.from("teams").select("*").order("display_order", { ascending: true });
+          if (error) {
+            console.error("[OfficeBearersSection/loadTeams]", error);
+            setTeamError("Failed to load teams.");
+            return;
+          }
+          setTeams((data as Team[]) || []);
+        } catch (err) {
+          console.error("[OfficeBearersSection/loadTeams]", err);
+          setTeamError("Failed to load teams.");
+        }
       })();
     }, 0);
     return () => window.clearTimeout(id);
@@ -49,8 +59,12 @@ export default function OfficeBearersSection() {
       }
       setNewTeamName("");
       showToast(`"${newTeamName.trim()}" team added`);
-      const { data } = await supabase.from("teams").select("*").order("display_order", { ascending: true });
-      setTeams((data as Team[]) || []);
+      const { data: freshTeams, error: fetchError } = await supabase.from("teams").select("*").order("display_order", { ascending: true });
+      if (fetchError) {
+        console.error("[OfficeBearersSection/refreshTeams]", fetchError);
+      } else {
+        setTeams((freshTeams as Team[]) || []);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to add team.";
       setTeamError(msg);
@@ -74,8 +88,12 @@ export default function OfficeBearersSection() {
       setConfirmDeleteTeamName(null);
       setConfirmDeleteTeamId(null);
       showToast(`Team deleted successfully`);
-      const { data } = await supabase.from("teams").select("*").order("display_order", { ascending: true });
-      setTeams((data as Team[]) || []);
+      const { data: freshTeams, error: fetchError } = await supabase.from("teams").select("*").order("display_order", { ascending: true });
+      if (fetchError) {
+        console.error("[OfficeBearersSection/refreshTeams]", fetchError);
+      } else {
+        setTeams((freshTeams as Team[]) || []);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to delete team.";
       setTeamError(msg);

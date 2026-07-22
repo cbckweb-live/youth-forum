@@ -3,6 +3,7 @@ import sharp from "sharp";
 import {
   jsonResponse,
   errorResponse,
+  safeErrorResponse,
   requireAdmin,
   getServiceSupabase,
   extractStorageLocationFromPublicUrl,
@@ -193,7 +194,7 @@ export async function POST(request: NextRequest) {
       contentType: uploadMime,
     });
 
-  if (uploadError) return errorResponse(uploadError.message, 500);
+  if (uploadError) return safeErrorResponse("[media/upload]", uploadError, "Failed to upload file.", 500);
 
   const url = serviceSupabase.storage.from(bucket).getPublicUrl(safePath).data.publicUrl;
   return jsonResponse({ url });
@@ -240,7 +241,6 @@ export async function DELETE(request: NextRequest) {
 
     return jsonResponse({ success: true });
   } catch (err) {
-    console.error("Error deleting file:", err);
-    return errorResponse("Failed to delete file.", 500);
+    return safeErrorResponse("[media/delete]", err, "Failed to delete file.", 500);
   }
 }

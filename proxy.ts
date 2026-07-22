@@ -3,6 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
 export async function proxy(request: NextRequest) {
+  try {
+    return await proxyHandler(request);
+  } catch (err) {
+    console.error("[proxy] Unexpected error, falling back to default response:", err);
+    return NextResponse.next();
+  }
+}
+
+async function proxyHandler(request: NextRequest) {
   const url = request.nextUrl;
 
   // ==========================================
@@ -93,36 +102,41 @@ export async function proxy(request: NextRequest) {
   // ==========================================
   const response = NextResponse.next();
 
-  const supabase = createServerClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+  if (supabaseUrl && supabaseAnonKey) {
+    const supabase = createServerClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options);
+            });
+          },
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
+      }
+    );
 
-  // Run the standard Supabase session layer logic over protected pages
-  if (url.pathname.startsWith('/admin/dashboard')) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // Run the standard Supabase session layer logic over protected pages
+    if (url.pathname.startsWith('/admin/dashboard')) {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    if (!session) {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
+      if (!session) {
+        return NextResponse.redirect(new URL("/admin", request.url));
+      }
 
-    const role = (session.user.app_metadata as Record<string, unknown>)?.role;
-    if (role !== "admin") {
-      return NextResponse.redirect(new URL("/admin?denied=1", request.url));
+      const role = (session.user.app_metadata as Record<string, unknown>)?.role;
+      if (role !== "admin") {
+        return NextResponse.redirect(new URL("/admin?denied=1", request.url));
+      }
     }
   }
 

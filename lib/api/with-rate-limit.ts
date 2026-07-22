@@ -7,7 +7,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { getRateLimiter, getClientIp, type RateLimitTier } from "@/lib/rate-limiter";
-import { errorResponse } from "@/lib/admin-api-utils";
+
 
 type RouteHandler = (
   request: NextRequest,

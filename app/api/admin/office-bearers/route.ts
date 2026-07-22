@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createGenericRoute } from "@/lib/crud/generic-api-handler";
-import { deleteStorageObject } from "@/lib/admin-api-utils";
+import { deleteStorageObject, safeErrorResponse } from "@/lib/admin-api-utils";
 
 export const POST = createGenericRoute({
   table: "office_bearers",
@@ -36,7 +36,7 @@ export const POST = createGenericRoute({
         .select();
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return safeErrorResponse("[office-bearers/create_team]", error, "Failed to create team.", 500);
       }
       return NextResponse.json({ data });
     },
@@ -52,7 +52,7 @@ export const POST = createGenericRoute({
         .eq("id", id);
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return safeErrorResponse("[office-bearers/delete_team]", error, "Failed to delete team.", 500);
       }
       return new NextResponse(null, { status: 204 });
     },

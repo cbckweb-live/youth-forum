@@ -32,8 +32,8 @@ export function useAdminImageUpload(options: UseAdminImageUploadOptions) {
       try {
         const { compressImageFile } = await import("@/lib/compress");
         toUpload = await compressImageFile(file, compress);
-      } catch {
-        // fallback to original file
+      } catch (err) {
+        console.warn("[useAdminImageUpload/compress]", err);
       }
     }
 

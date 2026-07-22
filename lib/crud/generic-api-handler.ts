@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   jsonResponse,
   errorResponse,
+  safeErrorResponse,
   requireAdmin,
   getServiceSupabase,
 } from "@/lib/admin-api-utils";
@@ -120,7 +121,7 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
         .delete()
         .eq("id", id);
 
-      if (error) return errorResponse(error.message, 500);
+      if (error) return safeErrorResponse(`[${config.table}/delete]`, error, "Failed to delete record.", 500);
       return new NextResponse(null, { status: 204 });
     }
 
@@ -143,7 +144,7 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
         .insert(insertData)
         .select();
 
-      if (error) return errorResponse(error.message, 500);
+      if (error) return safeErrorResponse(`[${config.table}/create]`, error, "Failed to create record.", 500);
 
       return jsonResponse({ data, insertedRows: data });
     }
@@ -170,7 +171,7 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
         .update(updateData)
         .eq("id", id);
 
-      if (error) return errorResponse(error.message, 500);
+      if (error) return safeErrorResponse(`[${config.table}/update]`, error, "Failed to update record.", 500);
 
       if (config.afterUpdate) {
         await config.afterUpdate(serviceSupabase, payload);
