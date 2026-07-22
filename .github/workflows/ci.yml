@@ -43,7 +43,7 @@ jobs:
 
       # Start a fresh server for the browser-level console error smoke test.
       # The kill + lsof ensures any leftover server from the previous step is cleaned up.
-      - name: Browser smoke tests
+      - name: Browser console smoke tests
         if: always()
         run: |
           kill $(lsof -ti:3000) 2>/dev/null || true
@@ -52,4 +52,17 @@ jobs:
           npx wait-on http://localhost:3000 --timeout 30000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
             node tests/smoke-console.mjs
+          kill $SERVER_PID 2>/dev/null || true
+
+      # Start another fresh server for the interactive smoke tests (admin routes,
+      # form interactions, login flow).
+      - name: Browser interactive smoke tests
+        if: always()
+        run: |
+          kill $(lsof -ti:3000) 2>/dev/null || true
+          yarn start &
+          SERVER_PID=$!
+          npx wait-on http://localhost:3000 --timeout 30000
+          LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
+            node tests/smoke-interactive.mjs
           kill $SERVER_PID 2>/dev/null || true

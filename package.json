@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "check:esm": "node scripts/check-esm-deps.mjs",
     "test:smoke": "node tests/smoke.mjs",
-    "test:smoke-console": "node tests/smoke-console.mjs"
+    "test:smoke-console": "node tests/smoke-console.mjs",
+    "test:smoke-interactive": "node tests/smoke-interactive.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
