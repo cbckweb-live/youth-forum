@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Image from "next/image";
 import RevealSection from "@/components/RevealSection";
 
 /* ─── chapter data ───────────────────────────────────────────── */
@@ -67,16 +68,14 @@ export default function JourneyPage() {
       <section className="relative text-center overflow-hidden min-h-[420px]">
 
         {/* background image */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/background.jpg"
           alt=""
           aria-hidden="true"
           width={1920}
           height={1080}
-          fetchPriority="high"
+          priority
           className="absolute inset-0 w-full h-full object-cover object-center z-0"
-
         />
 
         {/* subtle dark overlay for text legibility */}

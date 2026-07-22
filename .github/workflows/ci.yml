@@ -31,11 +31,25 @@ jobs:
       - name: Production build
         run: yarn build
 
-      # Start the production server and run smoke tests against it
-      - name: Smoke tests
+      # Start the production server and run HTTP smoke tests against it
+      - name: HTTP smoke tests
         run: |
           yarn start &
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 30000
-          node tests/smoke.mjs
+          LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
+            node tests/smoke.mjs
           kill $SERVER_PID
+
+      # Start a fresh server for the browser-level console error smoke test.
+      # The kill + lsof ensures any leftover server from the previous step is cleaned up.
+      - name: Browser smoke tests
+        if: always()
+        run: |
+          kill $(lsof -ti:3000) 2>/dev/null || true
+          yarn start &
+          SERVER_PID=$!
+          npx wait-on http://localhost:3000 --timeout 30000
+          LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
+            node tests/smoke-console.mjs
+          kill $SERVER_PID 2>/dev/null || true

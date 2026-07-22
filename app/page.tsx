@@ -164,14 +164,22 @@ export default async function HomePage() {
       {/* Hero Section: Handles layout gaps via mt-6 and positioning via deep top padding */}
 
 <section
-  className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16  w-full max-w-6xl mx-auto text-center relative overflow-hidden"
-  style={{
-    backgroundImage: "url('/background.jpg')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-  }}
+  className="mt-0 px-4 sm:px-8 pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-16 w-full max-w-6xl mx-auto text-center relative overflow-hidden"
+  // Background-color fills the area instantly (good for Speed Index)
+  // while next/image below loads progressively for LCP optimization.
+  style={{ backgroundColor: "#6B5B4D" }}
 >
+  {/* Full-bleed background image — preloaded via priority prop */}
+  <Image
+    src="/background.jpg"
+    alt=""
+    aria-hidden="true"
+    fill
+    priority
+    loading="eager"
+    sizes="(max-width: 1200px) 100vw, 1200px"
+    className="absolute inset-0 object-cover object-center -z-10"
+  />
   {/* Radial gradient: clear/light center, darker white toward the edges */}
   <div
     className="absolute inset-0 dark:hidden"
@@ -303,7 +311,6 @@ export default async function HomePage() {
                       sizes="(max-width: 768px) 100vw, 144px"
                       style={{ objectFit: "cover" }}
                       quality={85}
-                      priority
                       unoptimized
                     />
                   </div>

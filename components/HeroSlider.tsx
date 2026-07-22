@@ -133,10 +133,9 @@ export default function HeroSlider() {
               alt={!state.hidden ? "Community highlight" : ""}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1080px) 100vw, 56vw"
-              style={{ objectFit: "cover" }}
-              quality={85}
-              priority
-              unoptimized
+              style={{ objectFit: "cover" }}                              quality={85}
+                              priority={i === 0}
+                              unoptimized
             />
           </div>
         );
