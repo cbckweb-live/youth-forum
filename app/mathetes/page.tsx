@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Mathetes Fellowship | CBCK Youth Forum",
     description: "The Mathetes Fellowship bridges Sunday School and Youth Ministry, nurturing discipleship, leadership, and fellowship among young believers.",
-    images: [{ url: "/mathetes logo.png", width: 800, height: 400 }],
+    images: [{ url: "/mathetes-logo.png", width: 800, height: 400 }],
   },
 };
 
@@ -49,7 +49,7 @@ export default async function MathetesPage() {
   return (
     <main className="px-8 py-16 max-w-5xl mx-auto dark:text-[#e5e5e5]">
       <Image
-        src="/mathetes logo.png"
+        src="/mathetes-logo.png"
         alt="Mathetes Fellowship"
         width={480}
         height={240}

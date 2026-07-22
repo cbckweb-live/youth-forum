@@ -197,3 +197,7 @@ Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
 ✓ Finished writing to filesystem cache in 85s
 ✓ Finished filesystem cache database compaction in 16.4s
 ✓ Finished filesystem cache database compaction in 28.1s
+○ Compiling proxy ...
+✓ Compiled in 110ms
+✓ Finished writing to filesystem cache in 33.1s
+✓ Compiled in 52.1s

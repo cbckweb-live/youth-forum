@@ -44,57 +44,58 @@ async function proxyHandler(request: NextRequest) {
   // 1. "COMING SOON" LAUNCH GATEKEEPER LOGIC
   // ==========================================
   // ==========================================
-  const BYPASS_COOKIE_NAME = 'cbck_launch_bypass';
-  const BYPASS_SECRET_VALUE = process.env.LAUNCH_BYPASS_SECRET;
-  if (!BYPASS_SECRET_VALUE) {
-    console.error('LAUNCH_BYPASS_SECRET environment variable is not set!');
-  }
+  // TEMPORARILY DISABLED for dev preview of background image changes
+  // const BYPASS_COOKIE_NAME = 'cbck_launch_bypass';
+  // const BYPASS_SECRET_VALUE = process.env.LAUNCH_BYPASS_SECRET;
+  // if (!BYPASS_SECRET_VALUE) {
+  //   console.error('LAUNCH_BYPASS_SECRET environment variable is not set!');
+  // }
 
-  // Secret Team Backdoor Link Handler: https://cbckyouthforum.live/?preview=true
-  if (url.searchParams.get('preview') === 'true') {
-    if (!BYPASS_SECRET_VALUE) {
-      console.error('Cannot set bypass cookie: LAUNCH_BYPASS_SECRET is not configured');
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-    const redirectResponse = NextResponse.redirect(new URL('/', request.url));
-    redirectResponse.cookies.set(BYPASS_COOKIE_NAME, BYPASS_SECRET_VALUE, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
-    return redirectResponse;
-  }
+  // // Secret Team Backdoor Link Handler: https://cbckyouthforum.live/?preview=true
+  // if (url.searchParams.get('preview') === 'true') {
+  //   if (!BYPASS_SECRET_VALUE) {
+  //     console.error('Cannot set bypass cookie: LAUNCH_BYPASS_SECRET is not configured');
+  //     return NextResponse.redirect(new URL('/', request.url));
+  //   }
+  //   const redirectResponse = NextResponse.redirect(new URL('/', request.url));
+  //   redirectResponse.cookies.set(BYPASS_COOKIE_NAME, BYPASS_SECRET_VALUE, {
+  //     path: '/',
+  //     maxAge: 60 * 60 * 24 * 7,
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === 'production',
+  //     sameSite: 'lax',
+  //   });
+  //   return redirectResponse;
+  // }
 
-  // System Core / Framework Layout Assets Exclusions
-  const isAssetOrSystem =
-    url.pathname.startsWith('/_next') ||
-    url.pathname.startsWith('/api') ||
-    url.pathname === '/coming-soon' ||
-    url.pathname === '/favicon.ico' ||
-    url.pathname === '/sitemap.xml' ||
-    url.pathname === '/robots.txt' ||
-    url.pathname.endsWith('.png') ||
-    url.pathname.endsWith('.jpg') ||
-    url.pathname.endsWith('.svg');
+  // // System Core / Framework Layout Assets Exclusions
+  // const isAssetOrSystem =
+  //   url.pathname.startsWith('/_next') ||
+  //   url.pathname.startsWith('/api') ||
+  //   url.pathname === '/coming-soon' ||
+  //   url.pathname === '/favicon.ico' ||
+  //   url.pathname === '/sitemap.xml' ||
+  //   url.pathname === '/robots.txt' ||
+  //   url.pathname.endsWith('.png') ||
+  //   url.pathname.endsWith('.jpg') ||
+  //   url.pathname.endsWith('.svg');
 
-  // Check if visitor possesses the team bypass credentials cookie
-  const bypassCookie = request.cookies.get(BYPASS_COOKIE_NAME);
-  const isTeamMember = bypassCookie?.value === BYPASS_SECRET_VALUE;
+  // // Check if visitor possesses the team bypass credentials cookie
+  // const bypassCookie = request.cookies.get(BYPASS_COOKIE_NAME);
+  // const isTeamMember = bypassCookie?.value === BYPASS_SECRET_VALUE;
 
-  // Admin login routes exclusion check
-  const isAdminPath = url.pathname.startsWith('/developers/admin') || url.pathname.startsWith('/admin');
+  // // Admin login routes exclusion check
+  // const isAdminPath = url.pathname.startsWith('/developers/admin') || url.pathname.startsWith('/admin');
 
-  // CRUCIAL FORCE CHECK: If hitting homepage directly and they aren't a team member -> Block instantly!
-  if (url.pathname === '/' && !isTeamMember) {
-    return NextResponse.rewrite(new URL('/coming-soon', request.url));
-  }
+  // // CRUCIAL FORCE CHECK: If hitting homepage directly and they aren't a team member -> Block instantly!
+  // if (url.pathname === '/' && !isTeamMember) {
+  //   return NextResponse.rewrite(new URL('/coming-soon', request.url));
+  // }
 
-  // Block unauthorized traffic across other inner pages
-  if (!isAssetOrSystem && !isTeamMember && !isAdminPath) {
-    return NextResponse.rewrite(new URL('/coming-soon', request.url));
-  }
+  // // Block unauthorized traffic across other inner pages
+  // if (!isAssetOrSystem && !isTeamMember && !isAdminPath) {
+  //   return NextResponse.rewrite(new URL('/coming-soon', request.url));
+  // }
 
   
   // ==========================================

@@ -180,25 +180,7 @@ export default async function HomePage() {
     sizes="(max-width: 1200px) 100vw, 1200px"
     className="absolute inset-0 object-cover object-center -z-10"
   />
-  {/* Radial gradient: clear/light center, darker white toward the edges */}
-  <div
-    className="absolute inset-0 dark:hidden"
-    style={{
-      background:
-        "radial-gradient(ellipse at center, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.45) 35%, rgba(255,255,255,0.75) 65%, rgba(255,255,255,0.95) 100%)",
-    }}
-  ></div>
-
-  {/* Dark mode radial overlay */}
-  <div
-    className="hidden dark:block absolute inset-0"
-    style={{
-      background:
-        "radial-gradient(ellipse at center, rgba(10,10,10,0.35) 0%, rgba(15,15,15,0.60) 35%, rgba(20,20,20,0.80) 65%, rgba(21,21,21,0.95) 100%)",
-    }}
-  ></div>
-
-  {/* Frosted card sitting over the text, on top of the radial gradient */}
+  {/* Frosted card sits directly over the background image for text readability */}
   <div className="relative text-center bg-white/75 dark:bg-[#1e1e1e]/85 backdrop-blur-md rounded-2xl px-4 py-8 sm:px-10 sm:py-10 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
     <p className="text-lg sm:text-xl uppercase tracking-widest text-[#6B1F2A] dark:text-[#B84C5C] mb-4 font-medium text-center mx-auto">
       Welcome
