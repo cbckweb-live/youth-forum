@@ -55,6 +55,7 @@ export default async function MathetesPage() {
         height={240}
         priority
         className="mx-auto mb-8 h-auto w-full max-w-60 sm:max-w-80 md:max-w-100 lg:max-w-120"
+        unoptimized
       />
 
       <h1 className="font-['Copperplate',serif] font-bold text-3xl mb-4 text-center">Mathetes</h1>
