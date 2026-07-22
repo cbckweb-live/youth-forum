@@ -178,7 +178,7 @@ export default async function HomePage() {
     priority
     loading="eager"
     sizes="100vw"
-    className="object-cover object-center -z-10"
+    className="object-cover object-center"
   />
 
   {/* Dark gradient overlay — ensures text readability against any image brightness */}
