@@ -104,12 +104,8 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
 
     // ── CREATE ──
     if (action === config.actionCreate) {
-      let insertData = { ...payload };
-
-      // Strip control fields
-      delete insertData.action;
-      delete insertData.id;
-      delete insertData.previous_image_url;
+      // Strip control fields — destructuring creates a clean copy without them
+      let { action: _, id: _id, previous_image_url: _prev, ...insertData } = payload;
 
       if (config.sanitizePayload) {
         insertData = config.sanitizePayload(insertData);
@@ -135,11 +131,8 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
       const { id } = payload as { id?: string };
       if (!id) return errorResponse("ID is required.", 400);
 
-      let updateData = { ...payload };
-
-      delete updateData.action;
-      delete updateData.id;
-      delete updateData.previous_image_url;
+      // Strip control fields — destructuring creates a clean copy without them
+      let { action: _, id: _id, previous_image_url: _prev, ...updateData } = payload;
 
       if (config.sanitizePayload) {
         updateData = config.sanitizePayload(updateData);
