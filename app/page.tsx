@@ -178,7 +178,7 @@ export default async function HomePage() {
     priority
     loading="eager"
     sizes="100vw"
-    className="object-cover object-center"
+    className="object-cover object-center blur-sm"
     unoptimized
   />
 
