@@ -76,6 +76,7 @@ export default function JourneyPage() {
           height={1080}
           priority
           className="absolute inset-0 w-full h-full object-cover object-center z-0"
+          unoptimized
         />
 
         {/* subtle dark overlay for text legibility */}
