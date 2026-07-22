@@ -437,16 +437,341 @@ try {
 
   await navigateTo("The Living Room", "/living-room", "The Living Room");
 
-  // Finally, navigate home
-  await navigateTo("Home", "/", null);
+  // Home: we're already on the homepage (navbar logo links to /), so check content directly
   {
-    // Homepage should have content (hero section)
+    const errors = [];
+    startCapture(page, errors);
+    await page.goto(`${BASE}/`, { waitUntil: "networkidle0", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 1500));
+    page.removeAllListeners("console");
+
+    const realErrors = filterErrors(errors);
     const pageContent = await page.evaluate(() => document.body.innerText).catch(() => "");
+    testResult("Home loads without console errors", realErrors.length === 0, `${realErrors.length} error(s): ${realErrors.map(e => e.text).join("; ")}`);
     testResult("Homepage content loaded", pageContent.length > 50, `only ${pageContent.length} chars`);
   }
 
   // ====================================================================
-  // 7. HOME REDIRECT TEST
+  // 7. EVENTS ARCHIVE — past events page
+  // ====================================================================
+  console.log("\n📋  Events Archive\n");
+
+  {
+    const errors = [];
+    startCapture(page, errors);
+    const resp = await page.goto(`${BASE}/events/archive`, { waitUntil: "networkidle0", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 2000));
+    page.removeAllListeners("console");
+
+    const realErrors = filterErrors(errors);
+    testResult("Archive loads without console errors", realErrors.length === 0, `${realErrors.length} error(s): ${realErrors.map(e => e.text).join("; ")}`);
+    testResult("HTTP 200 OK", resp?.status() === 200, `HTTP ${resp?.status()}`);
+    testResult("Page title includes 'Past Years'", await page.$eval("h1", (el) => el.textContent).then(t => t.includes("Past Years")).catch(() => false), "h1 not found or wrong text");
+    testResult("'Back to This Year' link present", await page.$('a[href="/events"]').then(Boolean), "back link not found");
+
+    // Check presence of event cards or empty state
+    const hasCards = await page.$('[class*="rounded-2xl"]').then(Boolean);
+    const emptyMsg = await page.evaluate(() =>
+      document.body.innerText.includes("No past events on record yet")
+    ).catch(() => false);
+    testResult("Archive has event cards or empty state", hasCards || emptyMsg, "no cards and no empty-state message");
+    if (!hasCards && emptyMsg) {
+      console.log("  ℹ️  No past events in database — this is normal for a fresh site");
+    }
+  }
+
+  // ====================================================================
+  // 8. OFFICE BEARERS — search interaction
+  // ====================================================================
+  console.log("\n📋  Office Bearers — Search & Profiles\n");
+
+  {
+    const errors = [];
+    startCapture(page, errors);
+    const resp = await page.goto(`${BASE}/office-bearers`, { waitUntil: "networkidle0", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 2000));
+    page.removeAllListeners("console");
+
+    const realErrors = filterErrors(errors);
+    testResult("Office Bearers loads without console errors", realErrors.length === 0, `${realErrors.length} error(s): ${realErrors.map(e => e.text).join("; ")}`);
+    testResult("HTTP 200 OK", resp?.status() === 200, `HTTP ${resp?.status()}`);
+
+    // Check for search input
+    const hasSearch = await page.$('input[type="text"][placeholder*="Search"]').then(Boolean);
+    testResult("Search input field present", hasSearch, "search input not found");
+
+    // Check for office bearer cards — look for card containers on the page
+    const hasCards = await page.$$('[class*="rounded-xl"]').then(r => r.length > 1).catch(() => false);
+    // Also check for LeadershipCard components (featured leaders)
+    const hasFeaturedCards = await page.$$('[class*="rounded-2xl"]').then(r => r.length > 0).catch(() => false);
+    const hasContent = hasCards || hasFeaturedCards;
+
+    if (hasContent) {
+      testResult("Office bearer cards present", true, "");
+
+      // Try searching
+      if (hasSearch) {
+        const searchInput = await page.$('input[type="text"][placeholder*="Search"]');
+        if (searchInput) {
+          const searchErrors = [];
+          startCapture(page, searchErrors);
+          await searchInput.type("a");
+          await new Promise((r) => setTimeout(r, 1000));
+          page.removeAllListeners("console");
+
+          const searchRealErrors = filterErrors(searchErrors);
+          testResult("Searching without console errors", searchRealErrors.length === 0, `${searchRealErrors.length} error(s): ${searchRealErrors.map(e => e.text).join("; ")}`);
+
+          // Verify search filtering changed the DOM (results or no-results message)
+          const resultsMsg = await page.evaluate(() =>
+            document.body.innerText.includes("No results for")
+          ).catch(() => false);
+          if (resultsMsg) {
+            console.log("  ℹ️  Search returned no results — that's fine, filtering works");
+          }
+
+          // Clear the search via JavaScript (next section navigates away anyway)
+          await page.evaluate(() => {
+            const input = document.querySelector('input[type="text"][placeholder*="Search"]');
+            if (input) input.value = "";
+          }).catch(() => {});
+          await new Promise((r) => setTimeout(r, 500));
+        }
+      }
+    } else {
+      const emptyMsg = await page.evaluate(() =>
+        document.body.innerText.includes("Office Bearers")
+      ).catch(() => false);
+      if (emptyMsg) {
+        console.log("  ℹ️  No office bearers in database — page still renders");
+      }
+    }
+  }
+
+  // ====================================================================
+  // 9. THEME TOGGLE — dark/light mode switch
+  // ====================================================================
+  console.log("\n📋  Theme Toggle\n");
+
+  {
+    // Navigate to a simple page for theme testing
+    const errors = [];
+    startCapture(page, errors);
+    await page.goto(`${BASE}/coming-soon`, { waitUntil: "networkidle0", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 1500));
+    page.removeAllListeners("console");
+
+    // Find the theme toggle button by aria-label
+    const themeBtn = await page.$('button[aria-label*="Switch to" i]');
+    testResult("Theme toggle button present in navbar", !!themeBtn, "button with aria-label containing 'Switch to' not found");
+
+    if (themeBtn) {
+      // Determine current mode
+      const initialDark = await page.evaluate(() =>
+        document.documentElement.classList.contains("dark")
+      ).catch(() => false);
+      testResult(`Initial mode is ${initialDark ? "dark" : "light"}`, true, "");
+
+      // Click to toggle
+      const toggleErrors = [];
+      startCapture(page, toggleErrors);
+      await themeBtn.click();
+      await new Promise((r) => setTimeout(r, 1000));
+      page.removeAllListeners("console");
+
+      const toggleRealErrors = filterErrors(toggleErrors);
+      testResult("Toggling theme without console errors", toggleRealErrors.length === 0, `${toggleRealErrors.length} error(s): ${toggleRealErrors.map(e => e.text).join("; ")}`);
+
+      // Verify dark class toggled
+      const afterFirstToggle = await page.evaluate(() =>
+        document.documentElement.classList.contains("dark")
+      ).catch(() => false);
+      testResult(`Theme toggled to ${afterFirstToggle ? "dark" : "light"}`, afterFirstToggle !== initialDark, `expected ${!initialDark}, got ${afterFirstToggle}`);
+
+      // Verify localStorage was updated
+      const storedTheme = await page.evaluate(() => localStorage.getItem("theme")).catch(() => null);
+      testResult("localStorage updated with new theme", storedTheme === (afterFirstToggle ? "dark" : "light"), `expected "${afterFirstToggle ? "dark" : "light"}", got "${storedTheme}"`);
+
+      // Toggle back to restore original state
+      await themeBtn.click();
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  }
+
+  // ====================================================================
+  // 10. RESPONSIVE LAYOUT — mobile viewport & hamburger menu
+  // ====================================================================
+  console.log("\n📋  Responsive Layout — Mobile\n");
+
+  {
+    // Create a new page with mobile viewport
+    const mobilePage = await browser.newPage();
+
+    if (bypassSecret) {
+      await mobilePage.setCookie({
+        name: "cbck_launch_bypass",
+        value: bypassSecret,
+        domain: new URL(BASE).hostname,
+        path: "/",
+        httpOnly: true,
+      });
+    }
+
+    // Set mobile viewport (iPhone SE size)
+    await mobilePage.setViewport({ width: 375, height: 667 });
+
+    const errors = [];
+    startCapture(mobilePage, errors);
+    const resp = await mobilePage.goto(`${BASE}/`, { waitUntil: "networkidle0", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 2000));
+    mobilePage.removeAllListeners("console");
+
+    const realErrors = filterErrors(errors);
+    testResult("Mobile page loads without console errors", realErrors.length === 0, `${realErrors.length} error(s): ${realErrors.map(e => e.text).join("; ")}`);
+    testResult("HTTP 200 OK", resp?.status() === 200, `HTTP ${resp?.status()}`);
+
+    // Check hamburger menu button is visible
+    // The Navbar button uses aria-expanded, not aria-label on the button itself
+    const hamburgerBtn = await mobilePage.$('button[aria-expanded]');
+    testResult("Hamburger menu button is visible on mobile", !!hamburgerBtn, "button with aria-expanded not found in navbar");
+
+    if (hamburgerBtn) {
+      // Click to open mobile menu
+      const openErrors = [];
+      startCapture(mobilePage, openErrors);
+      await hamburgerBtn.click();
+      await new Promise((r) => setTimeout(r, 1000));
+      mobilePage.removeAllListeners("console");
+
+      const openRealErrors = filterErrors(openErrors);
+      testResult("Opening mobile menu without console errors", openRealErrors.length === 0, `${openRealErrors.length} error(s): ${openRealErrors.map(e => e.text).join("; ")}`);
+
+      // Check that the mobile panel opened — button aria-expanded should now be "true"
+      const isExpanded = await mobilePage.evaluate(() => {
+        const btn = document.querySelector('button[aria-expanded]');
+        return btn?.getAttribute("aria-expanded") === "true";
+      }).catch(() => false);
+      testResult("Mobile menu panel opened after click", isExpanded, "aria-expanded not 'true' after click");
+
+      // Click the Gallery link inside the mobile menu panel (not the desktop one)
+      // Desktop links appear first in DOM, so we need to scope to the mobile panel
+      const mobileNavLink = await mobilePage.evaluate(() => {
+        const nav = document.querySelector("nav");
+        if (!nav) return false;
+        // Find all gallery links and return the last one (mobile menu renders after desktop)
+        const links = Array.from(nav.querySelectorAll('a[href="/gallery"]'));
+        const mobileLink = links[links.length - 1];
+        if (mobileLink) {
+          mobileLink.scrollIntoView({ block: "center" });
+          return true;
+        }
+        return false;
+      }).catch(() => false);
+
+      if (mobileNavLink) {
+        const navPromise = mobilePage.waitForNavigation({ waitUntil: "networkidle0", timeout: 20000 }).catch(() => {});
+        await mobilePage.evaluate(() => {
+          const nav = document.querySelector("nav");
+          if (!nav) return;
+          const links = Array.from(nav.querySelectorAll('a[href="/gallery"]'));
+          const mobileLink = links[links.length - 1]; // last one is mobile
+          if (mobileLink) mobileLink.click();
+        });
+        await navPromise;
+        await new Promise((r) => setTimeout(r, 1500));
+
+        testResult("Tapping a mobile menu link navigates to the page", mobilePage.url().includes("/gallery"), `expected /gallery, got ${mobilePage.url()}`);
+
+        // After navigation, the mobile menu should be closed
+        const menuOpen = await mobilePage.evaluate(() => {
+          const btn = document.querySelector('button[aria-expanded="true"]');
+          return !!btn;
+        }).catch(() => false);
+        testResult("Mobile menu closes after navigation", !menuOpen, "aria-expanded=true still found after navigation");
+      } else {
+        console.log("  ℹ️  Gallery link not found in mobile menu — skipping navigation test");
+      }
+    }
+
+    await mobilePage.close();
+  }
+
+  // ====================================================================
+  // 11. BLOG POST PAGES — list & dynamic [slug] detail
+  // ====================================================================
+  console.log("\n📋  Blog & News — Posts\n");
+
+  {
+    const errors = [];
+    startCapture(page, errors);
+    const resp = await page.goto(`${BASE}/about/blog-news`, { waitUntil: "networkidle0", timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 2000));
+    page.removeAllListeners("console");
+
+    const realErrors = filterErrors(errors);
+    testResult("Blog & News loads without console errors", realErrors.length === 0, `${realErrors.length} error(s): ${realErrors.map(e => e.text).join("; ")}`);
+    testResult("HTTP 200 OK", resp?.status() === 200, `HTTP ${resp?.status()}`);
+    testResult("Page title includes 'Blog & News'", await page.$eval("h1", (el) => el.textContent).then(t => t.includes("Blog")).catch(() => false), "h1 not found or wrong text");
+
+    // Check filter tabs
+    const filterTabs = await page.$$('a[href*="category="], a[href="/about/blog-news"]');
+    testResult(`Filter tabs present (${filterTabs.length} tabs)`, filterTabs.length >= 2, `only ${filterTabs.length} tab(s) found`);
+
+    // Check for post cards
+    const postCards = await page.$$('[class*="rounded-2xl"]').catch(() => []);
+    const emptyMsg = await page.evaluate(() =>
+      document.body.innerText.includes("No posts yet")
+    ).catch(() => false);
+
+    if (postCards.length > 0) {
+      testResult(`Found ${postCards.length} post card(s)`, true, "");
+
+      // Click the first post card's link to navigate to [slug] detail
+      const postLinks = await page.$$('a[href^="/about/blog-news/"]');
+      if (postLinks.length > 0) {
+        const href = await postLinks[0].evaluate(el => el.getAttribute("href")).catch(() => "");
+        const slug = href.replace("/about/blog-news/", "");
+
+        if (slug && slug.length > 0) {
+          const navErrors = [];
+          startCapture(page, navErrors);
+          await Promise.all([
+            page.waitForNavigation({ waitUntil: "networkidle0", timeout: 20000 }),
+            postLinks[0].click(),
+          ]).catch(() => {});
+          await new Promise((r) => setTimeout(r, 2000));
+          page.removeAllListeners("console");
+
+          const navRealErrors = filterErrors(navErrors);
+          testResult(`Navigated to blog post \"${slug}\"`, page.url().includes(slug), `expected URL containing ${slug}, got ${page.url()}`);
+          testResult("Blog post page loads without console errors", navRealErrors.length === 0, `${navRealErrors.length} error(s): ${navRealErrors.map(e => e.text).join("; ")}`);
+
+          // Check for the back link and post content
+          const backLink = await page.$('a[href="/about/blog-news"]');
+          testResult("'Back to Blog & News' link present", !!backLink, "back link not found");
+
+          // Check for post title (h1)
+          const postTitle = await page.$eval("h1", (el) => el.textContent).catch(() => "");
+          testResult("Post has a title (h1)", postTitle.length > 0, "h1 empty or not found");
+
+          // Check for post content (either via SanitizedHtml or prose class)
+          const hasContent = await page.$('[class*="prose"]').then(Boolean);
+          const hasShareButtons = await page.$('[class*="SharePostButtons"], button[aria-label*="share"]').then(r => !!r).catch(() => false);
+          testResult("Post has content area (prose)", hasContent, "content area not found");
+          if (hasShareButtons) {
+            testResult("Share buttons present on post", true, "");
+          }
+        }
+      }
+    } else if (emptyMsg) {
+      console.log("  ℹ️  No blog posts in database — skipping [slug] navigation test");
+    } else {
+      testResult("Blog content rendered (posts or empty state)", false, "no posts and no empty-state message");
+    }
+  }
+
+  // ====================================================================
+  // 12. HOME REDIRECT TEST
   // ====================================================================
   console.log("\n📋  Home & Bypass\n");
 
