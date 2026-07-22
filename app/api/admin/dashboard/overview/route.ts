@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       galleryRecent,
       mathetesRecent,
       officeBearersRecent,
-      livingRoomRecent,
+      _livingRoomRecent,
       upcomingEventsRaw,
       allEventsThisYear,
     ] = await Promise.all([
@@ -135,6 +135,7 @@ export async function GET(request: NextRequest) {
         .gte("event_date", `${new Date().getFullYear()}-01-01`)
         .lte("event_date", `${new Date().getFullYear()}-12-31`),
     ]);
+    void _livingRoomRecent;
 
     const counts = {
       posts: postsCount.count ?? 0,
@@ -227,7 +228,6 @@ export async function GET(request: NextRequest) {
           (sum, row) => sum + row.total_bytes,
           0
         );
-        const totalMB = totalBytes / (1024 * 1024);
         const quotaBytes = 1024 * 1024 * 1024; // 1 GB free tier
         storageUsed = {
           totalBytes,

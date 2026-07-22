@@ -107,8 +107,9 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
       let insertData = { ...payload };
 
       // Strip control fields
-      const { action: _, id: _id, previous_image_url: _prev, ...rest } = insertData;
-      insertData = rest;
+      delete insertData.action;
+      delete insertData.id;
+      delete insertData.previous_image_url;
 
       if (config.sanitizePayload) {
         insertData = config.sanitizePayload(insertData);
@@ -136,8 +137,9 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
 
       let updateData = { ...payload };
 
-      const { action: _, id: _id, previous_image_url: _prev, ...rest } = updateData;
-      updateData = rest;
+      delete updateData.action;
+      delete updateData.id;
+      delete updateData.previous_image_url;
 
       if (config.sanitizePayload) {
         updateData = config.sanitizePayload(updateData);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, startTransition } from "react";
 
 declare global {
   interface Window {
@@ -36,7 +36,7 @@ export default function TurnstileWidget({ siteKey, onToken, theme = "auto" }: Pr
     // Script already loaded?
     if (document.querySelector('script[src*="turnstile"]')) {
       if (window.turnstile) {
-        setLoaded(true);
+        startTransition(() => setLoaded(true));
       }
       return;
     }
@@ -45,7 +45,7 @@ export default function TurnstileWidget({ siteKey, onToken, theme = "auto" }: Pr
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
     script.async = true;
     script.defer = true;
-    script.onload = () => setLoaded(true);
+    script.onload = () => startTransition(() => setLoaded(true));
     document.body.appendChild(script);
 
     return () => {

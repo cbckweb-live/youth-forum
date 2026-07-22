@@ -164,7 +164,7 @@ export default function EventsLineChart({ data }: EventsLineChartProps) {
         />
 
         {/* ── Dots with value labels ── */}
-        {dots.map((dot, i) => (
+        {dots.map((dot) => (
           <g key={dot.month}>
             {/* Dot circle */}
             <circle

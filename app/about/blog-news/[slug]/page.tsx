@@ -3,7 +3,6 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { decodeHtmlEntities } from "@/lib/utils";
 import SharePostButtons from "@/components/SharePostButtons";
 import { headers } from "next/headers";
 import SanitizedHtml from "@/components/SanitizedHtml";

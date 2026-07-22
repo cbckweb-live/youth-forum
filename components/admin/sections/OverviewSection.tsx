@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, startTransition } from "react";
 import type { DashboardOverview } from "@/app/api/admin/dashboard/overview/route";
 import EventsLineChart from "@/components/admin/EventsLineChart";
 
@@ -151,6 +151,13 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
   const [data, setData] = useState<DashboardOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Keep `now` refreshed for timeAgo displays
+  useEffect(() => {
+    const id = setInterval(() => startTransition(() => setNow(Date.now())), 60000);
+    return () => clearInterval(id);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -171,7 +178,7 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
   }, []);
 
   useEffect(() => {
-    load();
+    startTransition(() => load());
   }, [load]);
 
   function goTo(tabName: string) {
@@ -193,7 +200,7 @@ export default function OverviewSection({ onNavigate }: { onNavigate?: (tab: str
 
   function timeAgo(iso: string) {
     try {
-      const diff = Date.now() - new Date(iso).getTime();
+      const diff = now - new Date(iso).getTime();
       const mins = Math.floor(diff / 60000);
       if (mins < 1) return "just now";
       if (mins < 60) return `${mins}m ago`;

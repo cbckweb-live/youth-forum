@@ -3,10 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const url = request.nextUrl;
- 
-  
+
   // ==========================================
   // 1. "COMING SOON" LAUNCH GATEKEEPER LOGIC
+  // ==========================================
   // ==========================================
   const BYPASS_COOKIE_NAME = 'cbck_launch_bypass';
   const BYPASS_SECRET_VALUE = process.env.LAUNCH_BYPASS_SECRET;
@@ -23,7 +23,7 @@ export async function proxy(request: NextRequest) {
     const redirectResponse = NextResponse.redirect(new URL('/', request.url));
     redirectResponse.cookies.set(BYPASS_COOKIE_NAME, BYPASS_SECRET_VALUE, {
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, 
+      maxAge: 60 * 60 * 24 * 7,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -32,9 +32,8 @@ export async function proxy(request: NextRequest) {
   }
 
   // System Core / Framework Layout Assets Exclusions
-  // System Core / Framework Layout Assets Exclusions
-  const isAssetOrSystem = 
-    url.pathname.startsWith('/_next') || 
+  const isAssetOrSystem =
+    url.pathname.startsWith('/_next') ||
     url.pathname.startsWith('/api') ||
     url.pathname === '/coming-soon' ||
     url.pathname === '/favicon.ico' ||
@@ -44,7 +43,6 @@ export async function proxy(request: NextRequest) {
     url.pathname.endsWith('.jpg') ||
     url.pathname.endsWith('.svg');
 
-    
   // Check if visitor possesses the team bypass credentials cookie
   const bypassCookie = request.cookies.get(BYPASS_COOKIE_NAME);
   const isTeamMember = bypassCookie?.value === BYPASS_SECRET_VALUE;
@@ -64,7 +62,7 @@ export async function proxy(request: NextRequest) {
 
   
   // ==========================================
-  // 2. YOUR EXISTING SUPABASE AUTH LAYER
+  // 2. SUPABASE AUTH LAYER
   // ==========================================
   const response = NextResponse.next();
 
@@ -104,10 +102,8 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-// ⚠️ THE STRICT EXCLUSION MATCHER ["/admin/dashboard/:path*"],
 export const config = {
-  matcher: [ 
-    // "/admin/dashboard/:path*"
+  matcher: [
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)

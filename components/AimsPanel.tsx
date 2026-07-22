@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, startTransition } from 'react';
 
 /* ─── Fringe lines (desktop & mobile) ──────────────────── */
 
@@ -105,18 +105,17 @@ export default function AimsPanel() {
   useEffect(() => {
     if (reducedMotion) {
       // Skip animation entirely — show immediately at final state
-      setMounted(true);
+      startTransition(() => setMounted(true));
     } else {
-      const raf = requestAnimationFrame(() => setMounted(true));
-      return () => cancelAnimationFrame(raf);
+      startTransition(() => setMounted(true));
     }
   }, [reducedMotion]);
 
   /* Detect hover capability */
   useEffect(() => {
     const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
-    setIsHoverDevice(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsHoverDevice(e.matches);
+    startTransition(() => setIsHoverDevice(mq.matches));
+    const handler = (e: MediaQueryListEvent) => startTransition(() => setIsHoverDevice(e.matches));
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, []);

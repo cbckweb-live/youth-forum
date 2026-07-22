@@ -1,27 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 
 export default function ThemeToggle() {
   const [dark, setDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem("theme");
-    if (stored === "dark") {
-      setDark(true);
-      document.documentElement.classList.add("dark");
-    } else if (stored === "light") {
-      setDark(false);
-      document.documentElement.classList.remove("dark");
-    } else {
-      // No stored preference — use system
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setDark(prefersDark);
-      if (prefersDark) document.documentElement.classList.add("dark");
-      else document.documentElement.classList.remove("dark");
-    }
+    startTransition(() => {
+      setMounted(true);
+      const stored = localStorage.getItem("theme");
+      if (stored === "dark") {
+        setDark(true);
+        document.documentElement.classList.add("dark");
+      } else if (stored === "light") {
+        setDark(false);
+        document.documentElement.classList.remove("dark");
+      } else {
+        // No stored preference — use system
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        setDark(prefersDark);
+        if (prefersDark) document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+      }
+    });
   }, []);
 
   function toggle() {

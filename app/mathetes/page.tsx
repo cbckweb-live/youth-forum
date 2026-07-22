@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 import MathetesCard from "@/components/MathetesCard";
 import LeadershipCard from "@/components/LeadershipCard";
 import RevealSection from "@/components/RevealSection";
@@ -47,9 +48,11 @@ export default async function MathetesPage() {
 
   return (
     <main className="px-8 py-16 max-w-5xl mx-auto dark:text-[#e5e5e5]">
-      <img
+      <Image
         src="/mathetes logo.png"
         alt="Mathetes Fellowship"
+        width={480}
+        height={240}
         className="mx-auto mb-8 h-auto w-full max-w-60 sm:max-w-80 md:max-w-100 lg:max-w-120"
       />
 
