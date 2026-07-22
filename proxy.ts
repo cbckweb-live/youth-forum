@@ -1,8 +1,35 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
 export async function proxy(request: NextRequest) {
   const url = request.nextUrl;
+
+  // ==========================================
+  // 0. RATE LIMITING — protect auth-adjacent pages
+  // ==========================================
+  if (url.pathname.startsWith('/login') || url.pathname === '/admin') {
+    const limiter = getRateLimiter();
+    const ip = getClientIp(request);
+    const result = limiter.check({
+      ip,
+      endpoint: `page:${url.pathname}`,
+      tier: "public",
+    });
+    if (!result.allowed) {
+      const retryAfter = Math.ceil(result.retryAfter / 1000);
+      return new NextResponse(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": String(retryAfter),
+          },
+        },
+      );
+    }
+  }
 
   // ==========================================
   // 1. "COMING SOON" LAUNCH GATEKEEPER LOGIC

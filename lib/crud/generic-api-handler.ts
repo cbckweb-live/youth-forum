@@ -5,6 +5,7 @@ import {
   requireAdmin,
   getServiceSupabase,
 } from "@/lib/admin-api-utils";
+import { getRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
 /**
  * Configuration for a generic admin CRUD route.
@@ -74,6 +75,27 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
       serviceSupabase = getServiceSupabase();
     } catch {
       return errorResponse("Supabase service role key is not configured.", 500);
+    }
+
+    // ── Rate limit ──
+    const limiter = getRateLimiter();
+    const ip = getClientIp(request);
+    const rlResult = limiter.check({
+      ip,
+      endpoint: `admin:${config.table}`,
+      tier: "authenticated",
+    });
+    if (!rlResult.allowed) {
+      return new NextResponse(
+        JSON.stringify({ error: "Too many requests. Please slow down." }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": String(Math.ceil(rlResult.retryAfter / 1000)),
+          },
+        },
+      );
     }
 
     const payload = await request.json();

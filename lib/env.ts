@@ -32,6 +32,26 @@ const envSchema = z.object({
   VERCEL_PROJECT_ID: z.string().min(1).optional(),
   VERCEL_TEAM_ID: z.string().min(1).optional(),
 
+  // ── Rate limiting configuration (all optional — fall back to defaults in rate-limiter.ts) ──
+
+  // Auth tier (login, password reset): max attempts in window
+  RATE_LIMIT_AUTH_MAX_ATTEMPTS: z.coerce.number().int().positive().optional(),
+  RATE_LIMIT_AUTH_WINDOW_SECONDS: z.coerce.number().int().positive().optional(),
+  RATE_LIMIT_AUTH_BACKOFF_MULTIPLIER: z.coerce.number().positive().optional(),
+  RATE_LIMIT_AUTH_MAX_WINDOW_SECONDS: z.coerce.number().int().positive().optional(),
+
+  // Public tier (page views, read-only endpoints): max requests in window
+  RATE_LIMIT_PUBLIC_MAX_ATTEMPTS: z.coerce.number().int().positive().optional(),
+  RATE_LIMIT_PUBLIC_WINDOW_SECONDS: z.coerce.number().int().positive().optional(),
+  RATE_LIMIT_PUBLIC_BACKOFF_MULTIPLIER: z.coerce.number().positive().optional(),
+  RATE_LIMIT_PUBLIC_MAX_WINDOW_SECONDS: z.coerce.number().int().positive().optional(),
+
+  // Authenticated tier (admin CRUD): max requests in window
+  RATE_LIMIT_AUTHENTICATED_MAX_ATTEMPTS: z.coerce.number().int().positive().optional(),
+  RATE_LIMIT_AUTHENTICATED_WINDOW_SECONDS: z.coerce.number().int().positive().optional(),
+  RATE_LIMIT_AUTHENTICATED_BACKOFF_MULTIPLIER: z.coerce.number().positive().optional(),
+  RATE_LIMIT_AUTHENTICATED_MAX_WINDOW_SECONDS: z.coerce.number().int().positive().optional(),
+
   // Environment tracking
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });

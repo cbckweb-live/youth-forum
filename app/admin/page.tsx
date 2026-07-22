@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import ToastContainer, { showToast } from "@/components/admin/Toast";
 
@@ -36,20 +35,39 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError(null);
 
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-      options: captchaToken ? { captchaToken } : undefined,
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, captchaToken }),
+      });
 
-    if (error) {
-      showToast("Invalid email or password.", "error");
-      setLoading(false);
-      // Reset CAPTCHA so the user gets a fresh challenge
-      setCaptchaToken(null);
-    } else {
+      if (res.status === 429) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.retryAfterSeconds
+          ? `Too many attempts. Try again in ${data.retryAfterSeconds} seconds.`
+          : "Too many attempts. Please wait before trying again.";
+        showToast(msg, "error");
+        setError(msg);
+        setLoading(false);
+        setCaptchaToken(null);
+        return;
+      }
+
+      if (!res.ok) {
+        showToast("Invalid email or password.", "error");
+        setLoading(false);
+        setCaptchaToken(null);
+        return;
+      }
+
+      // Success — redirect to dashboard
       router.push("/admin/dashboard");
+    } catch (err) {
+      console.error("Login request failed:", err);
+      showToast("Network error. Please try again.", "error");
+      setError("Network error. Please try again.");
+      setLoading(false);
     }
   }
 
