@@ -19,9 +19,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+          cache: npm
 
-      - run: yarn install --frozen-lockfile
+      - run: npm ci
 
       # Fail fast if any ESM-only package sneaks into the dep tree
       - name: Check for forbidden ESM-only transitive deps
@@ -29,12 +29,12 @@ jobs:
 
       # Full production build — same Turbopack config as Vercel deploy
       - name: Production build
-        run: yarn build
+        run: npm run build
 
       # Start the production server and run HTTP smoke tests against it
       - name: HTTP smoke tests
         run: |
-          yarn start &
+          npm start &
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 30000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
@@ -47,7 +47,7 @@ jobs:
         if: always()
         run: |
           kill $(lsof -ti:3000) 2>/dev/null || true
-          yarn start &
+          npm start &
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 30000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
@@ -60,7 +60,7 @@ jobs:
         if: always()
         run: |
           kill $(lsof -ti:3000) 2>/dev/null || true
-          yarn start &
+          npm start &
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 30000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
