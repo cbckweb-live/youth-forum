@@ -100,6 +100,7 @@ export default async function MathetesPage() {
             {(entries as MathetesEntry[] | null | undefined)?.map((entry) => (
               <div key={entry.id} className="mb-6 break-inside-avoid">
                 <MathetesCard
+                  id={entry.id}
                   title={entry.title}
                   description={entry.description}
                   photo_url={entry.photo_url}
