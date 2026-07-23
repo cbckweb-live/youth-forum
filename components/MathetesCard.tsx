@@ -54,15 +54,6 @@ export default function MathetesCard({
           <h3 className="font-display text-lg mb-2 group-hover:text-[#6B1F2A] dark:group-hover:text-[#B84C5C] transition-colors">{title}</h3>
         </Link>
         {excerpt && <p className="text-sm text-[#231F1E]/70 dark:text-gray-400 leading-relaxed">{excerpt}</p>}
-        <Link
-          href={`/mathetes/${id}`}
-          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#6B1F2A] dark:text-[#B84C5C] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]/50 rounded transition-all"
-        >
-          Read More
-          <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </Link>
       </div>
     </div>
   );
