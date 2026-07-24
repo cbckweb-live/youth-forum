@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { get } from "@vercel/edge-config";
-import { errorResponse, getServerSupabase } from "@/lib/admin-api-utils";
+import { requireAdmin, safeErrorResponse, getServerSupabase } from "@/lib/admin-api-utils";
 import { env } from "@/lib/env";
 
 /**
@@ -16,34 +17,36 @@ async function readLaunched(): Promise<boolean> {
     // fall through to DB fallback
   }
 
-  // 2. Fall back to Supabase database — use the service role key if available
-  //    (this endpoint is already admin-protected, so it's safe)
+  // 2. Fall back to Supabase database — try service role key first, then anon
   try {
     const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = typeof process !== "undefined" ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined;
+    const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
+    // SUPABASE_SERVICE_ROLE_KEY is not exposed through env schema as optional,
+    // so read it from process.env directly
+    const serviceRoleKey = typeof process !== "undefined"
+      ? (process.env.SUPABASE_SERVICE_ROLE_KEY ?? serviceKey)
+      : undefined;
+    const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    if (supabaseUrl && serviceKey) {
-      const { createClient } = await import("@supabase/supabase-js");
-      const db = createClient(supabaseUrl, serviceKey);
-      const { data } = await db
+    if (supabaseUrl && serviceRoleKey) {
+      const db = createClient(supabaseUrl, serviceRoleKey);
+      const { data, error } = await db
         .from("site_config")
         .select("site_launched")
         .eq("id", 1)
         .single();
-      return data?.site_launched === true;
+      if (!error) return data?.site_launched === true;
     }
 
     // Fall back to anon key (RLS allows public reads on site_config)
-    const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (supabaseUrl && anonKey) {
-      const { createClient } = await import("@supabase/supabase-js");
       const db = createClient(supabaseUrl, anonKey);
-      const { data } = await db
+      const { data, error } = await db
         .from("site_config")
         .select("site_launched")
         .eq("id", 1)
         .maybeSingle();
-      return data?.site_launched === true;
+      if (!error) return data?.site_launched === true;
     }
   } catch (err) {
     console.error("[go-live/readLaunched] DB fallback also failed:", err);
@@ -55,48 +58,32 @@ async function readLaunched(): Promise<boolean> {
 
 export async function GET(request: NextRequest) {
   const response = new NextResponse();
-
-  const supabase = getServerSupabase(request, response);
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !session) {
-    return errorResponse("Unauthorized", 401);
-  }
-
-  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
-  if (role !== "admin") {
-    return errorResponse("Forbidden", 403);
-  }
+  const auth = await requireAdmin(request, response);
+  if ("error" in auth) return auth.error;
 
   try {
     const launched = await readLaunched();
     return NextResponse.json({ launched });
   } catch (err) {
-    console.error("[go-live/GET]", err);
-    return errorResponse("Failed to read launch status.", 500);
+    return safeErrorResponse("[go-live/GET]", err, "Failed to read launch status.", 500);
   }
 }
 
 export async function POST(request: NextRequest) {
   const response = new NextResponse();
 
-  // Create the authenticated Supabase client from the admin session
+  // 1. Verify admin session
+  const auth = await requireAdmin(request, response);
+  if ("error" in auth) return auth.error;
+
+  // 2. Create authenticated Supabase client for the DB write
+  //    Uses the admin's session cookies so RLS (authenticated role) applies
   const supabase = getServerSupabase(request, response);
-
-  // Verify admin session
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !session) {
-    return errorResponse("Unauthorized", 401);
-  }
-
-  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
-  if (role !== "admin") {
-    return errorResponse("Forbidden", 403);
-  }
 
   const errors: string[] = [];
 
-  // 1. Write to the database using the authenticated admin session
-  //    (RLS policy allows authenticated users to write site_config)
+  // 3. Write to the database using the authenticated admin session
+  //    Requires the RLS policy: "Authenticated users can manage site_config"
   try {
     const { error: dbErr } = await supabase
       .from("site_config")
@@ -113,7 +100,7 @@ export async function POST(request: NextRequest) {
     errors.push("db");
   }
 
-  // 2. Try to update Edge Config if configured
+  // 4. Try to update Edge Config if configured
   if (env.EDGE_CONFIG_ID && env.VERCEL_ACCESS_TOKEN) {
     try {
       const params = new URLSearchParams({ token: env.VERCEL_ACCESS_TOKEN });
@@ -141,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 3. Return result
+  // 5. Return result
   if (errors.length > 0 && errors.includes("db")) {
     return NextResponse.json(
       { error: "Failed to update launch status in the database." },
