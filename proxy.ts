@@ -148,20 +148,17 @@ async function proxyHandler(request: NextRequest) {
 
 /**
  * Reads the "siteLaunched" flag with a two-tier strategy:
- *   1. Vercel Edge Config (primary — fastest at the edge)
- *   2. Supabase DB (fallback — durable when Edge Config is unavailable)
+ *   1. Supabase DB (source of truth — durable, always updated by the go-live API)
+ *   2. Vercel Edge Config (fallback — fast cache when DB is unavailable)
  *   3. Default to false (not launched)
+ *
+ * Note: The database is checked FIRST because the go-live button always writes
+ * to the database (via the admin's authenticated session). Edge Config is only
+ * updated if the optional env vars (EDGE_CONFIG_ID, VERCEL_ACCESS_TOKEN) are
+ * configured on Vercel, so it cannot be the primary source.
  */
 async function readLaunchedState(): Promise<boolean> {
-  // 1. Try Edge Config
-  try {
-    const val = await get<boolean>("siteLaunched");
-    if (val !== undefined) return val === true;
-  } catch {
-    // fall through
-  }
-
-  // 2. Fall back to Supabase DB via REST API
+  // 1. Try Supabase DB (source of truth)
   try {
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -172,12 +169,21 @@ async function readLaunchedState(): Promise<boolean> {
         .select("site_launched")
         .eq("id", 1)
         .maybeSingle();
-      return data?.site_launched === true;
+      if (data !== null) return data?.site_launched === true;
     }
   } catch (err) {
-    console.error("[proxy] DB fallback for site_launched failed:", err);
+    console.error("[proxy] DB read for site_launched failed:", err);
   }
 
+  // 2. Fall back to Vercel Edge Config (fast cache when DB is unavailable)
+  try {
+    const val = await get<boolean>("siteLaunched");
+    if (val !== undefined) return val === true;
+  } catch {
+    // fall through
+  }
+
+  // 3. Default
   return false;
 }
 
