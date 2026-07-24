@@ -148,24 +148,24 @@ async function proxyHandler(request: NextRequest) {
 
 /**
  * Reads the "siteLaunched" flag with a hybrid strategy:
- *   1. Edge Config fast-path: if it says `true`, trust it immediately (no DB call)
- *   2. Supabase DB (source of truth for `false` — always updated by go-live API)
- *   3. Edge Config fallback: if DB is unavailable, use Edge Config as cache
- *   4. Default: false (not launched)
+ *   1. Edge Config fast-path: if it says `true` → trust it immediately (no DB call)
+ *   2. Supabase DB (source of truth — always checks when Edge Config isn't true)
+ *   3. Default: false (not launched)
  *
- * This balances performance (Edge Config is fast at the edge) with correctness
- * (the database is always authoritative — the go-live button always writes there).
+ * Edge Config is only authoritative for `true`. If it says `false` or is missing,
+ * the database is always checked. This balances performance with correctness:
+ * fast edge response when launched, but always deferring to the DB as truth.
  */
 async function readLaunchedState(): Promise<boolean> {
-  // 1. Fast path: Edge Config says true → trust it immediately
+  // 1. Fast path: Edge Config says true → trust it immediately (no DB latency)
   try {
     const val = await get<boolean>("siteLaunched");
     if (val === true) return true;
   } catch {
-    // fall through — Edge Config unavailable, check DB
+    // Edge Config unavailable — fall through to DB
   }
 
-  // 2. Check the database (source of truth)
+  // 2. Check the database (source of truth for all other cases)
   try {
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -182,15 +182,7 @@ async function readLaunchedState(): Promise<boolean> {
     console.error("[proxy] DB read for site_launched failed:", err);
   }
 
-  // 3. Edge Config fallback: DB unavailable, use cached value
-  try {
-    const val = await get<boolean>("siteLaunched");
-    if (val !== undefined) return val === true;
-  } catch {
-    // fall through
-  }
-
-  // 4. Default
+  // 3. Not launched
   return false;
 }
 
