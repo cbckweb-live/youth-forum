@@ -23,6 +23,7 @@
     "@tiptap/react": "^3.28.0",
     "@tiptap/starter-kit": "^3.28.0",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/edge-config": "^1.4.3",
     "html-to-text": "^10.0.0",
     "next": "16.2.11",
     "nprogress": "^0.2.0",

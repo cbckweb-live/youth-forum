@@ -32,6 +32,10 @@ const envSchema = z.object({
   VERCEL_PROJECT_ID: z.string().min(1).optional(),
   VERCEL_TEAM_ID: z.string().min(1).optional(),
 
+  // Vercel Edge Config (optional — for go-live trigger)
+  EDGE_CONFIG: z.string().url().optional(),
+  EDGE_CONFIG_ID: z.string().min(1).optional(),
+
   // ── Rate limiting configuration (all optional — fall back to defaults in rate-limiter.ts) ──
 
   // Auth tier (login, password reset): max attempts in window

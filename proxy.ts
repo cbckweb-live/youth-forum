@@ -1,5 +1,7 @@
+import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { get } from "@vercel/edge-config";
 import { getRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
 export async function proxy(request: NextRequest) {
@@ -43,59 +45,59 @@ async function proxyHandler(request: NextRequest) {
   // ==========================================
   // 1. "COMING SOON" LAUNCH GATEKEEPER LOGIC
   // ==========================================
-  // ==========================================
-  // TEMPORARILY DISABLED for dev preview of background image changes
-  // const BYPASS_COOKIE_NAME = 'cbck_launch_bypass';
-  // const BYPASS_SECRET_VALUE = process.env.LAUNCH_BYPASS_SECRET;
-  // if (!BYPASS_SECRET_VALUE) {
-  //   console.error('LAUNCH_BYPASS_SECRET environment variable is not set!');
-  // }
+  const isLaunched = await readLaunchedState();
 
-  // // Secret Team Backdoor Link Handler: https://cbckyouthforum.live/?preview=true
-  // if (url.searchParams.get('preview') === 'true') {
-  //   if (!BYPASS_SECRET_VALUE) {
-  //     console.error('Cannot set bypass cookie: LAUNCH_BYPASS_SECRET is not configured');
-  //     return NextResponse.redirect(new URL('/', request.url));
-  //   }
-  //   const redirectResponse = NextResponse.redirect(new URL('/', request.url));
-  //   redirectResponse.cookies.set(BYPASS_COOKIE_NAME, BYPASS_SECRET_VALUE, {
-  //     path: '/',
-  //     maxAge: 60 * 60 * 24 * 7,
-  //     httpOnly: true,
-  //     secure: process.env.NODE_ENV === 'production',
-  //     sameSite: 'lax',
-  //   });
-  //   return redirectResponse;
-  // }
+  const BYPASS_COOKIE_NAME = "cbck_launch_bypass";
+  const BYPASS_SECRET_VALUE = process.env.LAUNCH_BYPASS_SECRET;
+  if (!BYPASS_SECRET_VALUE) {
+    console.error("LAUNCH_BYPASS_SECRET environment variable is not set!");
+  }
 
-  // // System Core / Framework Layout Assets Exclusions
-  // const isAssetOrSystem =
-  //   url.pathname.startsWith('/_next') ||
-  //   url.pathname.startsWith('/api') ||
-  //   url.pathname === '/coming-soon' ||
-  //   url.pathname === '/favicon.ico' ||
-  //   url.pathname === '/sitemap.xml' ||
-  //   url.pathname === '/robots.txt' ||
-  //   url.pathname.endsWith('.png') ||
-  //   url.pathname.endsWith('.jpg') ||
-  //   url.pathname.endsWith('.svg');
+  // Secret Team Backdoor Link Handler: https://cbckyouthforum.live/?preview=true
+  if (url.searchParams.get("preview") === "true") {
+    if (!BYPASS_SECRET_VALUE) {
+      console.error("Cannot set bypass cookie: LAUNCH_BYPASS_SECRET is not configured");
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    const redirectResponse = NextResponse.redirect(new URL("/", request.url));
+    redirectResponse.cookies.set(BYPASS_COOKIE_NAME, BYPASS_SECRET_VALUE, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+    return redirectResponse;
+  }
 
-  // // Check if visitor possesses the team bypass credentials cookie
-  // const bypassCookie = request.cookies.get(BYPASS_COOKIE_NAME);
-  // const isTeamMember = bypassCookie?.value === BYPASS_SECRET_VALUE;
+  // System Core / Framework Layout Assets Exclusions
+  const isAssetOrSystem =
+    url.pathname.startsWith("/_next") ||
+    url.pathname.startsWith("/api") ||
+    url.pathname === "/coming-soon" ||
+    url.pathname === "/favicon.ico" ||
+    url.pathname === "/sitemap.xml" ||
+    url.pathname === "/robots.txt" ||
+    url.pathname.endsWith(".png") ||
+    url.pathname.endsWith(".jpg") ||
+    url.pathname.endsWith(".svg");
 
-  // // Admin login routes exclusion check
-  // const isAdminPath = url.pathname.startsWith('/developers/admin') || url.pathname.startsWith('/admin');
+  // Check if visitor possesses the team bypass credentials cookie
+  const bypassCookie = request.cookies.get(BYPASS_COOKIE_NAME);
+  const isTeamMember = bypassCookie?.value === BYPASS_SECRET_VALUE;
 
-  // // CRUCIAL FORCE CHECK: If hitting homepage directly and they aren't a team member -> Block instantly!
-  // if (url.pathname === '/' && !isTeamMember) {
-  //   return NextResponse.rewrite(new URL('/coming-soon', request.url));
-  // }
+  // Admin login routes exclusion check
+  const isAdminPath = url.pathname.startsWith("/developers/admin") || url.pathname.startsWith("/admin");
 
-  // // Block unauthorized traffic across other inner pages
-  // if (!isAssetOrSystem && !isTeamMember && !isAdminPath) {
-  //   return NextResponse.rewrite(new URL('/coming-soon', request.url));
-  // }
+  // CRUCIAL FORCE CHECK: If hitting homepage directly and they aren't a team member -> Block instantly!
+  if (url.pathname === "/" && !isTeamMember && !isLaunched) {
+    return NextResponse.rewrite(new URL("/coming-soon", request.url));
+  }
+
+  // Block unauthorized traffic across other inner pages
+  if (!isAssetOrSystem && !isTeamMember && !isAdminPath && !isLaunched) {
+    return NextResponse.rewrite(new URL("/coming-soon", request.url));
+  }
 
   
   // ==========================================
@@ -142,6 +144,41 @@ async function proxyHandler(request: NextRequest) {
   }
 
   return response;
+}
+
+/**
+ * Reads the "siteLaunched" flag with a two-tier strategy:
+ *   1. Vercel Edge Config (primary — fastest at the edge)
+ *   2. Supabase DB (fallback — durable when Edge Config is unavailable)
+ *   3. Default to false (not launched)
+ */
+async function readLaunchedState(): Promise<boolean> {
+  // 1. Try Edge Config
+  try {
+    const val = await get<boolean>("siteLaunched");
+    if (val !== undefined) return val === true;
+  } catch {
+    // fall through
+  }
+
+  // 2. Fall back to Supabase DB via REST API
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (supabaseUrl && anonKey) {
+      const sb = createClient(supabaseUrl, anonKey);
+      const { data } = await sb
+        .from("site_config")
+        .select("site_launched")
+        .eq("id", 1)
+        .maybeSingle();
+      return data?.site_launched === true;
+    }
+  } catch (err) {
+    console.error("[proxy] DB fallback for site_launched failed:", err);
+  }
+
+  return false;
 }
 
 export const config = {
