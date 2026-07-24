@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { get } from "@vercel/edge-config";
-import { requireAdmin, safeErrorResponse, getServiceSupabase } from "@/lib/admin-api-utils";
+import { errorResponse, getServerSupabase } from "@/lib/admin-api-utils";
 import { env } from "@/lib/env";
 
 /**
@@ -16,15 +16,35 @@ async function readLaunched(): Promise<boolean> {
     // fall through to DB fallback
   }
 
-  // 2. Fall back to Supabase database
+  // 2. Fall back to Supabase database — use the service role key if available
+  //    (this endpoint is already admin-protected, so it's safe)
   try {
-    const db = getServiceSupabase();
-    const { data } = await db
-      .from("site_config")
-      .select("site_launched")
-      .eq("id", 1)
-      .single();
-    return data?.site_launched === true;
+    const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = typeof process !== "undefined" ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined;
+
+    if (supabaseUrl && serviceKey) {
+      const { createClient } = await import("@supabase/supabase-js");
+      const db = createClient(supabaseUrl, serviceKey);
+      const { data } = await db
+        .from("site_config")
+        .select("site_launched")
+        .eq("id", 1)
+        .single();
+      return data?.site_launched === true;
+    }
+
+    // Fall back to anon key (RLS allows public reads on site_config)
+    const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (supabaseUrl && anonKey) {
+      const { createClient } = await import("@supabase/supabase-js");
+      const db = createClient(supabaseUrl, anonKey);
+      const { data } = await db
+        .from("site_config")
+        .select("site_launched")
+        .eq("id", 1)
+        .maybeSingle();
+      return data?.site_launched === true;
+    }
   } catch (err) {
     console.error("[go-live/readLaunched] DB fallback also failed:", err);
   }
@@ -35,28 +55,50 @@ async function readLaunched(): Promise<boolean> {
 
 export async function GET(request: NextRequest) {
   const response = new NextResponse();
-  const auth = await requireAdmin(request, response);
-  if ("error" in auth) return auth.error;
+
+  const supabase = getServerSupabase(request, response);
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !session) {
+    return errorResponse("Unauthorized", 401);
+  }
+
+  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
+  if (role !== "admin") {
+    return errorResponse("Forbidden", 403);
+  }
 
   try {
     const launched = await readLaunched();
     return NextResponse.json({ launched });
   } catch (err) {
-    return safeErrorResponse("[go-live/GET]", err, "Failed to read launch status.", 500);
+    console.error("[go-live/GET]", err);
+    return errorResponse("Failed to read launch status.", 500);
   }
 }
 
 export async function POST(request: NextRequest) {
   const response = new NextResponse();
-  const auth = await requireAdmin(request, response);
-  if ("error" in auth) return auth.error;
+
+  // Create the authenticated Supabase client from the admin session
+  const supabase = getServerSupabase(request, response);
+
+  // Verify admin session
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !session) {
+    return errorResponse("Unauthorized", 401);
+  }
+
+  const role = (session.user.app_metadata as Record<string, unknown>)?.role;
+  if (role !== "admin") {
+    return errorResponse("Forbidden", 403);
+  }
 
   const errors: string[] = [];
 
-  // 1. Always write to the database (reliable fallback)
+  // 1. Write to the database using the authenticated admin session
+  //    (RLS policy allows authenticated users to write site_config)
   try {
-    const db = getServiceSupabase();
-    const { error: dbErr } = await db
+    const { error: dbErr } = await supabase
       .from("site_config")
       .upsert(
         { id: 1, site_launched: true, updated_at: new Date().toISOString() },
@@ -101,15 +143,13 @@ export async function POST(request: NextRequest) {
 
   // 3. Return result
   if (errors.length > 0 && errors.includes("db")) {
-    // If the database write itself failed, return an error
     return NextResponse.json(
-      { error: "Failed to update launch status in the database. Edge Config may also be out of sync." },
+      { error: "Failed to update launch status in the database." },
       { status: 500 },
     );
   }
 
   if (errors.length > 0) {
-    // DB succeeded but Edge Config failed — still a partial success
     return NextResponse.json({
       success: true,
       warning: "Launch status updated in database, but Edge Config could not be updated. The site may take longer to reflect publicly.",
