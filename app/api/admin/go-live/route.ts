@@ -20,13 +20,12 @@ async function readLaunched(): Promise<boolean> {
   // 2. Fall back to Supabase database — try service role key first, then anon
   try {
     const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
-    // SUPABASE_SERVICE_ROLE_KEY is not exposed through env schema as optional,
-    // so read it from process.env directly
-    const serviceRoleKey = typeof process !== "undefined"
-      ? (process.env.SUPABASE_SERVICE_ROLE_KEY ?? serviceKey)
-      : undefined;
     const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    // Try service role key from process.env (optional — app still boots without it)
+    const serviceRoleKey = typeof process !== "undefined"
+      ? process.env.SUPABASE_SERVICE_ROLE_KEY
+      : undefined;
 
     if (supabaseUrl && serviceRoleKey) {
       const db = createClient(supabaseUrl, serviceRoleKey);
@@ -34,7 +33,7 @@ async function readLaunched(): Promise<boolean> {
         .from("site_config")
         .select("site_launched")
         .eq("id", 1)
-        .single();
+        .maybeSingle();
       if (!error) return data?.site_launched === true;
     }
 
