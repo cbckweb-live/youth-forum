@@ -10,6 +10,7 @@ export default function GoLiveSection() {
   const [error, setError] = useState<string | null>(null);
   const [launching, setLaunching] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [signalSent, setSignalSent] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -50,7 +51,8 @@ export default function GoLiveSection() {
       if (!res.ok) {
         throw new Error((data as { error?: string }).error || `Failed to go live (${res.status}).`);
       }
-      showToast("Site is now live!", "success");
+      setSignalSent(true);
+      showToast("Launch signal sent ✓", "success");
       setState("launched");
       setShowConfirm(false);
     } catch (err) {
@@ -109,18 +111,37 @@ export default function GoLiveSection() {
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-[#231F1E] dark:text-[#e5e5e5]">
-                The site is currently in coming-soon mode.
-              </p>
-              <p className="text-xs text-[#231F1E]/50 dark:text-gray-400 mt-1">
-                Going live will make the site public immediately for all visitors. This cannot be automatically undone.
-              </p>
+              {signalSent ? (
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full px-4 py-2 text-sm font-medium">
+                    <span className="inline-block w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                    Launch signal sent ✓
+                  </span>
+                  <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">
+                    The LCD device will detect this and reveal the site within seconds.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-[#231F1E] dark:text-[#e5e5e5]">
+                    The site is currently in coming-soon mode.
+                  </p>
+                  <p className="text-xs text-[#231F1E]/50 dark:text-gray-400 mt-1">
+                    Going live will make the site public immediately for all visitors. This cannot be automatically undone.
+                  </p>
+                </>
+              )}
             </div>
             <button
               onClick={() => setShowConfirm(true)}
+              disabled={signalSent}
               className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60 shrink-0"
             >
-              Go Live
+              {signalSent ? "Sent ✓" : "Go Live"}
             </button>
           </div>
         )}

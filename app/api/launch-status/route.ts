@@ -6,13 +6,22 @@ import { get } from "@vercel/edge-config";
  * Polled by the coming-soon page to detect when the site goes live.
  * Defaults to { launched: false } on any error so a misconfigured env var
  * never crashes the page.
+ *
+ * Cache-Control: no-store ensures no CDN or browser layer ever caches a stale
+ * answer during the live event.
  */
 export async function GET() {
   try {
     const launched = await get<boolean>("siteLaunched");
-    return NextResponse.json({ launched: launched === true });
+    return NextResponse.json(
+      { launched: launched === true },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (err) {
     console.error("[launch-status/GET] Edge Config read failed:", err);
-    return NextResponse.json({ launched: false });
+    return NextResponse.json(
+      { launched: false },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   }
 }

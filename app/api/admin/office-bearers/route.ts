@@ -46,6 +46,18 @@ export const POST = createGenericRoute({
         return NextResponse.json({ error: "Team ID is required." }, { status: 400 });
       }
 
+      // First, detach all office bearers from this team so the delete doesn't
+      // fail on foreign-key constraints
+      const { error: detachError } = await serviceSupabase
+        .from("office_bearers")
+        .update({ team_id: null })
+        .eq("team_id", id);
+
+      if (detachError) {
+        return safeErrorResponse("[office-bearers/delete_team/detach]", detachError, "Failed to detach team members.", 500);
+      }
+
+      // Then delete the team itself
       const { error } = await serviceSupabase
         .from("teams")
         .delete()
