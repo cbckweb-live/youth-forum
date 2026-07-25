@@ -144,3 +144,82 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+
+/**
+ * DELETE — Un-launch: sets siteLaunched to false in both DB and Edge Config.
+ * Allows the admin to reset the launch state for rehearsals.
+ */
+export async function DELETE(request: NextRequest) {
+  const response = new NextResponse();
+
+  // 1. Verify admin session
+  const auth = await requireAdmin(request, response);
+  if ("error" in auth) return auth.error;
+
+  // 2. Create authenticated Supabase client
+  const supabase = getServerSupabase(request, response);
+
+  const errors: string[] = [];
+
+  // 3. Write to the database
+  try {
+    const { error: dbErr } = await supabase
+      .from("site_config")
+      .upsert(
+        { id: 1, site_launched: false, updated_at: new Date().toISOString() },
+        { onConflict: "id" },
+      );
+    if (dbErr) {
+      console.error("[go-live/DELETE] DB upsert error:", dbErr);
+      errors.push("db");
+    }
+  } catch (err) {
+    console.error("[go-live/DELETE] DB upsert exception:", err);
+    errors.push("db");
+  }
+
+  // 4. Update Edge Config
+  if (env.EDGE_CONFIG_ID && env.VERCEL_ACCESS_TOKEN) {
+    try {
+      const params = new URLSearchParams({ token: env.VERCEL_ACCESS_TOKEN });
+
+      const res = await fetch(
+        `https://api.vercel.com/v1/edge-config/${env.EDGE_CONFIG_ID}/items?${params.toString()}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${env.VERCEL_ACCESS_TOKEN}`,
+          },
+          body: JSON.stringify({ items: [{ operation: "upsert", key: "siteLaunched", value: false }] }),
+        },
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("[go-live/DELETE] Vercel API error:", res.status, text);
+        errors.push("edge-config");
+      }
+    } catch (err) {
+      console.error("[go-live/DELETE] Edge Config patch exception:", err);
+      errors.push("edge-config");
+    }
+  }
+
+  // 5. Return result
+  if (errors.length > 0 && errors.includes("db")) {
+    return NextResponse.json(
+      { error: "Failed to reset launch status in the database." },
+      { status: 500 },
+    );
+  }
+
+  if (errors.length > 0) {
+    return NextResponse.json({
+      success: true,
+      warning: "Launch status reset in database, but Edge Config could not be updated. The site may still appear live.",
+    });
+  }
+
+  return NextResponse.json({ success: true });
+}

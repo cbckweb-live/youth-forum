@@ -26,6 +26,7 @@ export default function ComingSoonContent() {
   const [launching, setLaunching] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastDetectedRef = useRef(false);
 
   // Prefetch the homepage immediately so it's cached well before launch
   // Uses plain fetch (not router.prefetch) for easy Network-tab verification.
@@ -43,13 +44,20 @@ export default function ComingSoonContent() {
       try {
         const res = await fetch("/api/launch-status", { cache: "no-store" });
         const data: { launched: boolean } = await res.json();
-        if (data.launched === true) {
+        const currentlyLaunched = data.launched === true;
+
+        // Only trigger the animation on a false → true transition.
+        // After reverting, lastDetectedRef still holds true so the next
+        // poll with the same value skips — the revert actually sticks.
+        if (currentlyLaunched && !lastDetectedRef.current) {
           setLaunching(true);
           if (intervalRef.current) clearInterval(intervalRef.current);
           navTimeoutRef.current = setTimeout(() => {
             window.location.href = "/";
           }, prefersReducedMotion ? 100 : 2500);
         }
+
+        lastDetectedRef.current = currentlyLaunched;
       } catch {
         // Ignore polling errors — the endpoint defaults to { launched: false }
       }
@@ -65,6 +73,8 @@ export default function ComingSoonContent() {
     // Reset the launching state — animations revert via their transitions
     setLaunching(false);
     // Restart polling so it can detect a future real launch
+    // lastDetectedRef still holds true, so the next poll with the same
+    // value skips — the revert actually sticks.
     startPolling();
   }
 
