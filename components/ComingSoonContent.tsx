@@ -150,9 +150,9 @@ export default function ComingSoonContent() {
         />
       </div>
 
-      {/* Content — sits above curtains in z-index, fades out cleanly when launching */}
+      {/* Content — sits above curtains as a white card so text never overlaps the dark fabric */}
       <div
-        className="max-w-md space-y-10 relative z-30"
+        className="max-w-lg w-full relative z-30 bg-white rounded-2xl px-10 py-12 shadow-lg space-y-10"
         style={{
           opacity: launching ? 0 : 1,
           transition: contentTransition,
