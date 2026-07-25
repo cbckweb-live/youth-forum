@@ -54,8 +54,14 @@ export default function OfficeBearersSection() {
         body: JSON.stringify({ action: "create_team", name: newTeamName.trim(), display_order: teams.length }),
       });
       if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || "Failed to add team.");
+        let msg = "Failed to add team.";
+        try {
+          const body = await response.json();
+          if (body.error) msg = body.error;
+        } catch {
+          // ignore parse failure, use default message
+        }
+        throw new Error(msg);
       }
       setNewTeamName("");
       showToast(`"${newTeamName.trim()}" team added`);
@@ -81,8 +87,14 @@ export default function OfficeBearersSection() {
         body: JSON.stringify({ action: "delete_team", id }),
       });
       if (!response.ok) {
-        const text = await response.text();
-        setTeamError(text || "Failed to delete team.");
+        let msg = "Failed to delete team.";
+        try {
+          const body = await response.json();
+          if (body.error) msg = body.error;
+        } catch {
+          // ignore parse failure, use default message
+        }
+        setTeamError(msg);
         return;
       }
       setConfirmDeleteTeamName(null);
