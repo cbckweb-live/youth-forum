@@ -25,6 +25,7 @@ const prefersReducedMotion =
 export default function ComingSoonContent() {
   const [launching, setLaunching] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Prefetch the homepage immediately so it's cached well before launch
   // Uses plain fetch (not router.prefetch) for easy Network-tab verification.
@@ -34,7 +35,10 @@ export default function ComingSoonContent() {
     });
   }, []);
 
-  useEffect(() => {
+  // Extracted polling logic so it can be restarted after a revert
+  function startPolling() {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
     intervalRef.current = setInterval(async () => {
       try {
         const res = await fetch("/api/launch-status", { cache: "no-store" });
@@ -42,7 +46,7 @@ export default function ComingSoonContent() {
         if (data.launched === true) {
           setLaunching(true);
           if (intervalRef.current) clearInterval(intervalRef.current);
-          setTimeout(() => {
+          navTimeoutRef.current = setTimeout(() => {
             window.location.href = "/";
           }, prefersReducedMotion ? 100 : 2500);
         }
@@ -50,9 +54,25 @@ export default function ComingSoonContent() {
         // Ignore polling errors — the endpoint defaults to { launched: false }
       }
     }, 1500);
+  }
 
+  function handleRevert() {
+    // Cancel the pending navigation
+    if (navTimeoutRef.current) {
+      clearTimeout(navTimeoutRef.current);
+      navTimeoutRef.current = null;
+    }
+    // Reset the launching state — animations revert via their transitions
+    setLaunching(false);
+    // Restart polling so it can detect a future real launch
+    startPolling();
+  }
+
+  useEffect(() => {
+    startPolling();
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
     };
   }, []);
 
@@ -187,6 +207,16 @@ export default function ComingSoonContent() {
           </p>
         </div>
       </div>
+      {/* Revert button — visible only after launching so the curtain
+          animation can be tested and reset before the live event. */}
+      {launching && (
+        <button
+          onClick={handleRevert}
+          className="fixed bottom-6 right-6 z-50 px-4 py-2 text-xs font-medium tracking-wider uppercase rounded-full bg-[#6B1F2A] text-white shadow-lg hover:bg-[#5a1a23] transition-colors opacity-70 hover:opacity-100"
+        >
+          Revert
+        </button>
+      )}
     </main>
   );
 }
