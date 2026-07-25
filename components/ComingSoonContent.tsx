@@ -70,19 +70,19 @@ export default function ComingSoonContent() {
 
   return (
     <main
-      className="min-h-screen bg-[#f7f3ea] text-[#1c1b1a] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden"
+      className="min-h-screen bg-white text-black flex flex-col items-center justify-center p-6 text-center relative overflow-hidden"
       style={{ perspective: "1800px" }}
     >
       {/* Decorative gradient orbs — warmed for light bg */}
-      <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-[#6B1F2A]/10 blur-3xl" aria-hidden="true" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-[#C9A84C]/15 blur-3xl" aria-hidden="true" />
+      <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-[#6B1F2A]/8 blur-3xl" aria-hidden="true" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-[#C9A84C]/10 blur-3xl" aria-hidden="true" />
 
       {/* Warm light behind curtains — fades and scales in as curtains draw back */}
       <div
         className="absolute inset-0 z-10 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, #C9A84C 0%, #f7f3ea 40%, transparent 70%)",
+            "radial-gradient(circle at 50% 50%, #C9A84C 0%, #fff8e7 40%, transparent 65%)",
           opacity: launching ? 1 : 0,
           transform: launching ? "scale(1.3)" : "scale(0.8)",
           transition: lightTransition,
@@ -165,24 +165,24 @@ export default function ComingSoonContent() {
         </div>
 
         <div className="space-y-3">
-          <p className="text-xs uppercase tracking-[0.3em] text-[#1c1b1a]/80">
+          <p className="text-xs uppercase tracking-[0.3em] text-black/80 font-semibold">
             CBCK Youth Ministry
           </p>
-          <h1 className="font-display text-5xl sm:text-6xl font-bold leading-tight text-[#6B1F2A]">
+          <h1 className="font-display text-5xl sm:text-6xl font-bold leading-tight text-black">
             Coming Soon
           </h1>
           <div className="w-16 h-px mx-auto bg-[#C9A84C]" aria-hidden="true" />
-          <p className="text-base text-[#1c1b1a]/80 max-w-sm mx-auto leading-relaxed">
+          <p className="text-base text-black/80 max-w-sm mx-auto leading-relaxed">
             An exciting new platform for youth engagement is on its way. Stay tuned!
           </p>
         </div>
 
         {/* Event Details */}
-        <div className="border-t border-[#1c1b1a]/10 pt-6">
-          <p className="text-xs font-semibold text-[#6B1F2A] uppercase tracking-widest">
+        <div className="border-t border-black/10 pt-6">
+          <p className="text-xs font-bold text-[#6B1F2A] uppercase tracking-widest">
             Official Launch Event
           </p>
-          <p className="font-display text-2xl font-bold text-[#1c1b1a] mt-2">
+          <p className="font-display text-2xl font-bold text-black mt-2">
             16 August 2026
           </p>
         </div>
