@@ -70,10 +70,10 @@ export default async function LivingRoomPage() {
           <Image
             src="/livingroom.png"
             alt="The Living Room logo"
-            width={560}
-            height={224}
+            width={200}
+            height={200}
             unoptimized
-            className="h-36 w-auto drop-shadow-sm shrink-0"
+            className="w-36 h-auto drop-shadow-sm shrink-0"
           />
           <p className="max-w-xl text-lg leading-relaxed text-[#231F1E]/80 dark:text-gray-300">
             Designed to equip and inspire, The Living Room series hosted by the Chakhesang Baptist
@@ -86,9 +86,8 @@ export default async function LivingRoomPage() {
           <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
             The Living Room
           </h1>
-          <div className="mt-1 h-1 w-16 rounded-full bg-gradient-to-r from-[#6B1F2A] to-[#C99A3C] dark:from-[#B84C5C] dark:to-[#C99A3C]" />
         </div>
-        <p className="text-[#231F1E] dark:text-gray-300">Unable to load episodes at this time.</p>
+        <p className="text-[#231F1E]/50 dark:text-gray-400 italic">Unable to load episodes at this time. Please check back later.</p>
       </main>
     );
   }
@@ -100,10 +99,10 @@ export default async function LivingRoomPage() {
           <Image
             src="/livingroom.png"
             alt="The Living Room logo"
-            width={560}
-            height={224}
+            width={200}
+            height={200}
             unoptimized
-            className="h-36 w-auto drop-shadow-sm shrink-0"
+            className="w-36 h-auto drop-shadow-sm shrink-0"
           />
           <p className="max-w-xl text-lg leading-relaxed text-[#231F1E]/80 dark:text-gray-300">
             Designed to equip and inspire, The Living Room series hosted by the Chakhesang Baptist
@@ -116,9 +115,8 @@ export default async function LivingRoomPage() {
           <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
             The Living Room
           </h1>
-          <div className="mt-1 h-1 w-16 rounded-full bg-gradient-to-r from-[#6B1F2A] to-[#C99A3C] dark:from-[#B84C5C] dark:to-[#C99A3C]" />
         </div>
-        <p className="text-[#231F1E] dark:text-gray-300">No episodes available yet.</p>
+        <p className="text-[#231F1E]/50 dark:text-gray-400 italic">No episodes released yet. Stay tuned for new conversations.</p>
       </main>
     );
   }
@@ -129,10 +127,10 @@ export default async function LivingRoomPage() {
         <Image
           src="/livingroom.png"
           alt="The Living Room logo"
-          width={560}
-          height={224}
+          width={200}
+          height={200}
           unoptimized
-          className="h-36 w-auto drop-shadow-sm shrink-0"
+          className="w-36 h-auto drop-shadow-sm shrink-0"
         />
         <p className="max-w-xl text-lg leading-relaxed text-[#231F1E]/80 dark:text-gray-300">
           Designed to equip and inspire, The Living Room series hosted by the Chakhesang Baptist
@@ -146,7 +144,6 @@ export default async function LivingRoomPage() {
         <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
           The Living Room
         </h1>
-        <div className="mt-1 h-1 w-16 rounded-full bg-gradient-to-r from-[#6B1F2A] to-[#C99A3C] dark:from-[#B84C5C] dark:to-[#C99A3C]" />
       </div>
 
       <div className="woven-divider mb-12" />
@@ -158,7 +155,7 @@ export default async function LivingRoomPage() {
           return (
             <div
               key={episode.id}
-              className="group bg-white/40 dark:bg-[#1e1e1e]/40 backdrop-blur-sm border border-white/50 dark:border-white/10 shadow-md rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="group bg-white/40 dark:bg-[#1e1e1e]/40 backdrop-blur-sm border border-white/50 dark:border-white/10 shadow-md rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer"
             >
               <div className="mb-6 flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center rounded-full bg-[#6B1F2A]/10 dark:bg-[#B84C5C]/20 px-3 py-1 text-xs font-semibold tracking-wider text-[#6B1F2A] dark:text-[#B84C5C]">
