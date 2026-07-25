@@ -39,7 +39,7 @@ export default function ComingSoonContent() {
           if (intervalRef.current) clearInterval(intervalRef.current);
           setTimeout(() => {
             window.location.href = "/";
-          }, 1400);
+          }, 2500);
         }
       } catch {
         // Ignore polling errors — the endpoint defaults to { launched: false }
@@ -52,9 +52,9 @@ export default function ComingSoonContent() {
   }, []);
 
   // Inline transition values to avoid Tailwind arbitrary class scanning issues
-  const curtainTransition = "transform 1400ms cubic-bezier(.76,0,.24,1)";
-  const lightTransition = "opacity 800ms ease-in, transform 1400ms cubic-bezier(.76,0,.24,1)";
-  const contentTransition = "opacity 500ms ease-in-out";
+  const curtainTransition = "transform 2500ms cubic-bezier(.76,0,.24,1)";
+  const lightTransition = "opacity 1000ms ease-in, transform 2500ms cubic-bezier(.76,0,.24,1)";
+  const contentTransition = "opacity 800ms ease-in-out";
 
   return (
     <main
@@ -147,27 +147,27 @@ export default function ComingSoonContent() {
         }}
       >
         <div>
-          <span className="px-4 py-1.5 bg-[#6B1F2A]/10 border border-[#6B1F2A]/20 text-[#6B1F2A] text-xs font-semibold rounded-full tracking-wider uppercase">
+          <span className="px-4 py-1.5 bg-[#6B1F2A]/15 border border-[#6B1F2A]/30 text-[#C9A84C] text-xs font-semibold rounded-full tracking-wider uppercase">
             Something Big Is Coming
           </span>
         </div>
 
         <div className="space-y-3">
-          <p className="text-xs uppercase tracking-[0.3em] text-[#2c2416]/50">
+          <p className="text-xs uppercase tracking-[0.3em] text-[#2c2416]/70">
             CBCK Youth Ministry
           </p>
           <h1 className="font-display text-5xl sm:text-6xl font-bold leading-tight text-[#2c2416]">
             Coming Soon
           </h1>
           <div className="w-16 h-px mx-auto bg-[#C9A84C]/60" aria-hidden="true" />
-          <p className="text-base text-[#2c2416]/60 max-w-sm mx-auto leading-relaxed">
+          <p className="text-base text-[#2c2416]/80 max-w-sm mx-auto leading-relaxed">
             An exciting new platform for youth engagement is on its way. Stay tuned!
           </p>
         </div>
 
         {/* Event Details */}
         <div className="border-t border-[#2c2416]/10 pt-6">
-          <p className="text-xs font-semibold text-[#6B1F2A] uppercase tracking-widest">
+          <p className="text-xs font-semibold text-[#C9A84C] uppercase tracking-widest">
             Official Launch Event
           </p>
           <p className="font-display text-2xl font-bold text-[#2c2416] mt-2">

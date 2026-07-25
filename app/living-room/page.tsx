@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { getYouTubeEmbedUrl } from "@/lib/utils";
 import { createClient } from "@supabase/supabase-js";
+import RevealSection from "@/components/RevealSection";
 
 export const metadata: Metadata = {
   title: "The Living Room | Youth Forum",
@@ -69,15 +70,23 @@ export default async function LivingRoomPage() {
           <Image
             src="/livingroom.png"
             alt="The Living Room logo"
-            width={240}
-            height={96}
+            width={360}
+            height={144}
             unoptimized
-            className="h-17 w-auto"
+            className="h-24 w-auto drop-shadow-sm"
           />
           <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
             The Living Room
           </h1>
+            <div className="mt-1 h-1 w-16 rounded-full bg-gradient-to-r from-[#6B1F2A] to-[#C99A3C] dark:from-[#B84C5C] dark:to-[#C99A3C]" />
+          </div>
         </div>
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[#231F1E]/80 dark:text-gray-300">
+          Designed to equip and inspire, The Living Room series hosted by the Chakhesang Baptist
+          Church Youth Ministry creates a space where young people can hear firsthand from
+          professionals across diverse fields, empowering them with practical advice and fresh
+          perspectives for the future.
+        </p>
         <p className="text-[#231F1E] dark:text-gray-300">Unable to load episodes at this time.</p>
       </main>
     );
