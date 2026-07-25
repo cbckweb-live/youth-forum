@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${env.VERCEL_ACCESS_TOKEN}`,
           },
-          body: JSON.stringify({ items: [{ key: "siteLaunched", value: true }] }),
+          body: JSON.stringify({ items: [{ operation: "upsert", key: "siteLaunched", value: true }] }),
         },
       );
 
