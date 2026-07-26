@@ -72,11 +72,11 @@ export default function JourneyPage() {
           src="/background.jpg"
           alt=""
           aria-hidden="true"
-          width={1920}
-          height={1080}
+          width={1200}
+          height={675}
           priority
+          sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover object-center z-0"
-          unoptimized
         />
 
         {/* subtle dark overlay for text legibility */}
