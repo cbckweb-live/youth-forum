@@ -20,8 +20,9 @@ const prefersReducedMotion =
 
 /**
  * A scroll-reveal wrapper that animates only compositor-friendly
- * properties (opacity + translateY) and avoids expensive CSS filters
- * for smooth 60fps scrolling even with many instances on a page.
+ * properties (opacity + translateY). Sections already in the
+ * initial viewport on load are revealed immediately — no waiting
+ * for fade-in animations.
  */
 export default function RevealSection({
   children,
@@ -42,6 +43,14 @@ export default function RevealSection({
     if (!el || observedRef.current) return;
 
     observedRef.current = true;
+
+    // If the element is already in the viewport on page load,
+    // reveal it immediately — no need to wait for a scroll event.
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setRevealed(true);
+      return;
+    }
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
