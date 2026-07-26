@@ -38,17 +38,6 @@
   font-family: var(--font-body);
 }
 
-.woven-divider {
-  height: 10px;
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--color-terracotta) 0px,
-    var(--color-terracotta) 6px,
-    var(--color-ochre) 6px,
-    var(--color-ochre) 12px
-  );
-}
-
 /* Custom Branding for NProgress Loading Bar */
 #nprogress .bar {
   background: #6B1F2A !important; /* Oxblood Maroon */

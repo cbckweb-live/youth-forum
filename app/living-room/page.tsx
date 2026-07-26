@@ -50,79 +50,9 @@ function toRomanNumeral(num: number): string {
   return result;
 }
 
-export default async function LivingRoomPage() {
-  // Create client inside the async function
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-
-  const { data: episodes, error } = await supabase
-    .from("living_room_seasons")
-    .select("*")
-    .order("display_order", { ascending: false });
-
-  if (error) {
-    console.error("Failed to fetch episodes:", error);
-    return (
-      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
-        <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-center">
-          <Image
-            src="/livingroom.png"
-            alt="The Living Room logo"
-            width={200}
-            height={200}
-            unoptimized
-            className="w-36 h-auto drop-shadow-sm shrink-0"
-          />
-          <p className="max-w-xl text-lg leading-relaxed text-[#231F1E]/80 dark:text-gray-300">
-            Designed to equip and inspire, The Living Room series hosted by the Chakhesang Baptist
-            Church Youth Ministry creates a space where young people can hear firsthand from
-            professionals across diverse fields, empowering them with practical advice and fresh
-            perspectives for the future.
-          </p>
-        </div>
-        <div className="mb-6">
-          <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
-            The Living Room
-          </h1>
-        </div>
-        <p className="text-[#231F1E]/50 dark:text-gray-400 italic">Unable to load episodes at this time. Please check back later.</p>
-      </main>
-    );
-  }
-
-  if (!episodes || episodes.length === 0) {
-    return (
-      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
-        <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-center">
-          <Image
-            src="/livingroom.png"
-            alt="The Living Room logo"
-            width={200}
-            height={200}
-            unoptimized
-            className="w-36 h-auto drop-shadow-sm shrink-0"
-          />
-          <p className="max-w-xl text-lg leading-relaxed text-[#231F1E]/80 dark:text-gray-300">
-            Designed to equip and inspire, The Living Room series hosted by the Chakhesang Baptist
-            Church Youth Ministry creates a space where young people can hear firsthand from
-            professionals across diverse fields, empowering them with practical advice and fresh
-            perspectives for the future.
-          </p>
-        </div>
-        <div className="mb-6">
-          <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
-            The Living Room
-          </h1>
-        </div>
-        <p className="text-[#231F1E]/50 dark:text-gray-400 italic">No episodes released yet. Stay tuned for new conversations.</p>
-      </main>
-    );
-  }
-
-  return (      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
-
+function LivingRoomHeader() {
+  return (
+    <>
       <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-center">
         <Image
           src="/livingroom.png"
@@ -139,14 +69,50 @@ export default async function LivingRoomPage() {
           perspectives for the future.
         </p>
       </div>
-
       <div className="mb-6">
         <h1 className="font-display text-[2rem] text-[#6B1F2A] dark:text-[#B84C5C]">
           The Living Room
         </h1>
       </div>
+      <div className="h-px bg-[#231F1E]/10 mb-12 shadow-[0_1px_3px_-1px_rgba(0,0,0,0.08)]" />
+    </>
+  );
+}
 
-      <div className="woven-divider mb-12" />
+export default async function LivingRoomPage() {
+  // Create client inside the async function
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
+  const { data: episodes, error } = await supabase
+    .from("living_room_seasons")
+    .select("*")
+    .order("display_order", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch episodes:", error);
+    return (
+      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
+        <LivingRoomHeader />
+        <p className="text-[#231F1E]/50 dark:text-gray-400 italic">Unable to load episodes at this time. Please check back later.</p>
+      </main>
+    );
+  }
+
+  if (!episodes || episodes.length === 0) {
+    return (
+      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
+        <LivingRoomHeader />
+        <p className="text-[#231F1E]/50 dark:text-gray-400 italic">No episodes released yet. Stay tuned for new conversations.</p>
+      </main>
+    );
+  }
+
+  return (      <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
+
+      <LivingRoomHeader />
 
       <RevealSection delay={100} as="div" className="space-y-12">
         {episodes.map((episode: Episode) => {
