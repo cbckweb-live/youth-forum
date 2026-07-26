@@ -74,7 +74,7 @@ function LivingRoomHeader() {
           The Living Room
         </h1>
       </div>
-      <div className="h-[3px] bg-[#231F1E]/20 mb-12 shadow-[0_2px_6px_-1px_rgba(0,0,0,0.12)]" />
+      <div className="h-[5px] bg-gradient-to-r from-transparent via-[#C99A3C] to-transparent mb-12 shadow-[0_2px_10px_-2px_rgba(201,154,60,0.35)]" />
     </>
   );
 }
