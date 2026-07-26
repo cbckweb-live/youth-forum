@@ -85,7 +85,7 @@ export default function RevealSection({
     <Tag
       ref={ref as React.Ref<HTMLDivElement>}
       id={id}
-      className={`transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+      className={`transition-[opacity,transform] duration-400 ease-[cubic-bezier(0.32,0.72,0,1)] ${
         revealed
           ? "opacity-100 translate-y-0"
           : "opacity-0 translate-y-10"
