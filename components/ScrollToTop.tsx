@@ -6,10 +6,26 @@ const BTN_SIZE = 44; // w-11 = 44px
 const DEFAULT_POSITION = { left: 24, bottom: 24 };
 const STORAGE_KEY = "scrollToTopPosition";
 
+function getInitialPosition(): { left: number; bottom: number } {
+  if (typeof window === "undefined") return DEFAULT_POSITION;
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (typeof parsed.left === "number" && typeof parsed.bottom === "number") {
+        return parsed;
+      }
+    }
+  } catch {
+    // ignore corrupt storage
+  }
+  return DEFAULT_POSITION;
+}
+
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [position, setPosition] = useState(DEFAULT_POSITION);
+  const [position, setPosition] = useState(getInitialPosition);
 
   const wasDragged = useRef(false);
   const dragRef = useRef<{
@@ -19,22 +35,10 @@ export default function ScrollToTop() {
     startBottom: number;
   } | null>(null);
   const positionRef = useRef(position);
-  positionRef.current = position;
 
-  // ----- Restore saved position -----
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (typeof parsed.left === "number" && typeof parsed.bottom === "number") {
-          setPosition(parsed);
-        }
-      }
-    } catch {
-      // ignore corrupt storage
-    }
-  }, []);
+    positionRef.current = position;
+  }, [position]);
 
   // ----- Show / hide on scroll -----
   useEffect(() => {

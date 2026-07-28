@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import ToastContainer, { showToast } from "@/components/admin/Toast";
 
 type GoLiveState = "loading" | "not-launched" | "launched";
@@ -13,9 +13,9 @@ export default function GoLiveSection() {
   const [showLaunchConfirm, setShowLaunchConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [signalSent, setSignalSent] = useState(false);
+  const loadedRef = useRef(false);
 
   const load = useCallback(async () => {
-    setError(null);
     try {
       const res = await fetch("/api/admin/go-live");
       if (!res.ok) {
@@ -24,7 +24,6 @@ export default function GoLiveSection() {
       }
       const json = await res.json();
       setState(json.launched ? "launched" : "not-launched");
-      // If we're still showing "signal sent" after a reload, clear it
       if (!json.launched) setSignalSent(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load launch status.");
@@ -33,6 +32,8 @@ export default function GoLiveSection() {
   }, []);
 
   useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
     load();
   }, [load]);
 

@@ -128,6 +128,7 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
     // ── CREATE ──
     if (action === config.actionCreate) {
       // Strip control fields — destructuring creates a clean copy without them
+      // eslint-disable-next-line prefer-const
       let { action: _, id: _id, previous_image_url: _prev, ...insertData } = payload;
 
       if (config.sanitizePayload) {
@@ -155,6 +156,7 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
       if (!id) return errorResponse("ID is required.", 400);
 
       // Strip control fields — destructuring creates a clean copy without them
+      // eslint-disable-next-line prefer-const
       let { action: _, id: _id, previous_image_url: _prev, ...updateData } = payload;
 
       if (config.sanitizePayload) {
