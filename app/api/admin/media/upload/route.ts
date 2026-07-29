@@ -9,6 +9,8 @@ import {
   extractStorageLocationFromPublicUrl,
 } from "@/lib/admin-api-utils";
 
+let _sharpVersionLogged = false;
+
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
@@ -55,9 +57,16 @@ async function validateAndReencodeImage(buffer: Buffer): Promise<{
   buffer: Buffer;
   mime: string;
 }> {
-  // Sharp will throw "Input buffer contains unsupported image format"
-  // if the magic bytes don't match a supported image type.
-  const metadata = await sharp(buffer).metadata();
+  let metadata: Awaited<ReturnType<ReturnType<typeof sharp>["metadata"]>>;
+  try {
+    metadata = await sharp(buffer).metadata();
+  } catch (err) {
+    console.error("[media/upload/diagnostic] sharp().metadata() threw:", err);
+    throw err;
+  }
+  console.log(
+    `[media/upload/diagnostic] metadata: format=${metadata.format} width=${metadata.width} height=${metadata.height} space=${metadata.space}`,
+  );
 
   // Refuse SVG files — they can contain embedded <script> tags.
   if (metadata.format === "svg") {
@@ -75,13 +84,23 @@ async function validateAndReencodeImage(buffer: Buffer): Promise<{
       .webp({ quality: 82 })
       .toBuffer();
     mime = "image/webp";
-  } catch {
+    console.log(
+      `[media/upload/diagnostic] webp encode OK: byteLength=${reEncoded.length} mime=${mime}`,
+    );
+  } catch (err) {
+    console.error(
+      "[media/upload/diagnostic] webp encode FAILED (falling back to JPEG):",
+      err instanceof Error ? `${err.message}\n${err.stack}` : err,
+    );
     // If WebP encoding fails (unlikely), fall back to JPEG
     reEncoded = await sharp(buffer)
       .rotate()
       .jpeg({ quality: 85, mozjpeg: true })
       .toBuffer();
     mime = "image/jpeg";
+    console.log(
+      `[media/upload/diagnostic] jpeg fallback encode: byteLength=${reEncoded.length} mime=${mime}`,
+    );
   }
 
   return { buffer: reEncoded, mime };
@@ -106,6 +125,11 @@ export async function POST(request: NextRequest) {
     serviceSupabase = getServiceSupabase();
   } catch {
     return errorResponse("Supabase service role key is not configured.", 500);
+  }
+
+  if (!_sharpVersionLogged) {
+    _sharpVersionLogged = true;
+    console.log("[media/upload/diagnostic] sharp.versions:", JSON.stringify(sharp.versions));
   }
 
   const formData = await request.formData();
@@ -166,6 +190,7 @@ export async function POST(request: NextRequest) {
       uploadMime = result.mime;
       uploadExt = result.mime === "image/webp" ? "webp" : "jpg";
     } catch (err) {
+      console.error("[media/upload/diagnostic] validateAndReencodeImage threw:", err);
       return errorResponse(
         err instanceof Error
           ? err.message
@@ -173,6 +198,9 @@ export async function POST(request: NextRequest) {
         400,
       );
     }
+    console.log(
+      `[media/upload/diagnostic] uploadBody: byteLength=${uploadBody.length} hex12=${uploadBody.subarray(0, 12).toString("hex")}`,
+    );
   }
 
   // ── Sanitize folder path ──
@@ -188,11 +216,15 @@ export async function POST(request: NextRequest) {
   const safePath = `${normalizedFolder ? `${normalizedFolder}/` : ""}${timestamp}-${safeName}.${uploadExt}`;
 
   // ── Upload to Supabase Storage ──
-  const { error: uploadError } = await serviceSupabase.storage
+  const { data: uploadData, error: uploadError } = await serviceSupabase.storage
     .from(bucket)
     .upload(safePath, uploadBody, {
       contentType: uploadMime,
     });
+  console.log(
+    "[media/upload/diagnostic] supabase upload response:",
+    JSON.stringify({ data: uploadData, error: uploadError }),
+  );
 
   if (uploadError) return safeErrorResponse("[media/upload]", uploadError, "Failed to upload file.", 500);
 
