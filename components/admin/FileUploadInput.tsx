@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useMemo, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import ImageCropper from "./ImageCropper";
 
@@ -56,13 +56,16 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
     }
   };
 
-  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : currentUrl), [file, currentUrl]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (file) {
-      const url = URL.createObjectURL(file);
-      return () => URL.revokeObjectURL(url);
+    if (!file) {
+      setPreviewUrl(null);
+      return;
     }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
   }, [file]);
 
   const fileCount = multiple && files ? files.length : null;
@@ -91,10 +94,10 @@ export default function FileUploadInput({ accept, label, file, files, currentUrl
         onChange={handleChange}
       />
 
-      {isImage && previewUrl && !multiple && (
+      {isImage && (previewUrl ?? currentUrl) && !multiple && (
         <div className="relative mb-3 h-40">
           <Image
-            src={previewUrl}
+            src={(previewUrl ?? currentUrl)!}
             alt="Preview"
             fill
             unoptimized

@@ -215,28 +215,67 @@ export async function POST(request: NextRequest) {
   const timestamp = Date.now();
   const safePath = `${normalizedFolder ? `${normalizedFolder}/` : ""}${timestamp}-${safeName}.${uploadExt}`;
 
-  // ── Upload to Supabase Storage ──
-  const { data: uploadData, error: uploadError } = await serviceSupabase.storage
-    .from(bucket)
-    .upload(safePath, uploadBody, {
-      contentType: uploadMime,
-    });
-  console.log(
-    "[media/upload/diagnostic] supabase upload response:",
-    JSON.stringify({ data: uploadData, error: uploadError }),
-  );
+  // ── Upload to Supabase Storage with verify + retry ──
+  // Convert to Uint8Array to avoid inconsistent Node Buffer handling in the
+  // supabase-js storage transport layer.
+  const uploadPayload = new Uint8Array(uploadBody);
+  const expectedBytes = uploadBody.length;
+  const DELAYS = [0, 500, 1000];
 
-  if (uploadError) return safeErrorResponse("[media/upload]", uploadError, "Failed to upload file.", 500);
+  try {
+    let verified = false;
 
-  // Verify the uploaded image is readable by Sharp (catches corrupted WebP/JPEG before returning)
-  if (mediaType !== "pdf") {
-    try {
-      await sharp(uploadBody).metadata();
-    } catch (verifyErr) {
-      // If verification fails, try to clean up the uploaded file
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      if (DELAYS[attempt - 1] > 0) {
+        await new Promise((r) => setTimeout(r, DELAYS[attempt - 1]));
+      }
+
+      const { data: uploadData, error: uploadError } = await serviceSupabase.storage
+        .from(bucket)
+        .upload(safePath, uploadPayload, { contentType: uploadMime, upsert: attempt > 1 });
+      console.log(
+        `[media/upload/diagnostic] supabase upload response (attempt ${attempt}):`,
+        JSON.stringify({ data: uploadData, error: uploadError }),
+      );
+
+      if (uploadError) {
+        return safeErrorResponse("[media/upload]", uploadError, "Failed to upload file.", 500);
+      }
+
+      // Verify the stored object matches the buffer we sent.
+      const { data: verifyData, error: verifyError } = await serviceSupabase.storage
+        .from(bucket)
+        .download(safePath);
+
+      const actualBytes = !verifyError && verifyData
+        ? (await verifyData.arrayBuffer()).byteLength
+        : -1;
+
+      if (!verifyError && actualBytes === expectedBytes) {
+        verified = true;
+        break;
+      }
+
+      console.error(
+        `[media/upload] Verify failed on attempt ${attempt}, expected ${expectedBytes} bytes, got ${actualBytes}.${
+          attempt < 3 ? " Retrying..." : ""
+        }`,
+        verifyError ?? "",
+      );
+
+      // Remove the corrupted object before retrying.
       await serviceSupabase.storage.from(bucket).remove([safePath]).catch(() => {});
-      return safeErrorResponse("[media/upload/verify]", verifyErr, "Uploaded image failed validation. Please try again.", 500);
     }
+
+    if (!verified) {
+      return errorResponse(
+        "Upload failed integrity check after multiple attempts. Please try again.",
+        500,
+      );
+    }
+  } catch (err) {
+    await serviceSupabase.storage.from(bucket).remove([safePath]).catch(() => {});
+    return safeErrorResponse("[media/upload]", err, "Failed to upload file.", 500);
   }
 
   const url = serviceSupabase.storage.from(bucket).getPublicUrl(safePath).data.publicUrl;
