@@ -182,8 +182,8 @@ export async function POST(request: NextRequest) {
     .filter((segment) => segment && segment !== "." && segment !== "..")
     .join("/");
 
-  // ── Sanitize filename ──
-  const safeName = sanitizeFilename(file.name);
+  // ── Sanitize filename & strip original extension to avoid double extensions (e.g. "name-cropped.jpg.webp") ──
+  const safeName = sanitizeFilename(file.name).replace(/\.[^/.]+$/, "");
   const timestamp = Date.now();
   const safePath = `${normalizedFolder ? `${normalizedFolder}/` : ""}${timestamp}-${safeName}.${uploadExt}`;
 
@@ -195,6 +195,17 @@ export async function POST(request: NextRequest) {
     });
 
   if (uploadError) return safeErrorResponse("[media/upload]", uploadError, "Failed to upload file.", 500);
+
+  // Verify the uploaded image is readable by Sharp (catches corrupted WebP/JPEG before returning)
+  if (mediaType !== "pdf") {
+    try {
+      await sharp(uploadBody).metadata();
+    } catch (verifyErr) {
+      // If verification fails, try to clean up the uploaded file
+      await serviceSupabase.storage.from(bucket).remove([safePath]).catch(() => {});
+      return safeErrorResponse("[media/upload/verify]", verifyErr, "Uploaded image failed validation. Please try again.", 500);
+    }
+  }
 
   const url = serviceSupabase.storage.from(bucket).getPublicUrl(safePath).data.publicUrl;
   return jsonResponse({ url });
