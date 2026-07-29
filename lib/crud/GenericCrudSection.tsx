@@ -265,13 +265,16 @@ export default function GenericCrudSection<
         payload = schema.preparePayload(payload);
       }
 
+      // Derive the previous-URL key from the image field name (e.g. photo_url → previous_photo_url)
+      const previousImageKey = imageField ? `previous_${imageField.name}` : "previous_image_url";
+
       const response = await fetch(schema.apiPath, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: editingId ? schema.actionNames.update : schema.actionNames.create,
           id: editingId,
-          previous_image_url: editingId ? previousImageUrl : null,
+          [previousImageKey]: editingId ? previousImageUrl : null,
           ...payload,
         }),
       });

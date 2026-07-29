@@ -37,6 +37,10 @@ yarn-error.log*
 .env.production
 node_modules/
 
+# Windows reserved device name (can't be deleted via normal file ops)
+nul
+NUL
+
 
 # vercel
 .vercel

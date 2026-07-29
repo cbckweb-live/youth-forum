@@ -127,9 +127,15 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
 
     // ── CREATE ──
     if (action === config.actionCreate) {
-      // Strip control fields — destructuring creates a clean copy without them
+      // Strip control fields and any previous-* fields — destructuring creates a clean copy without them
       // eslint-disable-next-line prefer-const
-      let { action: _, id: _id, previous_image_url: _prev, ...insertData } = payload;
+      let { action: _, id: _id, ...insertData } = payload;
+      // Remove any field starting with "previous_" (e.g. previous_image_url, previous_photo_url)
+      for (const key of Object.keys(insertData)) {
+        if (key.startsWith("previous_")) {
+          delete insertData[key];
+        }
+      }
 
       if (config.sanitizePayload) {
         insertData = config.sanitizePayload(insertData);
@@ -155,9 +161,15 @@ export function createGenericRoute(config: GenericCrudRouteConfig) {
       const { id } = payload as { id?: string };
       if (!id) return errorResponse("ID is required.", 400);
 
-      // Strip control fields — destructuring creates a clean copy without them
+      // Strip control fields and any previous-* fields — destructuring creates a clean copy without them
       // eslint-disable-next-line prefer-const
-      let { action: _, id: _id, previous_image_url: _prev, ...updateData } = payload;
+      let { action: _, id: _id, ...updateData } = payload;
+      // Remove any field starting with "previous_" (e.g. previous_image_url, previous_photo_url)
+      for (const key of Object.keys(updateData)) {
+        if (key.startsWith("previous_")) {
+          delete updateData[key];
+        }
+      }
 
       if (config.sanitizePayload) {
         updateData = config.sanitizePayload(updateData);
