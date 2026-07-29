@@ -113,13 +113,19 @@ export default function OfficeBearersSection() {
     }
   }
 
-  // Inject dynamically loaded teams as options into the team_id field
+  // Inject dynamically loaded teams as options into the team_id field and filter
+  const teamChoices = teams.map((t) => ({ value: t.id, label: t.name }));
   const schema: CrudSchema<OfficeBearer> = {
     ...officeBearersSchema,
     fields: officeBearersSchema.fields.map((f) =>
       f.name === "team_id"
-        ? { ...f, options: teams.map((t) => ({ value: t.id, label: t.name })) }
+        ? { ...f, options: teamChoices }
         : f,
+    ),
+    filterOptions: (officeBearersSchema.filterOptions ?? []).map((opt) =>
+      opt.field === "team_id"
+        ? { ...opt, choices: teamChoices }
+        : opt,
     ),
   };
 

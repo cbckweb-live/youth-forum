@@ -333,4 +333,11 @@ export const officeBearersSchema: CrudSchema<OfficeBearer> = {
   emptyForm: () => ({ name: "", role: "", photo_url: null, phone: "", email: "", bio: "", team_id: null }),
   formatSubtitle: (r) => r.role ?? "—",
   searchFields: ["name", "role"],
+  filterOptions: [
+    {
+      label: "Team",
+      field: "team_id",
+      choices: [], // injected dynamically in OfficeBearersSection
+    },
+  ],
 };
