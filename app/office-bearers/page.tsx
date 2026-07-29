@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 0;
+export const revalidate = 86400;
 
 type Person = {
   id: string;

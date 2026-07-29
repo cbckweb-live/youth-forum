@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 0;
+export const revalidate = 3600;
 
 async function getBaseUrl() {
   const headerList = await headers();

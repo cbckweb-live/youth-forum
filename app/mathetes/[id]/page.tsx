@@ -4,8 +4,7 @@ import Link from "next/link";
 import SanitizedHtml from "@/components/SanitizedHtml";
 import { notFound } from "next/navigation";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function MathetesDetailPage({
   params,

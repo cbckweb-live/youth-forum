@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 86400;
+
 export default async function EventsArchivePage() {
   const currentYear = new Date().getFullYear();
   const yearStart = `${currentYear}-01-01`;

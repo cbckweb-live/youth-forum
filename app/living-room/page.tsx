@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Explore thought-provoking discussions and video content in The Living Room.",
 };
 
-export const revalidate = 0;
+export const revalidate = 86400;
 
 interface Episode {
   id: string;

@@ -31,7 +31,7 @@ function ensureAbsoluteImageUrl(url: string) {
   return stripQuery(url);
 }
 
-export const revalidate = 0;
+export const revalidate = 3600;
 
 type Event = {
   id: string;
@@ -107,10 +107,30 @@ type Person = {
 };
 
 export default async function HomePage() {
-  const { data: leadership } = await supabase
-    .from("office_bearers")
-    .select("*")
-    .or("role.ilike.%youth director%,role.ilike.%pastor in charge%,role.ilike.%youth chairman%");
+  const today = new Date().toISOString().split("T")[0];
+
+  const [
+    { data: leadership },
+    { data: upcomingEvents },
+    { data: recentPosts },
+  ] = await Promise.all([
+    supabase
+      .from("office_bearers")
+      .select("*")
+      .or("role.ilike.%youth director%,role.ilike.%pastor in charge%,role.ilike.%youth chairman%"),
+    supabase
+      .from("events")
+      .select("id,title,event_date,event_end_date,description,image_url")
+      .or(`event_end_date.gte.${today},event_end_date.is.null,event_end_date.eq.${today}`)
+      .order("event_date", { ascending: true })
+      .limit(20),
+    supabase
+      .from("posts")
+      .select("id,title,slug,category,content,created_at,photo_url")
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .limit(3),
+  ]);
 
   const roleRank: Record<string, number> = {
     "youth director": 0,
@@ -130,15 +150,6 @@ export default async function HomePage() {
     getRoleRank(a.role) - getRoleRank(b.role)
   );
 
-  const today = new Date().toISOString().split("T")[0];
-
-  const { data: upcomingEvents } = await supabase
-    .from("events")
-    .select("id,title,event_date,event_end_date,description,image_url")
-    .or(`event_end_date.gte.${today},event_end_date.is.null,event_end_date.eq.${today}`)
-    .order("event_date", { ascending: true })
-    .limit(20);
-
   const events = (upcomingEvents as Event[] | null) ?? [];
 
   const upcoming = events
@@ -149,13 +160,6 @@ export default async function HomePage() {
       image_url:
         typeof e.image_url === "string" ? ensureAbsoluteImageUrl(e.image_url) : null,
     }));
-
-  const { data: recentPosts } = await supabase
-    .from("posts")
-    .select("id,title,slug,category,content,created_at,photo_url")
-    .eq("published", true)
-    .order("created_at", { ascending: false })
-    .limit(3);
 
   const posts = (recentPosts as Post[] | null) ?? [];
 

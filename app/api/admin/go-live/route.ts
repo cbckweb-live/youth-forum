@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 import { get } from "@vercel/edge-config";
 import { requireAdmin, safeErrorResponse, getServerSupabase } from "@/lib/admin-api-utils";
@@ -99,7 +100,16 @@ export async function POST(request: NextRequest) {
     errors.push("db");
   }
 
-  // 4. Try to update Edge Config if configured
+  // 4. Revalidate the homepage cache so the next visitor gets the final launch content
+  try {
+    revalidatePath("/");
+  } catch (err) {
+    console.error("[go-live/POST] Revalidation failed:", err);
+    // Non-critical: the DB write already succeeded; the cache will naturally
+    // revalidate on the next request anyway.
+  }
+
+  // 5. Try to update Edge Config if configured
   if (env.EDGE_CONFIG_ID && env.VERCEL_ACCESS_TOKEN) {
     try {
       const params = new URLSearchParams({ token: env.VERCEL_ACCESS_TOKEN });
@@ -127,7 +137,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 5. Return result
+  // 6. Return result
   if (errors.length > 0 && errors.includes("db")) {
     return NextResponse.json(
       { error: "Failed to update launch status in the database." },
