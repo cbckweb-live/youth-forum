@@ -69,7 +69,7 @@ function FormField({
           onChange={(e) => onChange(e.target.value)}
           className={inputCls}
         >
-          <option value="">—</option>
+          <option value="">{field.placeholder || "—"}</option>
           {field.options?.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -212,10 +212,13 @@ export default function GenericCrudSection<
 
   function handleEditRecord(record: T) {
     openEdit(record);
+    const emptyForm = schema.emptyForm();
+    const recordAny = record as unknown as Record<string, unknown>;
     const formValues: Record<string, unknown> = {};
-    for (const field of schema.fields) {
-      const val = (record as unknown as Record<string, unknown>)[field.name];
-      formValues[field.name] = val ?? "";
+    // Populate from all emptyForm keys so extra fields (e.g. team_id for
+    // office bearers rendered via renderCustomFields) are also copied.
+    for (const key of Object.keys(emptyForm)) {
+      formValues[key] = key in recordAny ? (recordAny[key] ?? "") : emptyForm[key];
     }
     setForm(formValues);
     if (imageField) {

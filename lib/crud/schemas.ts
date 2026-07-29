@@ -327,6 +327,7 @@ export const officeBearersSchema: CrudSchema<OfficeBearer> = {
     { name: "phone", label: "Phone", type: "text", placeholder: "Phone number (optional)" },
     { name: "email", label: "Email", type: "email", placeholder: "Email address (optional)" },
     { name: "bio", label: "Bio", type: "richtext" },
+    { name: "team_id", label: "Team", type: "select", placeholder: "No team" },
   ],
   fileUploadBucket: "office-bearers-media",
   emptyForm: () => ({ name: "", role: "", photo_url: null, phone: "", email: "", bio: "", team_id: null }),

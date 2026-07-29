@@ -113,25 +113,13 @@ export default function OfficeBearersSection() {
     }
   }
 
-  // Merge base schema with OfficeBearers-specific team_id field (dynamic from DB)
+  // Inject dynamically loaded teams as options into the team_id field
   const schema: CrudSchema<OfficeBearer> = {
     ...officeBearersSchema,
-    renderCustomFields: ({ form, setForm }) => (
-      <div>
-        <label className="block text-sm font-medium text-[#231F1E] dark:text-[#e5e5e5] mb-1">
-          Team
-        </label>
-        <select
-          value={String(form.team_id ?? "")}
-          onChange={(e) => setForm({ team_id: e.target.value || null })}
-          className="w-full border border-gray-300 dark:border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B1F2A] bg-white dark:bg-[#1e1e1e] text-[#231F1E] dark:text-[#e5e5e5]"
-        >
-          <option value="">No team</option>
-          {teams.map((t) => (
-            <option key={t.id} value={t.id}>{t.name}</option>
-          ))}
-        </select>
-      </div>
+    fields: officeBearersSchema.fields.map((f) =>
+      f.name === "team_id"
+        ? { ...f, options: teams.map((t) => ({ value: t.id, label: t.name })) }
+        : f,
     ),
   };
 
