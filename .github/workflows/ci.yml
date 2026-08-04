@@ -38,35 +38,42 @@ jobs:
       # Start the production server and run HTTP smoke tests against it
       - name: HTTP smoke tests
         run: |
+          pkill -f "next start" || true
+          sleep 2
           npm start &
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 30000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
             node tests/smoke.mjs
-          kill $SERVER_PID
+          kill $SERVER_PID || true
+          sleep 2
 
       # Start a fresh server for the browser-level console error smoke test.
-      # The kill + lsof ensures any leftover server from the previous step is cleaned up.
+      # The pkill + sleep ensures any leftover server from the previous step is cleaned up.
       - name: Browser console smoke tests
         if: always()
         run: |
-          kill $(lsof -ti:3000) 2>/dev/null || true
+          pkill -f "next start" || true
+          sleep 2
           npm start &
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 30000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
             node tests/smoke-console.mjs
-          kill $SERVER_PID 2>/dev/null || true
+          kill $SERVER_PID || true
+          sleep 2
 
       # Start another fresh server for the interactive smoke tests (admin routes,
       # form interactions, login flow).
       - name: Browser interactive smoke tests
         if: always()
         run: |
-          kill $(lsof -ti:3000) 2>/dev/null || true
+          pkill -f "next start" || true
+          sleep 2
           npm start &
           SERVER_PID=$!
           npx wait-on http://localhost:3000 --timeout 30000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
             node tests/smoke-interactive.mjs
-          kill $SERVER_PID 2>/dev/null || true
+          kill $SERVER_PID || true
+          sleep 2
