@@ -39,29 +39,63 @@ jobs:
       # Start the production server and run HTTP smoke tests against it
       - name: HTTP smoke tests
         run: |
+          echo "Currently listening processes on port 3000:"
+          (lsof -i :3000 -sTCP:LISTEN -n -P || ss -ltnp | grep :3000 || true)
+
           pkill -f "next start" || true
           sleep 2
+
+          if command -v lsof >/dev/null 2>&1; then
+            if lsof -i :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+              echo "Port 3000 in use by PID(s): $(lsof -i :3000 -sTCP:LISTEN -t)"
+              lsof -i :3000 -sTCP:LISTEN -t | xargs -r kill -9 || true
+              sleep 1
+            fi
+          else
+            fuser -k 3000/tcp || true
+          fi
+          npx kill-port 3000 || true
+
           npm start &
           SERVER_PID=$!
-          npx wait-on http://localhost:3000 --timeout 30000
+          echo "Started server PID=$SERVER_PID"
+          npx wait-on http://localhost:3000 --timeout 60000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
             node tests/smoke.mjs
           kill $SERVER_PID || true
+          npx kill-port 3000 || true
           sleep 2
 
       # Start a fresh server for the browser-level console error smoke test.
-      # The pkill + sleep ensures any leftover server from the previous step is cleaned up.
+      # The port-kill logic ensures any leftover server from the previous step is cleaned up.
       - name: Browser console smoke tests
         if: always()
         run: |
+          echo "Currently listening processes on port 3000:"
+          (lsof -i :3000 -sTCP:LISTEN -n -P || ss -ltnp | grep :3000 || true)
+
           pkill -f "next start" || true
           sleep 2
+
+          if command -v lsof >/dev/null 2>&1; then
+            if lsof -i :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+              echo "Port 3000 in use by PID(s): $(lsof -i :3000 -sTCP:LISTEN -t)"
+              lsof -i :3000 -sTCP:LISTEN -t | xargs -r kill -9 || true
+              sleep 1
+            fi
+          else
+            fuser -k 3000/tcp || true
+          fi
+          npx kill-port 3000 || true
+
           npm start &
           SERVER_PID=$!
-          npx wait-on http://localhost:3000 --timeout 30000
+          echo "Started server PID=$SERVER_PID"
+          npx wait-on http://localhost:3000 --timeout 60000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
             node tests/smoke-console.mjs
           kill $SERVER_PID || true
+          npx kill-port 3000 || true
           sleep 2
 
       # Start another fresh server for the interactive smoke tests (admin routes,
@@ -69,12 +103,29 @@ jobs:
       - name: Browser interactive smoke tests
         if: always()
         run: |
+          echo "Currently listening processes on port 3000:"
+          (lsof -i :3000 -sTCP:LISTEN -n -P || ss -ltnp | grep :3000 || true)
+
           pkill -f "next start" || true
           sleep 2
+
+          if command -v lsof >/dev/null 2>&1; then
+            if lsof -i :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+              echo "Port 3000 in use by PID(s): $(lsof -i :3000 -sTCP:LISTEN -t)"
+              lsof -i :3000 -sTCP:LISTEN -t | xargs -r kill -9 || true
+              sleep 1
+            fi
+          else
+            fuser -k 3000/tcp || true
+          fi
+          npx kill-port 3000 || true
+
           npm start &
           SERVER_PID=$!
-          npx wait-on http://localhost:3000 --timeout 30000
+          echo "Started server PID=$SERVER_PID"
+          npx wait-on http://localhost:3000 --timeout 60000
           LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
             node tests/smoke-interactive.mjs
           kill $SERVER_PID || true
+          npx kill-port 3000 || true
           sleep 2
