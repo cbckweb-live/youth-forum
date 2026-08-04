@@ -6,7 +6,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, { message: "Supabase Anon Key is required" }),
 
   // Server-side Supabase vars (no NEXT_PUBLIC_ prefix — not exposed to browser)
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, { message: "Supabase Service Role Key is required" }),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, { message: "Supabase Service Role Key is required" }).optional(),
 
   // Used by proxy.ts (non-prefixed aliases optional — NEXT_PUBLIC_ variants above are the primary)
   SUPABASE_URL: z.string().url().optional(),
