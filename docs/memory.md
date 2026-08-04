@@ -1,7 +1,7 @@
 # Project Memory — CBCK Youth Forum
 
-**Version:** 1.0.0  
-**Last Updated:** 15 July 2026
+**Version:** 1.0.1  
+**Last Updated:** 30 July 2026
 
 ---
 
@@ -10,7 +10,7 @@
 CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist Church Kohima Youth Ministry. It serves as the ministry's digital content hub — with public-facing pages for events, blog/news, gallery, leadership directory, video content, and a private admin panel for content management.
 
 **Live URL:** [cbckyouthforum.live](https://cbckyouthforum.live)  
-**Version:** 1.0.0 — Initial release (all 10 phases complete)
+**Version:** 1.0.1 — Initial release + dashboard, go-live, rate limiting, security enhancements
 
 ---
 
@@ -77,7 +77,7 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 
 | Feature | Status | Description |
 |---|---|---|
-| Supabase Database | ✅ | 9 tables with RLS policies |
+| Supabase Database | ✅ | 10 tables with RLS policies |
 | Supabase Auth | ✅ | Email/password, admin role verification |
 | Supabase Storage | ✅ | posts-media and posts-pdf buckets |
 | Launch Gatekeeper | ✅ | Cookie-based pre-launch access control |
@@ -87,7 +87,7 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | CI/CD Pipeline | ✅ | Build + smoke tests on push/PR |
 | Database Keepalive | ✅ | Cron job every 3 days |
 
-### Components Built (17 total)
+### Public Components (updated)
 
 | Component | Type | Lines | Purpose |
 |---|---|---|---|
@@ -103,12 +103,34 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | SharePostButtons | Client | ~45 | Native share + clipboard copy |
 | ProgressBar | Client | ~45 | NProgress route transitions |
 | SanitizedHtml | Server | ~15 | Safe HTML rendering |
+| RevealSection | Client | ~30 | Scroll-triggered fade-in reveal wrapper |
+| ScrollToTop | Client | ~50 | Scroll-to-top floating button |
+| ThemeToggle | Client | ~40 | Dark/light theme toggle |
+| AimsPanel | Server | ~20 | Aims & Goals content panel |
+| ComingSoonContent | Server | ~25 | Coming-soon landing page content |
+| TurnstileWidget | Client | ~50 | Cloudflare Turnstile CAPTCHA |
+| SentryProvider | Client | ~20 | Client-side Sentry + session replay |
+
+### Admin Components (updated)
+
+| Component | Type | Lines | Purpose |
+|---|---|---|---|
+| OverviewSection | Client | ~400 | Dashboard overview (counts, storage, analytics) |
+| GoLiveSection | Client | ~250 | Site launch control panel |
+| PostsSection | Client | ~200 | Post CRUD with TipTap editor |
+| EventsSection | Client | ~150 | Event CRUD |
+| GallerySection | Client | ~150 | Gallery CRUD |
+| MathetesSection | Client | ~130 | Mathetes CRUD |
+| OfficeBearersSection | Client | ~180 | Office bearers CRUD with team filter |
+| LivingRoomSection | Client | ~130 | Living Room CRUD |
 | RichTextEditor | Client | ~100 | TipTap editor with toolbar |
 | FileUploadInput | Client | ~170 | File upload with preview + crop |
 | ImageCropper | Client | ~175 | Drag crop with export |
 | ConfirmDialog | Client | ~30 | Delete confirmation modal |
+| Toast | Client | ~80 | Toast notification container |
+| EventsLineChart | Client | ~50 | Events per month line chart |
 
-### Utilities Built (9 files)
+### Utilities Built (16 files)
 
 | File | Purpose |
 |---|---|
@@ -119,13 +141,22 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | `lib/categories.ts` | Post category constants |
 | `lib/truncate.ts` | HTML-to-text truncation |
 | `lib/utils.ts` | YouTube URL parser, HTML entity decoder |
+| `lib/rate-limiter.ts` | In-memory rate limiter (LRU cache + tiered backoff) |
+| `lib/admin-api-utils.ts` | Admin auth helpers (requireAdmin, getServerSupabase) |
 | `lib/compress/image.ts` | Client-side image compression |
 | `lib/compress/index.ts` | Compression exports |
+| `lib/api/with-rate-limit.ts` | API route rate-limit wrapper |
+| `lib/crud/generic-api-handler.ts` | Reusable CRUD API route handler |
+| `lib/crud/schemas.ts` | Zod validation schemas for CRUD |
+| `lib/crud/types.ts` | CRUD type definitions |
+| `lib/crud/index.ts` | CRUD utilities exports |
 
-### API Routes Built (7 routes)
+### API Routes Built (11 routes)
 
-| Route | Method | Purpose |
+| Route | Method(s) | Purpose |
 |---|---|---|
+| `/api/auth/login` | POST | Admin login (rate-limited + Turnstile) |
+| `/api/launch-status` | GET | Public launch state check |
 | `/api/admin/posts` | POST | CRUD for blog/news posts |
 | `/api/admin/events` | POST | CRUD for events |
 | `/api/admin/gallery` | POST | CRUD for gallery photos |
@@ -133,8 +164,10 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | `/api/admin/office-bearers` | POST | CRUD for office bearers |
 | `/api/admin/living-room` | POST | CRUD for living room episodes |
 | `/api/admin/media/upload` | POST | File upload to Supabase Storage |
+| `/api/admin/dashboard/overview` | GET | Dashboard overview data (counts, storage, analytics) |
+| `/api/admin/go-live` | GET/POST/DELETE | Site launch state control |
 
-### Documentation Created (5 files)
+### Documentation Created (8 files)
 
 | File | Description |
 |---|---|
@@ -143,6 +176,9 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | `phases.md` | Build phases in order |
 | `design.md` | Design system — colors, fonts, components |
 | `memory.md` | This file — project progress tracker |
+| `VERSIONING.md` | Versioning strategy and release process |
+| `RUNBOOK.md` | Operations runbook (deploy, backup, restore) |
+| `backup setup.md` | Database backup setup guide |
 
 ---
 
@@ -150,29 +186,18 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 
 **Build status:** All features complete. The website has been fully built and deployed.
 
-**Known recent changes (last git commits):**
-
-| Commit | Description |
+**Key recent features added:**
+| Feature | Description |
 |---|---|
-| `f04b502` | Added overlay text |
-| `379905b` | Gradient changes |
-| `55e6d79` | Mobile mode timeline |
-| `756665c` | Mobile mode updated |
-| `9260c69` | Style stamp to Tailwind classes |
-| `62d7e13` / `9969002` | Mathetes image updates |
-| `b4155ff` | Font adjustments |
-| `abb5cd5` | Font color changes |
-| `04ae28a` | Hero image and text |
-| `33ca1f8` | Image error fix |
-| `90ff704` | Updated background image |
-| `93a398f` | Journey page update |
-| `0abb744` | Dev page |
-| `e69bec5` | Sitemaps |
-| `a92eed2` | Share button |
-| `20ba293` | More unoptimisations |
-| `6063ad1` | Unoptimised final |
-| `030d245` | Image bug |
-| `593e63d` | Cezo |
+| Admin Dashboard Overview | Content counts, storage/DB usage, analytics charts, workflow status |
+| Go Live Control Panel | Launch/reset site from admin panel (writes to DB + Edge Config) |
+| Rate Limiting | In-memory LRU cache protecting login, public, and authenticated tiers |
+| Cloudflare Turnstile | CAPTCHA on admin login to prevent brute-force attacks |
+| ISR Caching | `revalidate` exports on all public pages (3600s–86400s) |
+| Sentry Error Tracking | Native Next.js 16 instrumentation hook |
+| Database Backup Workflow | Weekly pg_dump via GitHub Actions to Supabase Storage |
+| Team Filter Dropdown | Office bearers admin list view for filtering by team |
+| Error Boundaries | `app/error.tsx` and segment-level error pages for graceful failures |
 
 ---
 
@@ -183,7 +208,7 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | Site Title | CBCK | Youth Forum |
 | Tagline | News, events, and people of our youth forum |
 | Theme Verse | 1 Timothy 4:12 |
-| Version | `1.0.0` |
+| Version | `1.0.1` |
 | Theme 2026 | "Renew Thy Church" |
 | Book Focus | Revelations |
 | Primary Color | `#6B1F2A` (Maroon/Oxblood) |
@@ -195,7 +220,7 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 
 ---
 
-## Database Tables (9 total)
+## Database Tables (10 total)
 
 | Table | Records | Purpose |
 |---|---|---|
@@ -208,6 +233,7 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | `living_room_seasons` | — | Video episodes |
 | `cezo_mepu_locations` | — | Regional youth groups |
 | `developers` | — | Development team |
+| `site_config` | 1 | Launch state (single-row config) |
 
 ---
 
@@ -215,12 +241,10 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 
 All planned features have been implemented. The TODO.md file is empty of remaining tasks. Future considerations include:
 
-- Static revalidation (ISR) for improved performance.
 - Email notifications for content updates.
 - Living Room series/season groupings.
 - iCal calendar subscription for events.
 - Image CDN optimization beyond Supabase storage.
-- Analytics integration.
 - Multi-language support (if needed).
 - Member registration and profiles.
 - Comments on blog posts.
@@ -238,16 +262,18 @@ All planned features have been implemented. The TODO.md file is empty of remaini
 
 ---
 
-## Changelog
+## Changelog### 2026-07-19 — v1.0.1
 
-### 2026-07-19 — v1.0.1
-
+- ✨ **Added admin dashboard overview tab** — content counts, storage/DB usage, monthly deltas, upcoming events, missing image warnings, recent activity feed, Vercel Analytics charts, and GitHub Actions workflow health.
+- ✨ **Added Go Live control panel** — admin can toggle the public launch state from the dashboard. Writes to both Supabase DB and Vercel Edge Config. Displays current live/coming-soon state with confirmation dialogs.
 - 🔧 **Moved launch gatekeeper bypass secret to environment variable.** Removed hardcoded `BYPASS_SECRET_VALUE` from `proxy.ts`. Added `LAUNCH_BYPASS_SECRET` to the Zod env schema in `lib/env.ts` with a backward-compatible default.
-- ✨ **Added error boundaries to prevent crashes during Supabase outages.** Created `app/error.tsx` (root error boundary for all pages), `app/office-bearers/[id]/error.tsx`, and `app/about/blog-news/[slug]/error.tsx` (segment-level boundaries for dynamic routes). Each shows a friendly error message with "Try Again" and navigation links.
-
-
-
-All notable changes to this project will be documented in this section.
+- 🔧 **Implemented in-memory rate limiting** — LRU-cache-based rate limiter with three tiers (auth, public, authenticated). Applied to login pages and all admin API routes.
+- 🔧 **Integrated Cloudflare Turnstile CAPTCHA** on the admin login form to prevent brute-force attacks.
+- ✨ **Added error boundaries** to prevent crashes during Supabase outages. Created `app/error.tsx` (root), `app/office-bearers/[id]/error.tsx`, and `app/about/blog-news/[slug]/error.tsx` (segment-level). Each shows a friendly error message with "Try Again" and navigation links.
+- 🏗️ **Added database backup workflow** — GitHub Actions weekly pg_dump to Supabase Storage and artifact retention.
+- 🏗️ **Added Vercel Edge Config integration** — fast edge-level `siteLaunched` flag for middleware gatekeeper decisions.
+- 🏗️ **Added `site_config` table** — single-row config table for launch state management.
+- 📄 **Updated documentation** — all 8 docs reviewed and updated for consistency.
 
 ### 2026-07-15 — v1.0.1
 

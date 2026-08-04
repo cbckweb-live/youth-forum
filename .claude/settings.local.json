@@ -4,5 +4,10 @@
       "Bash(git commit -a -m \"Add delete image button to Office Bearers editing dialog\")",
       "Bash(git push)"
     ]
+  },
+  "env": {
+      "ANTHROPIC_BASE_URL": " http://localhost:20128/v1",
+      "ANTHROPIC_API_KEY": "sk-f5d749385aa30463-b4a08f-023a39ee",
+      "CLAUDE_CODE_ENABLE_GATEWAY_MODEL-DISCOVERY": "1"
   }
 }

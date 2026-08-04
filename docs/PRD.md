@@ -127,8 +127,31 @@ The project was built using Next.js 16 with the App Router, Supabase for databas
 
 #### 4.2.2 Admin Dashboard (`/admin/dashboard`)
 
-- A tabbed dashboard was built with six content management sections: **Posts, Events, Gallery, Mathetes, Office Bearers, Living Room**.
+- A tabbed dashboard was built with eight tabs: **Overview, Posts, Events, Gallery, Mathetes, Office Bearers, Living Room, Go Live**.
 - Session validation was implemented — unauthenticated users were redirected to the login page.
+- **Overview tab** displays content counts, storage/DB usage, GitHub Actions workflow health, missing image warnings, events per month chart, Vercel Analytics site traffic (visitors + top pages), and a recent activity feed.
+- **Go Live tab** provides one-click site launch/reset control with confirmation dialogs.
+
+#### 4.2.2.1 Admin Dashboard Overview
+
+- Content counts for all 6 tables with clickable quick-navigation to each CRUD section.
+- Monthly delta badges (this month vs last month) for posts, events, and gallery.
+- Supabase storage usage with progress bar and percentage against the 1 GB free tier.
+- Database size display.
+- GitHub Actions workflow health cards showing last run time and status for keepalive and backup workflows.
+- Missing image warnings — alerts when gallery photos or office bearer photos have null URLs.
+- Upcoming events list and empty table flags for sections with no content.
+- Events per month line chart.
+- Vercel Analytics integration: 8-day visitors bar chart and top pages ranking.
+- Recent activity feed showing latest changes across Posts, Events, Gallery, Mathetes, and Office Bearers.
+
+#### 4.2.2.2 Go Live Control
+
+- Displays current launch state (Live vs Coming-Soon).
+- Confirmation dialog with warning before going live (cannot be automatically undone).
+- Reset launch button to re-enable the coming-soon gate.
+- Writes launch state to both Supabase `site_config` table and Vercel Edge Config.
+- Revalidates homepage cache on launch.
 
 #### 4.2.3 Posts Management
 
@@ -172,8 +195,30 @@ The project was built using Next.js 16 with the App Router, Supabase for databas
 
 #### 4.3.3 Security Headers
 
-- Content Security Policy (CSP) headers were configured in `next.config.ts` allowing Supabase API connections, Google Fonts, YouTube embeds, and Vercel Live feedback.
+- Content Security Policy (CSP) headers were configured with dynamic nonces via middleware, allowing Supabase API connections, Google Fonts, YouTube embeds, and Vercel Live feedback.
 - Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, and Referrer-Policy headers were all set.
+
+#### 4.3.3.1 Rate Limiting
+
+- In-memory LRU-cache-based rate limiter (`lib/rate-limiter.ts`) with three tiers:
+  - **Auth tier:** Applied to login pages — stricter limits, exponential backoff.
+  - **Public tier:** Applied to read-only page views.
+  - **Authenticated tier:** Applied to admin CRUD API routes.
+- Configurable via environment variables for max attempts, window size, and backoff multiplier.
+- First violation triggers a lockout, with each subsequent violation multiplying the window.
+
+#### 4.3.3.2 Cloudflare Turnstile CAPTCHA
+
+- Admin login page includes a Cloudflare Turnstile CAPTCHA widget (`TurnstileWidget.tsx`).
+- Token is verified server-side on the `/api/auth/login` route.
+- Only shown when `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is configured — gracefully skips if unset.
+
+#### 4.3.3.3 Error Monitoring (Sentry)
+
+- Server-side Sentry initialized via `src/instrumentation.ts` using Next.js 16's native `register()` hook.
+- Client-side Sentry via `components/SentryProvider.tsx` with session replay.
+- Request errors captured via `captureRequestError` network hook.
+- Error boundaries (`app/error.tsx`) capture exceptions to Sentry.
 
 #### 4.3.4 SEO
 
@@ -184,6 +229,13 @@ The project was built using Next.js 16 with the App Router, Supabase for databas
 
 - A GitHub Actions CI workflow was configured that ran on every push/PR to `main`, performing: dependency installation, ESM-only dependency check, production build, and smoke tests against the production server.
 - A Supabase Keep-Alive cron job was configured to ping the database every 3 days to prevent the free-tier database from being paused.
+
+#### 4.3.6 Database Backup
+
+- A GitHub Actions workflow (`.github/workflows/backup.yml`) creates a weekly PostgreSQL dump of the entire database (every Sunday at 3:00 AM UTC).
+- Backups are gzip-compressed and uploaded to the `db-backups` Supabase Storage bucket (private).
+- A copy is also retained as a GitHub Actions artifact for 90 days.
+- Restoration instructions are documented in the RUNBOOK.
 
 ---
 
@@ -202,6 +254,7 @@ The following database tables were created in Supabase (Postgres):
 | `living_room_seasons` | Living Room video episodes with title, description, YouTube URL, and display order |
 | `cezo_mepu_locations` | Regional youth groups with name, address, photo, description, and WhatsApp URL |
 | `developers` | Development team members with name, role, photo, and description |
+| `site_config` | Single-row configuration table for site launched state (boolean) |
 
 Row-Level Security (RLS) policies were applied to all tables — public read access, admin-only write operations — using Supabase JWT role claims.
 
@@ -220,20 +273,23 @@ Row-Level Security (RLS) policies were applied to all tables — public read acc
 
 ### 6.2 Admin Flow
 
-1. Admin navigates to `/admin`, enters email and password.
-2. Admin is redirected to the dashboard with six content management tabs.
-3. Admin creates, edits, publishes, or deletes content items.
-4. Admin attaches photos or PDFs to posts via the file upload interface.
-5. Admin signs out when done.
+1. Admin navigates to `/admin`, completes CAPTCHA (Turnstile), enters email and password.
+2. Admin is redirected to the dashboard with eight tabs (Overview first).
+3. On the Overview tab, admin sees content counts, storage usage, analytics, and quick-action shortcuts.
+4. Admin creates, edits, publishes, or deletes content items via CRUD tabs (Posts, Events, etc.).
+5. Admin attaches photos or PDFs to posts via the file upload interface.
+6. When ready, admin uses the Go Live tab to make the site public.
+7. Admin signs out when done.
 
 ---
 
 ## 7. Non-Functional Requirements
 
-- **Performance:** All public pages were server-side rendered (SSR) with `revalidate = 0` (no caching) to ensure fresh content from Supabase.
+- **Performance:** All public pages use Incremental Static Regeneration (ISR) with `revalidate` values of 3600s (1 hour) or 86400s (24 hours), balancing freshness with caching.
+- **Rate Limiting:** Three-tier in-memory rate limiter protects auth endpoints, public pages, and admin API routes from abuse.
 - **Responsiveness:** The website was built mobile-first with responsive breakpoints at `sm:`, `md:`, and `lg:` Tailwind breakpoints.
 - **Accessibility:** ARIA labels were added to interactive elements, semantic HTML was used where possible, and `aria-hidden="true"` was applied to decorative elements.
-- **Security:** Row-Level Security enforced database-level access control. CSP headers protected against XSS. Admin routes were protected by session checks in middleware.
+- **Security:** Row-Level Security enforced database-level access control. CSP headers with dynamic nonces protected against XSS. Admin routes were protected by rate limiting, session checks in middleware, and CAPTCHA on login. Sentry monitors runtime errors.
 - **Typography:** Two Google Fonts were used — Sora (display headings) and Inter (body text).
 - **Brand Colors:** A maroon primary color (`#6B1F2A`) and dark text color (`#231F1E`) were used throughout, consistent with the church's branding.
 
@@ -254,9 +310,10 @@ The following features were identified as out of scope for the initial build:
 
 ## 9. Future Considerations
 
-- Implementing static revalidation (ISR) for improved performance once content publishing volume increases.
 - Adding email notifications for content updates.
 - Expanding the Living Room section with series/season groupings.
 - Adding a calendar subscription (iCal) feature for events.
 - Implementing image CDN optimization beyond Supabase Storage.
-- Adding analytics integration to track page views and user engagement.
+- Multi-language support (if needed).
+- Member registration and profiles.
+- Comments on blog posts.

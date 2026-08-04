@@ -44,15 +44,30 @@
 | **sanitize-html** | HTML sanitization for safe rendering of user-generated content |
 | **html-to-text** | HTML-to-plain-text conversion for truncated post previews |
 | **react-image-crop** | Image cropping utility in the admin panel |
-| **pdf-lib** | PDF utilities (available in dependencies) |
 
 ### 1.5 Infrastructure
 
 | Technology | Purpose |
 |---|---|
 | **Vercel** | Hosting and deployment platform |
-| **GitHub Actions** | CI/CD — production build verification and smoke tests |
+| **GitHub Actions** | CI/CD — production build verification, smoke tests, DB keepalive, weekly backups |
 | **Supabase Keep-Alive** | Cron job to prevent free-tier Supabase database pausing |
+| **Sentry** | Error tracking via `src/instrumentation.ts` (native Next.js 16 `register()` hook) |
+
+### 1.6 Security & Rate Limiting
+
+| Technology | Purpose |
+|---|---|
+| **In-memory Rate Limiter** (`lib/rate-limiter.ts`) | LRU-cache-based rate limiting with tiered backoff for auth, public, and authenticated tiers |
+| **Cloudflare Turnstile** | CAPTCHA-widget on admin login to prevent brute-force attacks |
+| **Vercel Edge Config** | Fast edge-level `siteLaunched` flag for launch-gatekeeper decisions |
+
+### 1.7 Performance & Analytics
+
+| Technology | Purpose |
+|---|---|
+| **ISR (Incremental Static Regeneration)** | `revalidate` exports on public pages for cached rendering (3600s–86400s) |
+| **Vercel Analytics** | Privacy-focused page view and visitor analytics (`@vercel/analytics`) |
 
 ---
 
@@ -61,34 +76,40 @@
 ### 2.1 Request Lifecycle
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────────┐
-│  Browser     │ ──> │  Next.js      │ ──> │  Supabase   │ ──> │  PostgreSQL  │
-│  (Client)    │ <── │  Middleware   │ <── │  (Auth/DB)  │ <── │  (Data)      │
-└─────────────┘     └──────────────┘     └─────────────┘     └──────────────┘
+┌─────────────┐     ┌──────────────────┐     ┌─────────────┐     ┌──────────────┐
+│  Browser     │ ──> │  Next.js          │ ──> │  Supabase   │ ──> │  PostgreSQL  │
+│  (Client)    │ <── │  Middleware       │ <── │  (Auth/DB)  │ <── │  (Data)      │
+│              │     │  (Rate Limiter +  │     │             │     │              │
+│              │     │   Gatekeeper +    │     │             │     │              │
+│              │     │   Auth Guard)     │     │             │     │              │
+└─────────────┘     └──────────────────┘     └─────────────┘     └──────────────┘
                           │
-                          v
-                    ┌──────────────┐
-                    │  Next.js      │
-                    │  App Router   │
-                    │  (Server)     │
-                    └──────────────┘
-                          │
-                    ┌─────┴─────┐
-                    v           v
-              ┌─────────┐  ┌─────────┐
-              │ Server   │  │ Client  │
-              │ Comps    │  │ Comps   │
-              │ (RSC)    │  │ ("use   │
-              │          │  │ client")│
-              └─────────┘  └─────────┘
+              ┌───────────┴───────────┐
+              │                       │
+              v                       v
+       ┌──────────────┐       ┌──────────────┐
+       │  Edge Config │       │  Next.js      │
+       │  (gatekeeper │       │  App Router   │
+       │   fast-path) │       │  (Server)     │
+       └──────────────┘       └──────────────┘
+                                      │
+                                ┌─────┴─────┐
+                                v           v
+                          ┌─────────┐  ┌─────────┐
+                          │ Server   │  │ Client  │
+                          │ Comps    │  │ Comps   │
+                          │ (RSC)    │  │ ("use   │
+                          │          │  │ client")│
+                          └─────────┘  └─────────┘
 ```
 
 ### 2.2 Request Flow (Step by Step)
 
 1. **Browser Request** — A user visits any URL on the site.
 
-2. **Next.js Middleware (`proxy.ts`)** — The middleware runs first and handles two concerns:
-   - **Launch Gatekeeper:** If the site is in pre-launch mode, unauthenticated visitors are rewritten to `/coming-soon`. Team members with the `?preview=true` cookie bypass this check.
+2. **Next.js Middleware (`proxy.ts`)** — The middleware runs first and handles several concerns:
+   - **Rate Limiting:** Login-adjacent paths (`/login`, `/admin`) are rate-limited using an in-memory LRU cache with tiered backoff.
+   - **Launch Gatekeeper:** Reads the `siteLaunched` flag from Vercel Edge Config (fast path) or Supabase `site_config` table (source of truth). If the site is in pre-launch mode, unauthenticated visitors are rewritten to `/coming-soon`. Team members with the `?preview=true` cookie bypass this check. Bypass secret is stored in `LAUNCH_BYPASS_SECRET` environment variable.
    - **Admin Auth Guard:** Requests to `/admin/dashboard` are checked for a valid Supabase session with admin role. Unauthenticated users are redirected to `/admin/login`.
 
 3. **Route Resolution** — Next.js matches the URL to the App Router file tree. Server Components (`page.tsx`) render on the server.
@@ -156,17 +177,22 @@ youth-forum/
 │   │   │   └── [slug]/page.tsx       # Individual post detail page
 │   │
 │   ├── admin/
-│   │   ├── page.tsx                  # Admin login page
-│   │   └── dashboard/page.tsx        # Admin dashboard with 6 content tabs
+│   │   ├── page.tsx                  # Admin login page (with Turnstile + rate limiting)
+│   │   └── dashboard/page.tsx        # Admin dashboard with 8 content tabs
 │   │
-│   ├── api/admin/                    # API routes for admin CRUD
-│   │   ├── events/route.ts           # Events CRUD
-│   │   ├── gallery/route.ts          # Gallery CRUD
-│   │   ├── living-room/route.ts      # Living Room episodes CRUD
-│   │   ├── mathetes/route.ts         # Mathetes entries CRUD
-│   │   ├── office-bearers/route.ts   # Office bearers CRUD
-│   │   ├── posts/route.ts            # Posts CRUD
-│   │   └── media/upload/route.ts     # Image/PDF file upload to Supabase Storage
+│   ├── api/
+│   │   ├── auth/login/route.ts       # Auth login with rate limiting + Turnstile
+│   │   ├── launch-status/route.ts    # Public endpoint for launch state
+│   │   └── admin/                    # Admin API routes
+│   │       ├── dashboard/overview/route.ts  # Dashboard overview data (counts, storage, analytics)
+│   │       ├── events/route.ts       # Events CRUD
+│   │       ├── gallery/route.ts      # Gallery CRUD
+│   │       ├── go-live/route.ts      # Site launch control (GET/POST/DELETE)
+│   │       ├── living-room/route.ts  # Living Room episodes CRUD
+│   │       ├── mathetes/route.ts     # Mathetes entries CRUD
+│   │       ├── office-bearers/route.ts  # Office bearers CRUD
+│   │       ├── posts/route.ts        # Posts CRUD
+│   │       └── media/upload/route.ts # Image/PDF file upload to Supabase Storage
 │   │
 │   ├── auth/update-password/
 │   │   └── page.tsx                  # Password update page
@@ -198,13 +224,25 @@ youth-forum/
 │   ├── SharePostButtons.tsx          # Native share + clipboard copy button
 │   ├── ProgressBar.tsx               # NProgress route transition indicator
 │   ├── SanitizedHtml.tsx             # Sanitized HTML rendering wrapper
+│   ├── RevealSection.tsx             # Scroll-triggered fade-in reveal wrapper
+│   ├── ScrollToTop.tsx               # Scroll-to-top button
+│   ├── ThemeToggle.tsx               # Dark/light theme toggle
+│   ├── AimsPanel.tsx                 # Aims & Goals page content
+│   ├── ComingSoonContent.tsx         # Coming-soon landing page content
+│   ├── TurnstileWidget.tsx           # Cloudflare Turnstile CAPTCHA widget
+│   ├── SentryProvider.tsx            # Client-side Sentry + session replay
+│   ├── OfficeBearersClient.tsx       # Client-side search/filter logic
 │   │
 │   └── admin/                        # Admin panel components
 │       ├── ConfirmDialog.tsx         # Delete confirmation modal
 │       ├── FileUploadInput.tsx       # File upload form input
 │       ├── ImageCropper.tsx          # Image cropping utility
 │       ├── RichTextEditor.tsx        # TipTap-based rich text editor
+│       ├── Toast.tsx                 # Toast notification container
+│       ├── EventsLineChart.tsx       # Events per month chart
 │       └── sections/                 # CRUD sections for each content type
+│           ├── OverviewSection.tsx    # Dashboard overview (counts, storage, analytics)
+│           ├── GoLiveSection.tsx      # Site launch control panel
 │           ├── PostsSection.tsx
 │           ├── EventsSection.tsx
 │           ├── GallerySection.tsx
@@ -220,11 +258,20 @@ youth-forum/
 │   ├── categories.ts                 # Post category constants
 │   ├── truncate.ts                   # HTML-to-text truncation
 │   ├── utils.ts                      # YouTube URL parser, HTML entity decoder
-│   └── compress/                     # Client-side image compression
+│   ├── rate-limiter.ts               # In-memory rate limiter (LRU cache + tiered backoff)
+│   ├── admin-api-utils.ts            # Admin auth helpers (requireAdmin, getServerSupabase)
+│   ├── compress/                     # Client-side image compression
+│   │   ├── index.ts                  # Public exports
+│   │   └── image.ts                  # Image resizing + WebP/JPEG encoding
+│   ├── api/
+│   │   └── with-rate-limit.ts        # API route rate limit wrapper
+│   └── crud/                         # Generic CRUD utilities
 │       ├── index.ts                  # Public exports
-│       └── image.ts                  # Image resizing + WebP/JPEG encoding
+│       ├── types.ts                  # CRUD type definitions
+│       ├── schemas.ts                # Zod validation schemas
+│       └── generic-api-handler.ts    # Reusable CRUD API route handler
 │
-├── proxy.ts                          # Next.js middleware — gatekeeper + auth guard
+├── proxy.ts                          # Next.js middleware — rate limiter + gatekeeper + auth guard
 ├── next.config.ts                    # Next.js config — security headers, images, fonts
 ├── postcss.config.mjs                # PostCSS configuration
 ├── tsconfig.json                     # TypeScript configuration
@@ -240,19 +287,34 @@ youth-forum/
 │   ├── site.webmanifest
 │   └── favicons.mjs
 │
+├── src/
+│   └── instrumentation.ts            # Next.js 16 native Sentry init (register() hook)
+│
 ├── supabase/migrations/              # Database migration SQL
 │   ├── 20260707_mathetes_rls.sql     # Mathetes table RLS policies
+│   ├── 20260719_admin_dashboard_functions.sql  # get_storage_usage, get_database_size
+│   ├── 20260722_rate_limits.sql      # Rate limiting support
+│   ├── 20260724_site_config.sql      # site_config table + RLS
+│   ├── 20260724_site_config_rls_fix.sql  # Fixed site_config RLS
+│   ├── 20260726_teams_table.sql      # Teams table migration
 │   └── add_storage_select_policies.sql
 │
 ├── tests/smoke.mjs                   # Production smoke tests
 ├── scripts/check-esm-deps.mjs        # ESM-only dependency checker
 ├── .github/workflows/                # CI/CD workflows
 │   ├── ci.yml                        # Build + smoke test pipeline
+│   ├── backup.yml                    # Weekly database backup workflow
 │   └── supabase-keepalive.yml        # Database keepalive cron job
 │
-├── PRD.md                            # Product Requirements Document
-├── architecture.md (this file)        # Architecture documentation
-├── README.md                         # Project overview
+├── docs/                             # Project documentation
+│   ├── PRD.md                        # Product Requirements Document
+│   ├── architecture.md (this file)   # Architecture documentation
+│   ├── phases.md                     # Build phases
+│   ├── design.md                     # Design system
+│   ├── memory.md                     # Project progress tracker
+│   ├── VERSIONING.md                 # Versioning strategy
+│   ├── RUNBOOK.md                    # Operations runbook
+│   └── backup setup.md              # Database backup setup guide
 ├── TODO.md                           # Remaining tasks
 ├── CLAUDE.md                         # Agent instructions
 └── AGENTS.md                         # AI agent rules
@@ -304,8 +366,19 @@ HomePage (server)
 ```
 AdminDashboard (client)
 ├── Sign Out button
-├── Tab bar (Posts | Events | Gallery | Mathetes | Office Bearers | Living Room)
+├── Tab bar (Overview | Posts | Events | Gallery | Mathetes | Office Bearers | Living Room | Go Live)
 └── Active Tab Section
+    ├── OverviewSection (client)           # Dashboard overview
+    │   ├── Quick-action shortcuts         # Add Event, Upload Photos, New Post
+    │   ├── Storage + Database usage       # Supabase quota bars
+    │   ├── Keepalive + Backup health      # GitHub Actions workflow status
+    │   ├── Content counts grid            # Posts, Events, Gallery, etc. (clickable)
+    │   ├── Missing image warnings         # Gallery & OB photos
+    │   ├── Upcoming events / empty table flags
+    │   ├── Events per month chart         # Line chart (via EventsLineChart)
+    │   ├── Site traffic (Vercel Analytics) # Bar chart + top pages
+    │   └── Recent activity feed
+    │
     ├── PostsSection (client)
     │   ├── Post list (title, category, published status, edit/delete)
     │   ├── ConfirmDialog (client)         # Delete confirmation
@@ -314,11 +387,18 @@ AdminDashboard (client)
     │       ├── RichTextEditor (client)    # TipTap editor
     │       ├── FileUploadInput (client)   # Photo/PDF upload
     │       └── Publish toggle
+    │
     ├── EventsSection (client)             # Similar CRUD pattern
     ├── GallerySection (client)
     ├── MathetesSection (client)
-    ├── OfficeBearersSection (client)
-    └── LivingRoomSection (client)
+    ├── OfficeBearersSection (client)      # With team filter dropdown
+    ├── LivingRoomSection (client)
+    │
+    └── GoLiveSection (client)             # Site launch control
+        ├── Shows current launch state      # Live / Coming-Soon
+        ├── Confirm dialog for Go Live      # With warning
+        ├── Reset launch button             # Re-enable coming-soon
+        └── API calls to /api/admin/go-live  # POST (launch) / DELETE (reset)
 ```
 
 ---
@@ -383,6 +463,13 @@ Request → proxy.ts middleware
 The Supabase PostgreSQL database contains the following tables:
 
 ```
+── Metadata / Config ──
+site_config
+├── id (integer, PK) — always 1
+├── site_launched (boolean)
+└── updated_at (timestamp)
+
+── Content Tables ──
 posts
 ├── id (uuid, PK)
 ├── title, slug
@@ -437,9 +524,17 @@ developers
 └── display_order (integer)
 ```
 
+**Storage Buckets:** `posts-media` (images), `posts-pdf` (documents), `db-backups` (private — database dumps)
+
+**Database Functions (via migrations):**
+- `get_storage_usage()` — Returns per-bucket storage totals for admin dashboard
+- `get_database_size()` — Returns database size in bytes and human-readable format
+
 All tables have Row-Level Security enabled with the same pattern:
 - **SELECT:** Public access (anonymous + authenticated users)
 - **INSERT/UPDATE/DELETE:** Admin-only (authenticated users with `app_metadata.role = 'admin'`)
+
+`schema` is managed via Supabase migrations in `supabase/migrations/`.
 
 ---
 
@@ -451,6 +546,11 @@ All tables have Row-Level Security enabled with the same pattern:
 | **Authentication** | Supabase Auth — email/password login, JWT-based sessions |
 | **Admin Routes** | Middleware auth guard — checks session + admin role claim |
 | **API Routes** | Session validation within each route handler |
-| **Network** | CSP headers, HSTS, X-Frame-Options, X-Content-Type-Options |
+| **Network** | CSP headers (with dynamic nonce), HSTS, X-Frame-Options, X-Content-Type-Options |
 | **Content** | HTML sanitization via `sanitize-html` for user-generated content |
 | **File Upload** | Client-side validation (type + size checks before upload) |
+| **Rate Limiting** | In-memory LRU cache — tiered limits for auth, public, and authenticated users |
+| **Login Protection** | Cloudflare Turnstile CAPTCHA widget on admin login form |
+| **Error Monitoring** | Sentry via `src/instrumentation.ts` — captures unhandled request errors |
+| **Edge Config** | Vercel Edge Config for fast edge-level launch-gatekeeper decisions |
+| **Environment Secrets** | `LAUNCH_BYPASS_SECRET` in env variable (not hardcoded) |

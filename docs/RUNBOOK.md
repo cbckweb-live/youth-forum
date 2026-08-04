@@ -33,6 +33,14 @@
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ Yes | Same as `SUPABASE_URL`, exposed to browser |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ Yes | Same as `SUPABASE_ANON_KEY`, exposed to browser |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ Yes | Supabase service_role key (admin bypass — keep secret) |
+| `LAUNCH_BYPASS_SECRET` | ✅ Yes | Secret value for pre-launch bypass cookie (`?preview=true`) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Optional | Cloudflare Turnstile CAPTCHA site key (for login form) |
+| `TURNSTILE_SECRET_KEY` | Optional | Cloudflare Turnstile secret key (for server verification) |
+| `VERCEL_ACCESS_TOKEN` | Optional | Vercel API token (for dashboard analytics + Edge Config) |
+| `VERCEL_PROJECT_ID` | Optional | Vercel project ID (for analytics API queries) |
+| `VERCEL_TEAM_ID` | Optional | Vercel team ID (for team projects) |
+| `EDGE_CONFIG` | Optional | Vercel Edge Config connection string |
+| `EDGE_CONFIG_ID` | Optional | Vercel Edge Config ID (for go-live API updates) |
 | `SENTRY_DSN` | Optional | Server-side Sentry error tracking DSN |
 | `NEXT_PUBLIC_SENTRY_DSN` | Optional | Browser-side Sentry error tracking DSN |
 
@@ -43,6 +51,12 @@ Supabase Dashboard → **Project Settings** → **API** → Project URL (for `SU
 
 **Where to find Sentry values:**  
 Sentry Dashboard → **Settings** → **Projects** → `javascript-nextjs` → **Client Keys (DSN)**.
+
+**Where to get Cloudflare Turnstile keys:**  
+Cloudflare Dashboard → **Turnstile** → **Add a site** → copy Site Key and Secret Key.
+
+**Where to get Vercel tokens:**  
+Vercel Dashboard → **Settings** → **Tokens** → Create a token with full access. Find Project ID in **Settings → General**.
 
 ### 1.2 GitHub Actions Secrets
 
@@ -68,9 +82,18 @@ SUPABASE_ANON_KEY=<your-anon-key>
 NEXT_PUBLIC_SUPABASE_URL=https://emsfthlfptmysgzpectv.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+LAUNCH_BYPASS_SECRET=<your-bypass-secret>
+
 # Optional:
 SENTRY_DSN=<your-sentry-dsn>
 NEXT_PUBLIC_SENTRY_DSN=<your-sentry-dsn>
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=<your-turnstile-site-key>
+TURNSTILE_SECRET_KEY=<your-turnstile-secret-key>
+VERCEL_ACCESS_TOKEN=<your-vercel-token>
+VERCEL_PROJECT_ID=<your-vercel-project-id>
+VERCEL_TEAM_ID=<your-vercel-team-id>
+EDGE_CONFIG=<your-edge-config-url>
+EDGE_CONFIG_ID=<your-edge-config-id>
 ```
 
 ---
@@ -99,7 +122,8 @@ vercel deploy --prod --yes
 - [ ] Visit `https://cbckyouthforum.live` — page loads without errors
 - [ ] Visit `/coming-soon` — gatekeeper page renders correctly
 - [ ] If gatekeeper is bypassed: verify a few public pages render (events, gallery, etc.)
-- [ ] Visit `/admin` — login page loads
+- [ ] Visit `/admin` — login page loads (with Turnstile CAPTCHA if configured)
+- [ ] Log in with admin credentials — dashboard loads with 8 tabs (Overview first)
 - [ ] Check Vercel deployment logs for build errors
 - [ ] Verify Sentry is capturing errors (trigger a test or check dashboard)
 - [ ] Check Vercel Analytics dashboard for page view data
@@ -313,18 +337,43 @@ The site uses a middleware-based gatekeeper in `proxy.ts` that hides the site be
 - **Unauthenticated visitors** see the `/coming-soon` page
 - **Team members** can bypass by visiting `https://cbckyouthforum.live/?preview=true` (sets a 7-day cookie)
 - Certain paths are always accessible: `/api/*`, `/_next/*`, `/coming-soon`, `/favicon.ico`, static files (`.png`, `.jpg`, `.svg`)
+- The bypass secret is stored in the `LAUNCH_BYPASS_SECRET` environment variable (not hardcoded).
+- The gatekeeper checks the `siteLaunched` flag from **Vercel Edge Config** (fast path) first, then falls back to the `site_config` database table.
 
-### Launch Day Steps
+### Going Live (via Admin Panel)
 
-To fully open the site:
+Instead of code changes, admins can go live directly from the dashboard:
 
-1. **Edit `proxy.ts`** — Change the gatekeeper logic to allow all traffic:
-   - Remove the `?preview=true` handler (optional)
-   - Remove the homepage force-check block
-   - Remove the general block that rewrites to `/coming-soon`
-   - Keep the Supabase auth guard for `/admin/dashboard` (still needed)
+1. Log in at `/admin`
+2. Navigate to the **Go Live** tab
+3. Click **Go Live** and confirm
+4. The launch state is written to both the database and Vercel Edge Config
+5. The homepage cache is revalidated immediately
+6. The site is public for all visitors within seconds
 
-2. **Or simply** change the `/coming-soon` page to show the actual homepage and remove the middleware rewrite logic.
+To reset (re-enable coming-soon), use the **Reset Launch** button.
+
+### How to Set Up Edge Config for Go-Live
+
+1. **Create an Edge Config** in Vercel Dashboard → Storage → Edge Config
+2. Add item: `siteLaunched` = `false`
+3. Set `EDGE_CONFIG` (connection string) and `EDGE_CONFIG_ID` in Vercel environment variables
+4. Create a **Vercel Access Token** and set it as `VERCEL_ACCESS_TOKEN`
+5. The middleware will use Edge Config as the fast path for gatekeeper decisions
+6. The Go Live tab will also update Edge Config when toggling launch state
+
+### Alternative: Go Live Without Edge Config
+
+If Edge Config is not configured, the gatekeeper falls back to the `site_config` database table. Go to **Supabase Dashboard → SQL Editor** and run:
+
+```sql
+-- Mark the site as launched
+INSERT INTO site_config (id, site_launched, updated_at)
+VALUES (1, true, now())
+ON CONFLICT (id) DO UPDATE SET site_launched = true, updated_at = now();
+```
+
+This will make the site public within seconds (the middleware checks the DB on every request).
 
 ---
 
