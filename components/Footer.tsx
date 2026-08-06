@@ -145,7 +145,7 @@ export default function Footer() {
               Gallery
             </Link>
             <Link href="/developers" className="hover:text-[#6B1F2A] dark:hover:text-[#B84C5C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B1F2A]">
-              Developers
+              Team
             </Link>
           </div>
         </div>
