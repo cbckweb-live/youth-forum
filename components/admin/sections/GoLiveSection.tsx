@@ -170,14 +170,9 @@ export default function GoLiveSection() {
                 Launching...
               </span>
             ) : (
-              <>
-                <span className="text-4xl sm:text-5xl leading-none" aria-hidden="true">
-                  🚀
-                </span>
-                <span className="text-2xl sm:text-3xl">
-                  {signalSent ? "Sent ✓" : "GO LIVE"}
-                </span>
-              </>
+              <span className="text-2xl sm:text-3xl">
+                {signalSent ? "Sent ✓" : "Launch"}
+              </span>
             )}
           </button>
         )}
