@@ -10,7 +10,6 @@ export default function GoLiveSection() {
   const [error, setError] = useState<string | null>(null);
   const [launching, setLaunching] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [showLaunchConfirm, setShowLaunchConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [signalSent, setSignalSent] = useState(false);
   const loadedRef = useRef(false);
@@ -37,18 +36,17 @@ export default function GoLiveSection() {
     load();
   }, [load]);
 
-  // Document-level Escape key handler for the confirm dialogs
+  // Document-level Escape key handler for the reset confirm dialog
   useEffect(() => {
-    if (!showLaunchConfirm && !showResetConfirm) return;
+    if (!showResetConfirm) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setShowLaunchConfirm(false);
         setShowResetConfirm(false);
       }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [showLaunchConfirm, showResetConfirm]);
+  }, [showResetConfirm]);
 
   async function handleLaunch() {
     setLaunching(true);
@@ -65,7 +63,6 @@ export default function GoLiveSection() {
         : "Launch signal sent ✓";
       showToast(msg, "success");
       setState("launched");
-      setShowLaunchConfirm(false);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to go live.";
       showToast(msg, "error");
@@ -154,76 +151,37 @@ export default function GoLiveSection() {
             </button>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              {signalSent ? (
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full px-4 py-2 text-sm font-medium">
-                    <span className="inline-block w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </span>
-                    Launch signal sent ✓
-                  </span>
-                  <p className="text-xs text-[#231F1E]/50 dark:text-gray-400">
-                    The LCD device will detect this and reveal the site within seconds.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <p className="text-sm font-medium text-[#231F1E] dark:text-[#e5e5e5]">
-                    The site is currently in coming-soon mode.
-                  </p>
-                  <p className="text-xs text-[#231F1E]/50 dark:text-gray-400 mt-1">
-                    Going live will make the site public immediately for all visitors. This cannot be automatically undone.
-                  </p>
-                </>
-              )}
-            </div>
-            <button
-              onClick={() => setShowLaunchConfirm(true)}
-              disabled={signalSent}
-              className="bg-[#6B1F2A] text-white rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-[#7d2432] transition-colors disabled:opacity-60 shrink-0"
-            >
-              {signalSent ? "Sent ✓" : "Go Live"}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleLaunch}
+            disabled={signalSent || launching}
+            className={`w-full h-56 sm:h-64 flex flex-col items-center justify-center gap-3 rounded-3xl bg-[#6B1F2A] text-white font-bold transition-all duration-150 ease-out select-none ${
+              signalSent || launching
+                ? "shadow-none translate-y-2 opacity-60 cursor-not-allowed"
+                : "shadow-[0_8px_0_#4a1520] hover:bg-[#7d2432] active:translate-y-2 active:shadow-[0_2px_0_#4a1520] cursor-pointer"
+            }`}
+          >
+            {launching ? (
+              <span className="inline-flex items-center gap-3 text-2xl sm:text-3xl">
+                <span
+                  className="w-6 h-6 sm:w-7 sm:h-7 border-[3px] border-white/40 border-t-white rounded-full animate-spin"
+                  aria-hidden="true"
+                />
+                Launching...
+              </span>
+            ) : (
+              <>
+                <span className="text-4xl sm:text-5xl leading-none" aria-hidden="true">
+                  🚀
+                </span>
+                <span className="text-2xl sm:text-3xl">
+                  {signalSent ? "Sent ✓" : "GO LIVE"}
+                </span>
+              </>
+            )}
+          </button>
         )}
       </div>
-
-      {/* Launch confirm dialog */}
-      {showLaunchConfirm && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4"
-          onClick={() => setShowLaunchConfirm(false)}
-        >
-          <div
-            className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-xl dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] w-full max-w-sm p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="text-sm font-medium text-center text-[#231F1E] dark:text-[#e5e5e5] mb-5">
-              This will make the site public immediately for all visitors. Continue?
-            </p>
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={() => setShowLaunchConfirm(false)}
-                disabled={launching}
-                className="px-4 py-2 text-sm font-medium text-[#231F1E]/60 dark:text-gray-400 hover:text-[#231F1E] dark:hover:text-[#e5e5e5] bg-gray-100 dark:bg-[#2a2a2a] rounded-lg hover:bg-gray-200 dark:hover:bg-[#3a3a3a] transition-colors disabled:opacity-60"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleLaunch}
-                disabled={launching}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#6B1F2A] text-white rounded-lg hover:bg-[#7d2432] transition-colors disabled:opacity-60"
-              >
-                {launching ? "Launching..." : "Yes, Go Live"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Reset confirm dialog */}
       {showResetConfirm && (
