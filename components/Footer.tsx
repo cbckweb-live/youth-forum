@@ -38,7 +38,6 @@ export default function Footer() {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 cbckyouthministry&#64;gmail.com
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">+91 8974494949</p>
             </div>
           </div>
 
