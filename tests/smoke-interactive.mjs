@@ -554,10 +554,12 @@ try {
   console.log("\n📋  Theme Toggle\n");
 
   {
-    // Navigate to a simple page for theme testing
+    // Navigate to a simple page for theme testing. /coming-soon polls
+    // /api/launch-status every 1.5s by design, so networkidle0 never fires —
+    // wait for the DOM instead.
     const errors = [];
     startCapture(page, errors);
-    await page.goto(`${BASE}/coming-soon`, { waitUntil: "networkidle0", timeout: 30000 });
+    await page.goto(`${BASE}/coming-soon`, { waitUntil: "domcontentloaded", timeout: 30000 });
     await new Promise((r) => setTimeout(r, 1500));
     page.removeAllListeners("console");
 
@@ -775,13 +777,14 @@ try {
   // ====================================================================
   console.log("\n📋  Home & Bypass\n");
 
-  // Without bypass cookie, / should rewrite to /coming-soon
-  // We already set the cookie, so let's verify the bypass works
+  // Without bypass cookie, / should rewrite to /coming-soon (which polls
+  // /api/launch-status every 1.5s), so networkidle0 never fires — wait for the
+  // DOM instead.
   {
     const noCookiePage = await browser.newPage();
     const errors = [];
     startCapture(noCookiePage, errors);
-    const resp = await noCookiePage.goto(`${BASE}/`, { waitUntil: "networkidle0", timeout: 30000 });
+    const resp = await noCookiePage.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 30000 });
     await new Promise((r) => setTimeout(r, 2000));
     noCookiePage.removeAllListeners("console");
 

@@ -56,7 +56,9 @@ const ROUTES = [
   { path: "/about/blog-news", label: "Blog / News" },
   { path: "/about/journey", label: "Journey" },
   { path: "/cezo-mepu", label: "Cezo Mepu" },
-  { path: "/coming-soon", label: "Coming Soon" },
+  // /coming-soon polls /api/launch-status every 1.5s by design (live-event
+  // responsiveness), so networkidle0 never fires. Wait for DOM only.
+  { path: "/coming-soon", label: "Coming Soon", waitUntil: "domcontentloaded" },
   { path: "/developers", label: "Developers" },
   { path: "/events", label: "Events" },
   { path: "/events/archive", label: "Events Archive" },
@@ -137,7 +139,7 @@ try {
     });
   }
 
-  for (const { path, label } of ROUTES) {
+  for (const { path, label, waitUntil } of ROUTES) {
     const url = `${BASE}${path}`;
     const errors = [];
 
@@ -175,7 +177,10 @@ try {
 
     let httpStatus = null;
     try {
-      const response = await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
+      // Routes with perpetual background network activity (e.g. /coming-soon's
+      // 1.5s launch-status polling) can never satisfy networkidle0; let them
+      // override to domcontentloaded. All other routes keep networkidle0.
+      const response = await page.goto(url, { waitUntil: waitUntil ?? "networkidle0", timeout: 30000 });
       httpStatus = response?.status() ?? null;
       // Give the page a moment to settle and fire any async errors
       await new Promise((r) => setTimeout(r, 2000));
