@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 import { get } from "@vercel/edge-config";
@@ -80,8 +80,6 @@ export async function POST(request: NextRequest) {
   //    Uses the admin's session cookies so RLS (authenticated role) applies
   const supabase = getServerSupabase(request, response);
 
-  const errors: string[] = [];
-
   // 3. Write to the database using the authenticated admin session
   //    Requires the RLS policy: "Authenticated users can manage site_config"
   try {
@@ -93,65 +91,61 @@ export async function POST(request: NextRequest) {
       );
     if (dbErr) {
       console.error("[go-live/POST] DB upsert error:", dbErr);
-      errors.push("db");
+      return NextResponse.json(
+        { error: "Failed to update launch status in the database." },
+        { status: 500 },
+      );
     }
   } catch (err) {
     console.error("[go-live/POST] DB upsert exception:", err);
-    errors.push("db");
-  }
-
-  // 4. Revalidate the homepage cache so the next visitor gets the final launch content
-  try {
-    revalidatePath("/");
-  } catch (err) {
-    console.error("[go-live/POST] Revalidation failed:", err);
-    // Non-critical: the DB write already succeeded; the cache will naturally
-    // revalidate on the next request anyway.
-  }
-
-  // 5. Try to update Edge Config if configured
-  if (env.EDGE_CONFIG_ID && env.VERCEL_ACCESS_TOKEN) {
-    try {
-      const params = new URLSearchParams({ token: env.VERCEL_ACCESS_TOKEN });
-
-      const res = await fetch(
-        `https://api.vercel.com/v1/edge-config/${env.EDGE_CONFIG_ID}/items?${params.toString()}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${env.VERCEL_ACCESS_TOKEN}`,
-          },
-          body: JSON.stringify({ items: [{ operation: "upsert", key: "siteLaunched", value: true }] }),
-        },
-      );
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("[go-live/POST] Vercel API error:", res.status, text);
-        errors.push("edge-config");
-      }
-    } catch (err) {
-      console.error("[go-live/POST] Edge Config patch exception:", err);
-      errors.push("edge-config");
-    }
-  }
-
-  // 6. Return result
-  if (errors.length > 0 && errors.includes("db")) {
     return NextResponse.json(
       { error: "Failed to update launch status in the database." },
       { status: 500 },
     );
   }
 
-  if (errors.length > 0) {
-    return NextResponse.json({
-      success: true,
-      warning: "Launch status updated in database, but Edge Config could not be updated. The site may take longer to reflect publicly.",
-    });
-  }
+  // 4. Defer non-critical work until after the response is sent, so the
+  //    "Go Live" button responds as soon as the DB write succeeds. The DB is
+  //    the source of truth (readLaunched falls back to it), so the cache
+  //    revalidation and Edge Config sync can safely catch up in the background.
+  after(async () => {
+    // Revalidate the homepage cache so the next visitor gets the final launch content
+    try {
+      revalidatePath("/");
+    } catch (err) {
+      console.error("[go-live/POST] Revalidation failed:", err);
+      // Non-critical: the DB write already succeeded; the cache will naturally
+      // revalidate on the next request anyway.
+    }
 
+    // Try to update Edge Config if configured
+    if (env.EDGE_CONFIG_ID && env.VERCEL_ACCESS_TOKEN) {
+      try {
+        const params = new URLSearchParams({ token: env.VERCEL_ACCESS_TOKEN });
+
+        const res = await fetch(
+          `https://api.vercel.com/v1/edge-config/${env.EDGE_CONFIG_ID}/items?${params.toString()}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${env.VERCEL_ACCESS_TOKEN}`,
+            },
+            body: JSON.stringify({ items: [{ operation: "upsert", key: "siteLaunched", value: true }] }),
+          },
+        );
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("[go-live/POST] Vercel API error:", res.status, text);
+        }
+      } catch (err) {
+        console.error("[go-live/POST] Edge Config patch exception:", err);
+      }
+    }
+  });
+
+  // 5. Return result — the essential DB write succeeded
   return NextResponse.json({ success: true });
 }
 
@@ -169,8 +163,6 @@ export async function DELETE(request: NextRequest) {
   // 2. Create authenticated Supabase client
   const supabase = getServerSupabase(request, response);
 
-  const errors: string[] = [];
-
   // 3. Write to the database
   try {
     const { error: dbErr } = await supabase
@@ -181,55 +173,50 @@ export async function DELETE(request: NextRequest) {
       );
     if (dbErr) {
       console.error("[go-live/DELETE] DB upsert error:", dbErr);
-      errors.push("db");
+      return NextResponse.json(
+        { error: "Failed to reset launch status in the database." },
+        { status: 500 },
+      );
     }
   } catch (err) {
     console.error("[go-live/DELETE] DB upsert exception:", err);
-    errors.push("db");
-  }
-
-  // 4. Update Edge Config
-  if (env.EDGE_CONFIG_ID && env.VERCEL_ACCESS_TOKEN) {
-    try {
-      const params = new URLSearchParams({ token: env.VERCEL_ACCESS_TOKEN });
-
-      const res = await fetch(
-        `https://api.vercel.com/v1/edge-config/${env.EDGE_CONFIG_ID}/items?${params.toString()}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${env.VERCEL_ACCESS_TOKEN}`,
-          },
-          body: JSON.stringify({ items: [{ operation: "upsert", key: "siteLaunched", value: false }] }),
-        },
-      );
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("[go-live/DELETE] Vercel API error:", res.status, text);
-        errors.push("edge-config");
-      }
-    } catch (err) {
-      console.error("[go-live/DELETE] Edge Config patch exception:", err);
-      errors.push("edge-config");
-    }
-  }
-
-  // 5. Return result
-  if (errors.length > 0 && errors.includes("db")) {
     return NextResponse.json(
       { error: "Failed to reset launch status in the database." },
       { status: 500 },
     );
   }
 
-  if (errors.length > 0) {
-    return NextResponse.json({
-      success: true,
-      warning: "Launch status reset in database, but Edge Config could not be updated. The site may still appear live.",
-    });
-  }
+  // 4. Defer the Edge Config sync until after the response is sent, so the
+  //    reset responds as soon as the DB write succeeds. Same reasoning as POST:
+  //    the DB is the source of truth, so Edge Config can catch up in the background.
+  after(async () => {
+    // Try to update Edge Config if configured
+    if (env.EDGE_CONFIG_ID && env.VERCEL_ACCESS_TOKEN) {
+      try {
+        const params = new URLSearchParams({ token: env.VERCEL_ACCESS_TOKEN });
 
+        const res = await fetch(
+          `https://api.vercel.com/v1/edge-config/${env.EDGE_CONFIG_ID}/items?${params.toString()}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${env.VERCEL_ACCESS_TOKEN}`,
+            },
+            body: JSON.stringify({ items: [{ operation: "upsert", key: "siteLaunched", value: false }] }),
+          },
+        );
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("[go-live/DELETE] Vercel API error:", res.status, text);
+        }
+      } catch (err) {
+        console.error("[go-live/DELETE] Edge Config patch exception:", err);
+      }
+    }
+  });
+
+  // 5. Return result — the essential DB write succeeded
   return NextResponse.json({ success: true });
 }
