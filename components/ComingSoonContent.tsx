@@ -213,7 +213,7 @@ export default function ComingSoonContent() {
             Official Launch Event
           </p>
           <p className="font-display text-2xl font-bold text-black mt-2">
-            16 August 2026
+            12 September 2026
           </p>
         </div>
       </div>
