@@ -191,7 +191,7 @@ The project was built using Next.js 16 with the App Router, Supabase for databas
 
 - A middleware proxy was implemented in `proxy.ts` that restricted public access before the official launch.
 - Authorized team members could bypass the gatekeeper via a secret cookie obtained by visiting `?preview=true`.
-- The gatekeeper rewrote unauthorized requests to a `/coming-soon` page while allowing system assets (Next.js internals, images, API routes) through.
+- Public requests are routed normally without a redirect or rewrite gate.
 
 #### 4.3.3 Security Headers
 
@@ -278,7 +278,7 @@ Row-Level Security (RLS) policies were applied to all tables — public read acc
 3. On the Overview tab, admin sees content counts, storage usage, analytics, and quick-action shortcuts.
 4. Admin creates, edits, publishes, or deletes content items via CRUD tabs (Posts, Events, etc.).
 5. Admin attaches photos or PDFs to posts via the file upload interface.
-6. When ready, admin uses the Go Live tab to make the site public.
+6. The public site is already live and available without a launch toggle.
 7. Admin signs out when done.
 
 ---

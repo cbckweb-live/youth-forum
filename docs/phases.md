@@ -163,7 +163,6 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
 - **About Pages:**
   - **Journey** (`app/about/journey/page.tsx`) — Ministry history with hero, timeline (1960–Today), three alternating chapters (Foundation, Growth, Mathetes), pull quote, and closing CTA.
   - **Aims & Goals** (`app/about/aims/page.tsx`) — Placeholder page.
-- **Coming Soon** (`app/coming-soon/page.tsx`) — Pre-launch landing page.
 - **Developers** (`app/developers/page.tsx`) — Team page with admin panel redirect.
 
 ### Deliverables
@@ -280,7 +279,7 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
 ### Tasks Completed
 
 - Built **Launch Gatekeeper** in `proxy.ts`:
-  - Pre-launch access restriction — unauthorized visitors see `/coming-soon`.
+  - Public access without a pre-launch gate.
   - Secret bypass cookie via `?preview=true` param (7-day expiry).
   - System asset exclusions (Next.js internals, API routes, images).
   - Admin path exclusion (login must work for team members).

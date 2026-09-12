@@ -120,7 +120,7 @@ vercel deploy --prod --yes
 ### 2.3 Post-Deploy Checklist
 
 - [ ] Visit `https://cbckyouthforum.live` — page loads without errors
-- [ ] Visit `/coming-soon` — gatekeeper page renders correctly
+- [ ] Confirm the public homepage loads without a launch gate
 - [ ] If gatekeeper is bypassed: verify a few public pages render (events, gallery, etc.)
 - [ ] Visit `/admin` — login page loads (with Turnstile CAPTCHA if configured)
 - [ ] Log in with admin credentials — dashboard loads with 8 tabs (Overview first)
@@ -432,7 +432,7 @@ Each page exports `metadata` with a `title`, `description`, and `openGraph` tags
 | `/cezo-mepu` | Cezo Mepu \| CBCK Youth Forum |
 | `/living-room` | The Living Room \| Youth Forum |
 | `/developers` | Developers \| CBCK Youth Forum |
-| `/coming-soon` | Coming Soon \| CBCK Youth Forum |
+| `/` | Homepage |
 
 ### Dynamic OG Images
 
@@ -528,7 +528,7 @@ export default function RootLayout({ children }) {
 ### Troubleshooting
 
 - **No data after deploy:** Ensure the deploy included the `<Analytics />` component in the layout. Check Vercel deployment logs for build success.
-- **Only showing / routes:** This is normal — the gatekeeper rewrites most paths to `/coming-soon` for non-team visitors. Data will be more meaningful after launch.
+- **Only showing / routes:** This is normal for a public site; the homepage is available without a launch redirect.
 
 ---
 

@@ -52,7 +52,6 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | The Living Room | `/living-room` | ✅ | Video episodes with YouTube embeds |
 | Journey | `/about/journey` | ✅ | History timeline, chapters, pull quote |
 | Aims & Goals | `/about/aims` | ✅ | Placeholder page |
-| Coming Soon | `/coming-soon` | ✅ | Pre-launch gatekeeper page |
 | Developers | `/developers` | ✅ | Team page + admin panel redirect |
 
 ### Admin Panel
@@ -80,7 +79,6 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | Supabase Database | ✅ | 10 tables with RLS policies |
 | Supabase Auth | ✅ | Email/password, admin role verification |
 | Supabase Storage | ✅ | posts-media and posts-pdf buckets |
-| Launch Gatekeeper | ✅ | Cookie-based pre-launch access control |
 | Security Headers | ✅ | CSP, HSTS, X-Frame-Options, etc. |
 | SEO (sitemap) | ✅ | All major pages with priorities |
 | SEO (robots.txt) | ✅ | Public pages allowed, admin denied |
@@ -107,7 +105,6 @@ CBCK Youth Forum is a Next.js 16 + Supabase website for the Chakhesang Baptist C
 | ScrollToTop | Client | ~50 | Scroll-to-top floating button |
 | ThemeToggle | Client | ~40 | Dark/light theme toggle |
 | AimsPanel | Server | ~20 | Aims & Goals content panel |
-| ComingSoonContent | Server | ~25 | Coming-soon landing page content |
 | TurnstileWidget | Client | ~50 | Cloudflare Turnstile CAPTCHA |
 | SentryProvider | Client | ~20 | Client-side Sentry + session replay |
 

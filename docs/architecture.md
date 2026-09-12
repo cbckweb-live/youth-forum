@@ -60,7 +60,7 @@
 |---|---|
 | **In-memory Rate Limiter** (`lib/rate-limiter.ts`) | LRU-cache-based rate limiting with tiered backoff for auth, public, and authenticated tiers |
 | **Cloudflare Turnstile** | CAPTCHA-widget on admin login to prevent brute-force attacks |
-| **Vercel Edge Config** | Fast edge-level `siteLaunched` flag for launch-gatekeeper decisions |
+| **Public Access** | Site is available without a pre-launch gate or landing page |
 
 ### 1.7 Performance & Analytics
 
@@ -109,7 +109,7 @@
 
 2. **Next.js Middleware (`proxy.ts`)** — The middleware runs first and handles several concerns:
    - **Rate Limiting:** Login-adjacent paths (`/login`, `/admin`) are rate-limited using an in-memory LRU cache with tiered backoff.
-   - **Launch Gatekeeper:** Reads the `siteLaunched` flag from Vercel Edge Config (fast path) or Supabase `site_config` table (source of truth). If the site is in pre-launch mode, unauthenticated visitors are rewritten to `/coming-soon`. Team members with the `?preview=true` cookie bypass this check. Bypass secret is stored in `LAUNCH_BYPASS_SECRET` environment variable.
+   - **Public Site Access:** Requests are allowed through normally without a pre-launch gate or redirect.
    - **Admin Auth Guard:** Requests to `/admin/dashboard` are checked for a valid Supabase session with admin role. Unauthenticated users are redirected to `/admin/login`.
 
 3. **Route Resolution** — Next.js matches the URL to the App Router file tree. Server Components (`page.tsx`) render on the server.
@@ -182,12 +182,10 @@ youth-forum/
 │   │
 │   ├── api/
 │   │   ├── auth/login/route.ts       # Auth login with rate limiting + Turnstile
-│   │   ├── launch-status/route.ts    # Public endpoint for launch state
 │   │   └── admin/                    # Admin API routes
 │   │       ├── dashboard/overview/route.ts  # Dashboard overview data (counts, storage, analytics)
 │   │       ├── events/route.ts       # Events CRUD
 │   │       ├── gallery/route.ts      # Gallery CRUD
-│   │       ├── go-live/route.ts      # Site launch control (GET/POST/DELETE)
 │   │       ├── living-room/route.ts  # Living Room episodes CRUD
 │   │       ├── mathetes/route.ts     # Mathetes entries CRUD
 │   │       ├── office-bearers/route.ts  # Office bearers CRUD
@@ -198,7 +196,6 @@ youth-forum/
 │   │   └── page.tsx                  # Password update page
 │   │
 │   ├── cezo-mepu/page.tsx            # Regional youth groups directory
-│   ├── coming-soon/page.tsx          # Pre-launch gatekeeper page
 │   ├── developers/page.tsx           # Development team page
 │   ├── events/
 │   │   ├── page.tsx                  # Current year events calendar
@@ -228,7 +225,6 @@ youth-forum/
 │   ├── ScrollToTop.tsx               # Scroll-to-top button
 │   ├── ThemeToggle.tsx               # Dark/light theme toggle
 │   ├── AimsPanel.tsx                 # Aims & Goals page content
-│   ├── ComingSoonContent.tsx         # Coming-soon landing page content
 │   ├── TurnstileWidget.tsx           # Cloudflare Turnstile CAPTCHA widget
 │   ├── SentryProvider.tsx            # Client-side Sentry + session replay
 │   ├── OfficeBearersClient.tsx       # Client-side search/filter logic
@@ -366,7 +362,7 @@ HomePage (server)
 ```
 AdminDashboard (client)
 ├── Sign Out button
-├── Tab bar (Overview | Posts | Events | Gallery | Mathetes | Office Bearers | Living Room | Go Live)
+├── Tab bar (Overview | Posts | Events | Gallery | Mathetes | Office Bearers | Living Room)
 └── Active Tab Section
     ├── OverviewSection (client)           # Dashboard overview
     │   ├── Quick-action shortcuts         # Add Event, Upload Photos, New Post
@@ -392,13 +388,7 @@ AdminDashboard (client)
     ├── GallerySection (client)
     ├── MathetesSection (client)
     ├── OfficeBearersSection (client)      # With team filter dropdown
-    ├── LivingRoomSection (client)
-    │
-    └── GoLiveSection (client)             # Site launch control
-        ├── Shows current launch state      # Live / Coming-Soon
-        ├── Confirm dialog for Go Live      # With warning
-        ├── Reset launch button             # Re-enable coming-soon
-        └── API calls to /api/admin/go-live  # POST (launch) / DELETE (reset)
+    └── LivingRoomSection (client)
 ```
 
 ---
@@ -435,26 +425,9 @@ Three different Supabase client factories were created for different contexts:
 5. Public URL returned and stored in database
 ```
 
-### 5.5 Launch Gatekeeper
+### 5.5 Public Access Model
 
-The middleware (`proxy.ts`) implements a pre-launch access control system:
-
-```
-Request → proxy.ts middleware
-    │
-    ├── Is /coming-soon, /api, /_next, or a static file?
-    │   └── Yes → Allow through
-    │
-    ├── Has ?preview=true param?
-    │   └── Yes → Set secret cookie, redirect to /
-    │
-    ├── Has valid secret cookie?
-    │   ├── Yes → Allow through (member)
-    │   └── No  → Rewrite to /coming-soon
-    │
-    └── Is /admin path?
-        └── Yes → Allow through (login must work)
-```
+The middleware (`proxy.ts`) does not impose a pre-launch redirect. All public pages remain visible and only the admin authorization and rate-limiting checks remain in place.
 
 ---
 

@@ -10,9 +10,8 @@ import GallerySection from "@/components/admin/sections/GallerySection";
 import OfficeBearersSection from "@/components/admin/sections/OfficeBearersSection";
 import LivingRoomSection from "@/components/admin/sections/LivingRoomSection";
 import MathetesSection from "@/components/admin/sections/MathetesSection";
-import GoLiveSection from "@/components/admin/sections/GoLiveSection";
 
-const TABS = ["Overview", "Posts", "Events", "Gallery", "Mathetes", "Office Bearers", "Living Room", "Go Live"] as const;
+const TABS = ["Overview", "Posts", "Events", "Gallery", "Mathetes", "Office Bearers", "Living Room"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function AdminDashboard() {
@@ -68,7 +67,6 @@ export default function AdminDashboard() {
       {activeTab === "Mathetes" && <MathetesSection />}
       {activeTab === "Office Bearers" && <OfficeBearersSection />}
       {activeTab === "Living Room" && <LivingRoomSection />}
-      {activeTab === "Go Live" && <GoLiveSection />}
     </main>
   );
 }
