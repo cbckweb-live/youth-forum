@@ -5,11 +5,8 @@
  * Asserts HTTP 200 for every SSR route and checks response bodies for
  * common crash indicators (React error boundaries, server errors).
  *
- * Supports a LAUNCH_BYPASS_SECRET env var to bypass the "coming soon"
- * gatekeeper in proxy.ts (set to the same value as your .env.local).
- *
  * Usage:
- *   LAUNCH_BYPASS_SECRET=dev-bypass-secret node tests/smoke.mjs [BASE_URL]
+ *   node tests/smoke.mjs [BASE_URL]
  *
  * Default BASE_URL: http://localhost:3000
  */
@@ -26,7 +23,6 @@ const ROUTES = [
   // [slug] pages require a real DB row, skip them here
   "/about/journey",
   "/cezo-mepu",
-  "/coming-soon",
   "/developers",
   "/events",
   "/events/archive",
@@ -55,17 +51,10 @@ const ERROR_PATTERNS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Helper: build fetch options with optional bypass cookie
+// Helper: build fetch options
 // ---------------------------------------------------------------------------
 function fetchOptions() {
-  const opts = { redirect: "follow" };
-  const secret = process.env.LAUNCH_BYPASS_SECRET;
-  if (secret) {
-    opts.headers = {
-      Cookie: `cbck_launch_bypass=${encodeURIComponent(secret)}`,
-    };
-  }
-  return opts;
+  return { redirect: "follow" };
 }
 
 // ---------------------------------------------------------------------------

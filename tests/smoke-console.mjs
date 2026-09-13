@@ -3,11 +3,8 @@
  * Browser-level smoke test — runs against a live `next start` or `next dev`
  * server using Puppeteer to capture console errors on every public page.
  *
- * Supports a LAUNCH_BYPASS_SECRET env var to bypass the "coming soon"
- * gatekeeper in proxy.ts (set to the same value as your .env.local).
- *
  * Usage:
- *   LAUNCH_BYPASS_SECRET=dev-bypass-secret node tests/smoke-console.mjs [BASE_URL]
+ *   node tests/smoke-console.mjs [BASE_URL]
  *
  * Default BASE_URL: http://localhost:3000
  */
@@ -56,9 +53,6 @@ const ROUTES = [
   { path: "/about/blog-news", label: "Blog / News" },
   { path: "/about/journey", label: "Journey" },
   { path: "/cezo-mepu", label: "Cezo Mepu" },
-  // /coming-soon polls /api/launch-status every 1.5s by design (live-event
-  // responsiveness), so networkidle0 never fires. Wait for DOM only.
-  { path: "/coming-soon", label: "Coming Soon", waitUntil: "domcontentloaded" },
   { path: "/developers", label: "Developers" },
   { path: "/events", label: "Events" },
   { path: "/events/archive", label: "Events Archive" },
@@ -126,18 +120,6 @@ const browser = await puppeteer.launch({
 
 try {
   const page = await browser.newPage();
-  const bypassSecret = process.env.LAUNCH_BYPASS_SECRET;
-
-  // Set the bypass cookie if provided (to get past the "coming soon" gate)
-  if (bypassSecret) {
-    await page.setCookie({
-      name: "cbck_launch_bypass",
-      value: bypassSecret,
-      domain: new URL(BASE).hostname,
-      path: "/",
-      httpOnly: true,
-    });
-  }
 
   for (const { path, label, waitUntil } of ROUTES) {
     const url = `${BASE}${path}`;
@@ -177,9 +159,6 @@ try {
 
     let httpStatus = null;
     try {
-      // Routes with perpetual background network activity (e.g. /coming-soon's
-      // 1.5s launch-status polling) can never satisfy networkidle0; let them
-      // override to domcontentloaded. All other routes keep networkidle0.
       const response = await page.goto(url, { waitUntil: waitUntil ?? "networkidle0", timeout: 30000 });
       httpStatus = response?.status() ?? null;
       // Give the page a moment to settle and fire any async errors

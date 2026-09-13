@@ -16,7 +16,6 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      LAUNCH_BYPASS_SECRET: ${{ secrets.LAUNCH_BYPASS_SECRET }}
 
     steps:
       - uses: actions/checkout@v4
@@ -60,8 +59,7 @@ jobs:
           SERVER_PID=$!
           echo "Started server PID=$SERVER_PID"
           npx wait-on http://localhost:3000 --timeout 60000
-          LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
-            node tests/smoke.mjs
+          node tests/smoke.mjs
           kill $SERVER_PID || true
           npx kill-port 3000 || true
           sleep 2
@@ -92,8 +90,7 @@ jobs:
           SERVER_PID=$!
           echo "Started server PID=$SERVER_PID"
           npx wait-on http://localhost:3000 --timeout 60000
-          LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
-            node tests/smoke-console.mjs
+          node tests/smoke-console.mjs
           kill $SERVER_PID || true
           npx kill-port 3000 || true
           sleep 2
@@ -124,8 +121,7 @@ jobs:
           SERVER_PID=$!
           echo "Started server PID=$SERVER_PID"
           npx wait-on http://localhost:3000 --timeout 60000
-          LAUNCH_BYPASS_SECRET=${{ secrets.LAUNCH_BYPASS_SECRET }} \
-            node tests/smoke-interactive.mjs
+          node tests/smoke-interactive.mjs
           kill $SERVER_PID || true
           npx kill-port 3000 || true
           sleep 2

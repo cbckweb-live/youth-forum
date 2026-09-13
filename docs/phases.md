@@ -274,15 +274,13 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
 
 ## Phase 9: Middleware & Launch Infrastructure
 
-**Goal:** Implement the launch gatekeeper, SEO configuration, and deployment infrastructure.
+**Goal:** Configure SEO, middleware guards, and deployment infrastructure.
 
 ### Tasks Completed
 
-- Built **Launch Gatekeeper** in `proxy.ts`:
-  - Public access without a pre-launch gate.
-  - Secret bypass cookie via `?preview=true` param (7-day expiry).
-  - System asset exclusions (Next.js internals, API routes, images).
-  - Admin path exclusion (login must work for team members).
+- Implemented **middleware guards** in `proxy.ts`:
+  - Rate limiting on auth-adjacent pages (`/login`, `/admin`).
+  - Admin auth guard protecting `/admin/dashboard` (redirect to `/admin` if unauthenticated).
 - Configured **SEO:**
   - `app/robots.ts` — crawler rules allowing public pages, disallowing admin/developers.
   - `app/sitemap.ts` — XML sitemap covering all major pages with priorities.
@@ -299,7 +297,6 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
 
 ### Deliverables
 
-- Launch gatekeeper for controlled rollout.
 - SEO configuration for search engines.
 - Automated CI pipeline.
 - Database keepalive cron job.
@@ -363,11 +360,6 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
   - Events per month line chart (`EventsLineChart.tsx`).
   - Vercel Analytics integration — 8-day visitors bar chart and top pages.
   - Recent activity feed showing latest changes across all content types.
-- **Go Live Control Panel** (`components/admin/sections/GoLiveSection.tsx`):
-  - Displays current launch state (Live vs Coming-Soon).
-  - Confirmation dialog with warning before going live.
-  - Reset launch button to re-enable coming-soon gate.
-  - API calls to `/api/admin/go-live` (GET, POST, DELETE).
 - **Rate Limiting System** (`lib/rate-limiter.ts`):
   - In-memory LRU cache with three tiers: auth, public, authenticated.
   - Tiered exponential backoff — each violation increases the lockout window.
@@ -377,13 +369,6 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
   - Invisible/visible CAPTCHA widget on admin login form.
   - Token verification on login API route.
   - Theme-aware (auto-dark/light).
-- **Vercel Edge Config Integration:**
-  - Fast edge-level `siteLaunched` flag for middleware gatekeeper decisions.
-  - Written alongside DB on go-live/reset operations.
-  - Graceful fallback to DB when Edge Config is unavailable.
-- **Launch Gatekeeper Secret → Environment Variable:**
-  - Moved hardcoded `BYPASS_SECRET_VALUE` from `proxy.ts` to `LAUNCH_BYPASS_SECRET` in `lib/env.ts`.
-  - Backward-compatible default.
 - **Error Boundaries:**
   - Root error boundary (`app/error.tsx`) covering all pages.
   - Segment-level boundaries for dynamic routes (`office-bearers/[id]`, `blog-news/[slug]`).
@@ -400,11 +385,9 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
   - Added `lib/crud/` generic CRUD utilities with Zod validation schemas.
   - Added `lib/api/with-rate-limit.ts` wrapper for API route rate limiting.
   - Added `/api/auth/login` route with rate limiting + Turnstile verification.
-  - Added `/api/launch-status` public endpoint.
-  - Added `/api/admin/dashboard/overview` endpoint.
-  - Added `/api/admin/go-live` endpoint (GET/POST/DELETE).
+   - Added `/api/admin/dashboard/overview` endpoint.
 - **Admin Dashboard Tab Expansion:**
-  - Expanded from 6 (Posts, Events, Gallery, Mathetes, Office Bearers, Living Room) to 8 tabs — added **Overview** and **Go Live** tabs.
+   - Expanded from 6 (Posts, Events, Gallery, Mathetes, Office Bearers, Living Room) to 7 tabs — added the **Overview** tab.
   - Team filter dropdown added to Office Bearers admin list view.
 - **Sentry Relocation:**
   - Removed `withSentryConfig` webpack plugin (incompatible with Turbopack).
@@ -414,21 +397,17 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
   - `20260707_mathetes_rls.sql` — Mathetes table RLS policies.
   - `20260719_admin_dashboard_functions.sql` — `get_storage_usage()` and `get_database_size()` functions.
   - `20260722_rate_limits.sql` — Rate limiting support.
-  - `20260724_site_config.sql` — `site_config` table + RLS.
-  - `20260724_site_config_rls_fix.sql` — Fixed site_config RLS policies.
-  - `20260726_teams_table.sql` — Teams table migration.
+   - `20260726_teams_table.sql` — Teams table migration.
 - **New Public Components:**
   - `RevealSection.tsx` — Scroll-triggered fade-in reveal wrapper.
   - `ScrollToTop.tsx` — Floating scroll-to-top button.
   - `ThemeToggle.tsx` — Dark/light mode toggle.
   - `TurnstileWidget.tsx` — Cloudflare Turnstile CAPTCHA widget.
-  - `SentryProvider.tsx` — Client-side Sentry with session replay.
-  - `ComingSoonContent.tsx` — Coming-soon landing page content.
+   - `SentryProvider.tsx` — Client-side Sentry with session replay.
 
 ### Deliverables
 
 - Enhanced admin dashboard with real-time overview and analytics.
-- Go live/reset control panel for site launch management.
 - Rate limiting protecting auth endpoints and admin API.
 - CAPTCHA protection on admin login.
 - Weekly automated database backups.
@@ -449,6 +428,6 @@ This document outlines the phases in which the CBCK Youth Forum website was buil
 | 6 | Admin Authentication | Login, Dashboard, middleware auth guard |
 | 7 | Admin Content Management | CRUD sections, TipTap editor, API routes |
 | 8 | Media Upload & Processing | File upload, image compression |
-| 9 | Launch Infrastructure | Gatekeeper, SEO, CI/CD, smoke tests |
+| 9 | Launch Infrastructure | SEO, CI/CD, smoke tests |
 | 10 | Polish & Refinements | Responsiveness, styling, documentation |
-| 11 | Dashboard, Rate Limiting & Security | Overview tab, Go Live, rate limiter, Turnstile, backups, ISR, error boundaries |
+| 11 | Dashboard, Rate Limiting & Security | Overview tab, rate limiter, Turnstile, backups, ISR, error boundaries |

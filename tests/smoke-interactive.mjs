@@ -3,11 +3,8 @@
  * Interactive browser smoke test — runs against a live `next start` server
  * using Puppeteer to test admin routes, form interactions, and login flow.
  *
- * Supports a LAUNCH_BYPASS_SECRET env var to bypass the "coming soon"
- * gatekeeper in proxy.ts (set to the same value as your .env.local).
- *
  * Usage:
- *   LAUNCH_BYPASS_SECRET=dev-bypass-secret node tests/smoke-interactive.mjs [BASE_URL]
+ *   node tests/smoke-interactive.mjs [BASE_URL]
  *
  * Default BASE_URL: http://localhost:3000
  */
@@ -108,8 +105,6 @@ const browser = await puppeteer.launch({
   args: ["--no-sandbox", "--disable-setuid-sandbox"],
 });
 
-const bypassSecret = process.env.LAUNCH_BYPASS_SECRET;
-
 try {
   // ====================================================================
   // 1. ADMIN LOGIN PAGE — basic load & form structure
@@ -117,17 +112,6 @@ try {
   console.log("\n📋  Admin Login Page\n");
 
   const page = await browser.newPage();
-
-  // Set bypass cookie if provided
-  if (bypassSecret) {
-    await page.setCookie({
-      name: "cbck_launch_bypass",
-      value: bypassSecret,
-      domain: new URL(BASE).hostname,
-      path: "/",
-      httpOnly: true,
-    });
-  }
 
   // Navigate to /admin (login page)
   {
@@ -554,12 +538,8 @@ try {
   console.log("\n📋  Theme Toggle\n");
 
   {
-    // Navigate to a simple page for theme testing. /coming-soon polls
-    // /api/launch-status every 1.5s by design, so networkidle0 never fires —
-    // wait for the DOM instead.
-    const errors = [];
-    startCapture(page, errors);
-    await page.goto(`${BASE}/coming-soon`, { waitUntil: "domcontentloaded", timeout: 30000 });
+    // Navigate to the homepage for theme testing.
+    await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 30000 });
     await new Promise((r) => setTimeout(r, 1500));
     page.removeAllListeners("console");
 
@@ -770,32 +750,6 @@ try {
     } else {
       testResult("Blog content rendered (posts or empty state)", false, "no posts and no empty-state message");
     }
-  }
-
-  // ====================================================================
-  // 12. HOME REDIRECT TEST
-  // ====================================================================
-  console.log("\n📋  Home & Bypass\n");
-
-  // Without bypass cookie, / should rewrite to /coming-soon (which polls
-  // /api/launch-status every 1.5s), so networkidle0 never fires — wait for the
-  // DOM instead.
-  {
-    const noCookiePage = await browser.newPage();
-    const errors = [];
-    startCapture(noCookiePage, errors);
-    const resp = await noCookiePage.goto(`${BASE}/`, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await new Promise((r) => setTimeout(r, 2000));
-    noCookiePage.removeAllListeners("console");
-
-    const realErrors = filterErrors(errors);
-
-    // Without bypass cookie, this should show the coming-soon content
-    // Note: the proxy rewrites to /coming-soon, not redirects
-    testResult("Home loads without console errors (no bypass)", realErrors.length === 0, `${realErrors.length} error(s)`);
-    testResult("Response OK", resp?.status() === 200, `HTTP ${resp?.status()}`);
-
-    await noCookiePage.close();
   }
 
   // ====================================================================

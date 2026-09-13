@@ -1,0 +1,58 @@
+
+> youth-forum@1.0.0 build
+> next build
+
+Γû▓ Next.js 16.2.11 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 30.8s
+  Running TypeScript ...
+  Finished TypeScript in 14.3s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/30) ...
+  Generating static pages using 3 workers (7/30) 
+  Generating static pages using 3 workers (14/30) 
+  Generating static pages using 3 workers (22/30) 
+Γ£ô Generating static pages using 3 workers (30/30) in 2.8s
+  Finalizing page optimization ...
+
+Route (app)
+Γöî ╞Æ /
+Γö£ ╞Æ /_not-found
+Γö£ ╞Æ /about/aims
+Γö£ ╞Æ /about/blog-news
+Γö£ ╞Æ /about/blog-news/[slug]
+Γö£ ╞Æ /about/journey
+Γö£ ╞Æ /admin
+Γö£ ╞Æ /admin/dashboard
+Γö£ ╞Æ /api/admin/dashboard/overview
+Γö£ ╞Æ /api/admin/events
+Γö£ ╞Æ /api/admin/gallery
+Γö£ ╞Æ /api/admin/living-room
+Γö£ ╞Æ /api/admin/mathetes
+Γö£ ╞Æ /api/admin/media/upload
+Γö£ ╞Æ /api/admin/office-bearers
+Γö£ ╞Æ /api/admin/posts
+Γö£ ╞Æ /api/auth/login
+Γö£ ╞Æ /auth/update-password
+Γö£ ╞Æ /cezo-mepu
+Γö£ ╞Æ /developers
+Γö£ ╞Æ /events
+Γö£ ╞Æ /events/archive
+Γö£ ╞Æ /gallery
+Γö£ ╞Æ /living-room
+Γö£ ╞Æ /login
+Γö£ ╞Æ /mathetes
+Γö£ ╞Æ /mathetes/[id]
+Γö£ ╞Æ /office-bearers
+Γö£ ╞Æ /office-bearers/[id]
+Γö£ Γùï /robots.txt
+Γöö Γùï /sitemap.xml
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

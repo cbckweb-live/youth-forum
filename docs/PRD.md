@@ -30,7 +30,7 @@ The project was built using Next.js 16 with the App Router, Supabase for databas
 6. **Implement role-based access control** to secure admin functions.
 7. **Optimize for mobile devices** given the high rate of mobile internet usage in Northeast India.
 8. **Maintain SEO best practices** for discoverability.
-9. **Prepare for a planned launch** with a pre-launch gatekeeper page.
+ 9. **Prepare for a public launch** with all pages immediately accessible.
 
 ---
 
@@ -127,10 +127,9 @@ The project was built using Next.js 16 with the App Router, Supabase for databas
 
 #### 4.2.2 Admin Dashboard (`/admin/dashboard`)
 
-- A tabbed dashboard was built with eight tabs: **Overview, Posts, Events, Gallery, Mathetes, Office Bearers, Living Room, Go Live**.
+- A tabbed dashboard was built with seven tabs: **Overview, Posts, Events, Gallery, Mathetes, Office Bearers, Living Room**.
 - Session validation was implemented — unauthenticated users were redirected to the login page.
 - **Overview tab** displays content counts, storage/DB usage, GitHub Actions workflow health, missing image warnings, events per month chart, Vercel Analytics site traffic (visitors + top pages), and a recent activity feed.
-- **Go Live tab** provides one-click site launch/reset control with confirmation dialogs.
 
 #### 4.2.2.1 Admin Dashboard Overview
 
@@ -144,14 +143,6 @@ The project was built using Next.js 16 with the App Router, Supabase for databas
 - Events per month line chart.
 - Vercel Analytics integration: 8-day visitors bar chart and top pages ranking.
 - Recent activity feed showing latest changes across Posts, Events, Gallery, Mathetes, and Office Bearers.
-
-#### 4.2.2.2 Go Live Control
-
-- Displays current launch state (Live vs Coming-Soon).
-- Confirmation dialog with warning before going live (cannot be automatically undone).
-- Reset launch button to re-enable the coming-soon gate.
-- Writes launch state to both Supabase `site_config` table and Vercel Edge Config.
-- Revalidates homepage cache on launch.
 
 #### 4.2.3 Posts Management
 
@@ -187,10 +178,9 @@ The project was built using Next.js 16 with the App Router, Supabase for databas
 - A media upload API route was built at `/api/admin/media/upload` supporting image uploads (to the `posts-media` bucket) and PDF uploads (to the `posts-pdf` bucket) using Supabase Storage.
 - Client-side image compression was implemented via `compressImageFile` — resizing images to a maximum of 1600px and re-encoding as WebP at 78% quality, with a JPEG fallback for browsers without WebP support.
 
-#### 4.3.2 Launch Gatekeeper
+#### 4.3.2 Middleware Guard
 
-- A middleware proxy was implemented in `proxy.ts` that restricted public access before the official launch.
-- Authorized team members could bypass the gatekeeper via a secret cookie obtained by visiting `?preview=true`.
+- A middleware proxy was implemented in `proxy.ts` that applies rate limiting to auth-adjacent pages and enforces the admin auth guard on protected routes.
 - Public requests are routed normally without a redirect or rewrite gate.
 
 #### 4.3.3 Security Headers
@@ -253,8 +243,7 @@ The following database tables were created in Supabase (Postgres):
 | `mathetes` | Mathetes fellowship diary entries with title, description, and photo |
 | `living_room_seasons` | Living Room video episodes with title, description, YouTube URL, and display order |
 | `cezo_mepu_locations` | Regional youth groups with name, address, photo, description, and WhatsApp URL |
-| `developers` | Development team members with name, role, photo, and description |
-| `site_config` | Single-row configuration table for site launched state (boolean) |
+ | `developers` | Development team members with name, role, photo, and description |
 
 Row-Level Security (RLS) policies were applied to all tables — public read access, admin-only write operations — using Supabase JWT role claims.
 
@@ -274,7 +263,7 @@ Row-Level Security (RLS) policies were applied to all tables — public read acc
 ### 6.2 Admin Flow
 
 1. Admin navigates to `/admin`, completes CAPTCHA (Turnstile), enters email and password.
-2. Admin is redirected to the dashboard with eight tabs (Overview first).
+ 2. Admin is redirected to the dashboard with seven tabs (Overview first).
 3. On the Overview tab, admin sees content counts, storage usage, analytics, and quick-action shortcuts.
 4. Admin creates, edits, publishes, or deletes content items via CRUD tabs (Posts, Events, etc.).
 5. Admin attaches photos or PDFs to posts via the file upload interface.

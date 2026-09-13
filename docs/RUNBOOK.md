@@ -15,10 +15,9 @@
 4. [Database Keepalive Workflow](#4-database-keepalive-workflow)
 5. [Database Backup Workflow](#5-database-backup-workflow)
 6. [How to Restore from a Backup](#6-how-to-restore-from-a-backup)
-7. [Pre-Launch Gatekeeper](#7-pre-launch-gatekeeper)
-8. [How to Add a New Admin User](#8-how-to-add-a-new-admin-user)
-9. [SEO & Metadata](#9-seo--metadata)
-10. [Vercel Analytics](#10-vercel-analytics)
+ 7. [How to Add a New Admin User](#7-how-to-add-a-new-admin-user)
+ 8. [SEO & Metadata](#8-seo--metadata)
+ 9. [Vercel Analytics](#9-vercel-analytics)
 
 ---
 
@@ -32,16 +31,13 @@
 | `SUPABASE_ANON_KEY` | ✅ Yes | Supabase public anon key (safe for client) |
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ Yes | Same as `SUPABASE_URL`, exposed to browser |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ Yes | Same as `SUPABASE_ANON_KEY`, exposed to browser |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ Yes | Supabase service_role key (admin bypass — keep secret) |
-| `LAUNCH_BYPASS_SECRET` | ✅ Yes | Secret value for pre-launch bypass cookie (`?preview=true`) |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Optional | Cloudflare Turnstile CAPTCHA site key (for login form) |
+ | `SUPABASE_SERVICE_ROLE_KEY` | ✅ Yes | Supabase service_role key (admin bypass — keep secret) |
+ | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Optional | Cloudflare Turnstile CAPTCHA site key (for login form) |
 | `TURNSTILE_SECRET_KEY` | Optional | Cloudflare Turnstile secret key (for server verification) |
-| `VERCEL_ACCESS_TOKEN` | Optional | Vercel API token (for dashboard analytics + Edge Config) |
-| `VERCEL_PROJECT_ID` | Optional | Vercel project ID (for analytics API queries) |
-| `VERCEL_TEAM_ID` | Optional | Vercel team ID (for team projects) |
-| `EDGE_CONFIG` | Optional | Vercel Edge Config connection string |
-| `EDGE_CONFIG_ID` | Optional | Vercel Edge Config ID (for go-live API updates) |
-| `SENTRY_DSN` | Optional | Server-side Sentry error tracking DSN |
+ | `VERCEL_ACCESS_TOKEN` | Optional | Vercel API token (for dashboard analytics) |
+ | `VERCEL_PROJECT_ID` | Optional | Vercel project ID (for analytics API queries) |
+ | `VERCEL_TEAM_ID` | Optional | Vercel team ID (for team projects) |
+ | `SENTRY_DSN` | Optional | Server-side Sentry error tracking DSN |
 | `NEXT_PUBLIC_SENTRY_DSN` | Optional | Browser-side Sentry error tracking DSN |
 
 **Note:** `@vercel/analytics` requires **no environment variables** — it works out of the box once installed and added to the layout.
@@ -81,20 +77,17 @@ SUPABASE_URL=https://emsfthlfptmysgzpectv.supabase.co
 SUPABASE_ANON_KEY=<your-anon-key>
 NEXT_PUBLIC_SUPABASE_URL=https://emsfthlfptmysgzpectv.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
-LAUNCH_BYPASS_SECRET=<your-bypass-secret>
-
-# Optional:
+ SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+ 
+ # Optional:
 SENTRY_DSN=<your-sentry-dsn>
 NEXT_PUBLIC_SENTRY_DSN=<your-sentry-dsn>
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=<your-turnstile-site-key>
 TURNSTILE_SECRET_KEY=<your-turnstile-secret-key>
 VERCEL_ACCESS_TOKEN=<your-vercel-token>
 VERCEL_PROJECT_ID=<your-vercel-project-id>
-VERCEL_TEAM_ID=<your-vercel-team-id>
-EDGE_CONFIG=<your-edge-config-url>
-EDGE_CONFIG_ID=<your-edge-config-id>
-```
+ VERCEL_TEAM_ID=<your-vercel-team-id>
+ ```
 
 ---
 
@@ -120,10 +113,9 @@ vercel deploy --prod --yes
 ### 2.3 Post-Deploy Checklist
 
 - [ ] Visit `https://cbckyouthforum.live` — page loads without errors
-- [ ] Confirm the public homepage loads without a launch gate
-- [ ] If gatekeeper is bypassed: verify a few public pages render (events, gallery, etc.)
-- [ ] Visit `/admin` — login page loads (with Turnstile CAPTCHA if configured)
-- [ ] Log in with admin credentials — dashboard loads with 8 tabs (Overview first)
+ - [ ] Confirm the public homepage loads without a launch gate
+ - [ ] Visit `/admin` — login page loads (with Turnstile CAPTCHA if configured)
+ - [ ] Log in with admin credentials — dashboard loads with 7 tabs (Overview first)
 - [ ] Check Vercel deployment logs for build errors
 - [ ] Verify Sentry is capturing errors (trigger a test or check dashboard)
 - [ ] Check Vercel Analytics dashboard for page view data
@@ -328,56 +320,7 @@ After restoring, check:
 
 ---
 
-## 7. Pre-Launch Gatekeeper
-
-The site uses a middleware-based gatekeeper in `proxy.ts` that hides the site behind a `/coming-soon` page until the official launch.
-
-### How It Works
-
-- **Unauthenticated visitors** see the `/coming-soon` page
-- **Team members** can bypass by visiting `https://cbckyouthforum.live/?preview=true` (sets a 7-day cookie)
-- Certain paths are always accessible: `/api/*`, `/_next/*`, `/coming-soon`, `/favicon.ico`, static files (`.png`, `.jpg`, `.svg`)
-- The bypass secret is stored in the `LAUNCH_BYPASS_SECRET` environment variable (not hardcoded).
-- The gatekeeper checks the `siteLaunched` flag from **Vercel Edge Config** (fast path) first, then falls back to the `site_config` database table.
-
-### Going Live (via Admin Panel)
-
-Instead of code changes, admins can go live directly from the dashboard:
-
-1. Log in at `/admin`
-2. Navigate to the **Go Live** tab
-3. Click **Go Live** and confirm
-4. The launch state is written to both the database and Vercel Edge Config
-5. The homepage cache is revalidated immediately
-6. The site is public for all visitors within seconds
-
-To reset (re-enable coming-soon), use the **Reset Launch** button.
-
-### How to Set Up Edge Config for Go-Live
-
-1. **Create an Edge Config** in Vercel Dashboard → Storage → Edge Config
-2. Add item: `siteLaunched` = `false`
-3. Set `EDGE_CONFIG` (connection string) and `EDGE_CONFIG_ID` in Vercel environment variables
-4. Create a **Vercel Access Token** and set it as `VERCEL_ACCESS_TOKEN`
-5. The middleware will use Edge Config as the fast path for gatekeeper decisions
-6. The Go Live tab will also update Edge Config when toggling launch state
-
-### Alternative: Go Live Without Edge Config
-
-If Edge Config is not configured, the gatekeeper falls back to the `site_config` database table. Go to **Supabase Dashboard → SQL Editor** and run:
-
-```sql
--- Mark the site as launched
-INSERT INTO site_config (id, site_launched, updated_at)
-VALUES (1, true, now())
-ON CONFLICT (id) DO UPDATE SET site_launched = true, updated_at = now();
-```
-
-This will make the site public within seconds (the middleware checks the DB on every request).
-
----
-
-## 8. How to Add a New Admin User
+## 7. How to Add a New Admin User
 
 ### Step 1: Create the User
 
@@ -402,14 +345,13 @@ WHERE email = 'new-admin@example.com';
 Tell the new admin:
 1. **Login URL:** `https://cbckyouthforum.live/admin`
 2. **Dashboard URL:** `https://cbckyouthforum.live/admin/dashboard`
-3. They can change their password at `/auth/update-password`
-4. They'll need admin bypass cookie: visit `/?preview=true` first (if gatekeeper is active)
+ 3. They can change their password at `/auth/update-password`
 
 ---
 
 ---
 
-## 9. SEO & Metadata
+## 8. SEO & Metadata
 
 All public pages on the site have SEO metadata configured for better search engine visibility and social sharing.
 
@@ -483,7 +425,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 ---
 
-## 10. Vercel Analytics
+## 9. Vercel Analytics
 
 **Package:** `@vercel/analytics`  
 **Added in:** Root `layout.tsx`
