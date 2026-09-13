@@ -105,7 +105,7 @@ export default async function LivingRoomPage() {
     return (
       <main className="px-4 sm:px-8 py-12 max-w-6xl mx-auto dark:text-[#e5e5e5]">
         <LivingRoomHeader />
-        <p className="text-[#231F1E]/50 dark:text-gray-400 italic">No episodes released yet. Stay tuned for new conversations.</p>
+        <p className="text-[#231F1E]/50 dark:text-gray-400 italic">No episodes are available yet.</p>
       </main>
     );
   }

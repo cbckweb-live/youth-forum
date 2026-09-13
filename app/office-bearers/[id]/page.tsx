@@ -61,7 +61,7 @@ export default async function OfficeBearerDetailPage({
             />
           ) : (
             <p className="text-[#231F1E]/80 dark:text-gray-300 leading-relaxed text-justify">
-              Their story will be added here soon.
+              This profile does not include a biography yet.
             </p>
           )}
         </div>
